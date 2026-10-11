@@ -16,6 +16,7 @@ public final class NativePayloads {
         ThrowableProjectile result=switch(ability) {
             case AMETHYST_CLUSTER -> new Amethyst_Cluster_Projectile_Entity(ModEntities.AMETHYST_CLUSTER_PROJECTILE.get(),world,frame.caster(),Math.max(0,(float)CMCommonConfig.AmethystCrab.AmethystClusterDamage+Resources.damageBonus(amplify)));
             case LIONFISH_SPIKE -> new Lionfish_Spike_Entity(world,frame.caster());
+            case LAVA_BOMB -> new Lava_Bomb_Entity(ModEntities.LAVA_BOMB.get(),world,frame.caster());
             case FLARE_BOMB -> new Flare_Bomb_Entity(ModEntities.FLARE_BOMB.get(),world,frame.caster());
             default -> throw new IllegalArgumentException("Not a projectile: "+ability);
         };
@@ -24,7 +25,10 @@ public final class NativePayloads {
         return result;
     }
     public static void hit(ThrowableProjectile projectile,HitResult hit) {
-        ((ProjectileHitAccess)projectile).confluxCataclysm$nativeHit(hit);
+        if (projectile instanceof Lava_Bomb_Entity lava && ((ManagedProjectile)lava).confluxCataclysm$mode() > 0
+                && (((ManagedProjectile)lava).confluxCataclysm$resolving() || ((ManagedProjectile)lava).confluxCataclysm$impact()==null))
+            LavaCasting.impact(lava, hit);
+        else ((ProjectileHitAccess)projectile).confluxCataclysm$nativeHit(hit);
     }
     public static boolean bolt(ServerLevel world,CastContext frame,double amplify) {
         if (frame.target()==null || frame.target().getType()==HitResult.Type.MISS) return false;
@@ -51,7 +55,7 @@ public final class NativePayloads {
     }
 
     /** Local ground projection only: never scan a cave column or cause chunk loading. */
-    private static Vec3 groundPoint(ServerLevel world, CastContext frame) {
+    public static Vec3 groundPoint(ServerLevel world, CastContext frame) {
         if (frame.target() == null || frame.target().getType() == HitResult.Type.MISS) return null;
         Vec3 point = frame.target() instanceof EntityHitResult hit ? hit.getEntity().position() : frame.origin();
         BlockPos start = BlockPos.containing(point.add(0, 0.01, 0));

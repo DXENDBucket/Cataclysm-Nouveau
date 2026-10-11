@@ -1,0 +1,16 @@
+{
+  "type": "ars_nouveau:glyph",
+  "exp": 27,
+  "output": {
+    "id": "cataclysm_nouveau:glyph_flame_ring",
+    "count": 1
+  },
+  "inputs": [
+    {
+      "item": "cataclysm:monstrous_horn"
+    },
+    {
+      "item": "ars_nouveau:source_gem"
+    }
+  ]
+}

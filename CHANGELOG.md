@@ -1,5 +1,14 @@
 # Changelog
 
+## 0.1.0-dev.6
+
+- 接入巨兽的熔岩炸弹、巨兽震地、撼地裂波、环形焰柱、巨兽肩撞、熔岩汲取，以及恶兽头盔的骇人之恶；共 15 个魔符。
+- 相似攻击采用 Boss 实现，保留生命比例伤害、逐段冲击、骨裂及半血变化；通过独立调用帧复用本体，不复制其代码。
+- Boss 独有能力使用恶兽犄角／熔岩能量单元制作，骇人之恶使用恶兽头盔；均为抄写台真实配方。
+- 临时熔岩有独立原生生命周期和存档清理记录，禁止扩散；普通本体熔岩与投射物不受影响。重复载体按命中付费，空蓝停止。
+- 新增冷却与参数配置、完整中英文本，复用本体图标、粒子、声音和地块外观。
+- 23 项服务端 GameTest、文本检查、二进制及源码包资源边界检查通过。客户端外观未人工验证。
+
 ## 0.1.0-dev.5
 
 - Fix Ars augment tooltips by supplying actual translated Components, reusing each projectile form's existing description across carriers.

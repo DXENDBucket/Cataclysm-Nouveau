@@ -48,7 +48,7 @@ public final class ProjectileCasting {
             state.confluxCataclysm$impact(hit->impact(session,hit));
             if (trajectory!=null) return trajectory.start(session.world(),()->{},hit->impact(session,hit));
             payload.setPos(carrier.position());
-            float speed=(ability==Ability.AMETHYST_CLUSTER?.8F:ability==Ability.FLARE_BOMB?1F:.35F)*Math.max(.1F,1+acceleration/.75F);
+            float speed=(ability==Ability.AMETHYST_CLUSTER?.8F:(ability==Ability.FLARE_BOMB || ability==Ability.LAVA_BOMB)?1F:.35F)*Math.max(.1F,1+acceleration/.75F);
             payload.shoot(direction.x,direction.y,direction.z,speed,0);
             return session.world().addFreshEntity(payload);
         }

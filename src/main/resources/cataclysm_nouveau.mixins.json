@@ -16,7 +16,13 @@
     "AnchorHitAccess",
     "WaveStateMixin",
     "FlareStateMixin",
-    "FlareDamageMixin"
+    "FlareDamageMixin",
+    "MonstrosityAccess",
+    "MonstrosityAdapterMixin",
+    "LavaStateMixin",
+    "LavaBombMixin",
+    "TemporaryLavaFlowMixin",
+    "TemporaryLavaBlockMixin"
   ],
   "injectors": {
     "defaultRequire": 1

@@ -350,7 +350,7 @@ public final class NativeAbilityTests {
                         var description=profile.glyph().augmentDescriptions.get(form);
                         h.assertTrue(description!=null,"Every carrier has a projectile-form description");components.add(description);
                     }
-                for(var glyph:List.of(GlyphCatalog.BOLT,GlyphCatalog.RUNE,GlyphCatalog.JET))
+                for(var glyph:GlyphCatalog.ALL.stream().filter(g->g instanceof dev.cataclysmnouveau.glyph.CataclysmEffectGlyph).toList())
                     components.addAll(glyph.augmentDescriptions.values());
                 for(var component:components) {
                     h.assertTrue(component.getContents() instanceof net.minecraft.network.chat.contents.TranslatableContents,"Description remains translatable");
@@ -420,6 +420,189 @@ public final class NativeAbilityTests {
         });
     }
 
+
+    private static final class Arena implements AutoCloseable {
+        final GameTestHelper h;final ServerPlayer p;final Vec3 center;final BlockPos base;
+        final List<net.minecraft.world.level.ChunkPos> forced=new ArrayList<>();
+        final List<Entity> actors=new ArrayList<>();final net.minecraft.world.scores.PlayerTeam team;
+        Arena(GameTestHelper h) {
+            this.h=h;p=player(h);p.setNoGravity(true);center=scene(h).add(0,1,0);base=BlockPos.containing(scene(h));
+            p.setPos(center.add(-22,2,0));
+            for(int x=(base.getX()-20)>>4;x<=(base.getX()+20)>>4;x++) for(int z=(base.getZ()-20)>>4;z<=(base.getZ()+20)>>4;z++)
+                if(!h.getLevel().getForcedChunks().contains(net.minecraft.world.level.ChunkPos.asLong(x,z))) {
+                    h.getLevel().setChunkForced(x,z,true);forced.add(new net.minecraft.world.level.ChunkPos(x,z));
+                }
+            for(int x=-18;x<=18;x++) for(int z=-18;z<=18;z++) h.getLevel().setBlockAndUpdate(base.offset(x,0,z),Blocks.STONE.defaultBlockState());
+            var board=h.getLevel().getScoreboard();team=board.addPlayerTeam("mon_"+p.getUUID().toString().substring(0,8));board.addPlayerToTeam(p.getScoreboardName(),team);
+        }
+        LivingEntity target(Vec3 point,boolean allied) {
+            var entity=cow(h,point);actors.add(entity);
+            if(allied) h.getLevel().getScoreboard().addPlayerToTeam(entity.getScoreboardName(),team);
+            return entity;
+        }
+        void cast(dev.cataclysmnouveau.glyph.CataclysmEffectGlyph glyph,HitResult hit,boolean amp) {
+            var parts=new ArrayList<AbstractSpellPart>();parts.add(MethodTouch.INSTANCE);parts.add(glyph);
+            if(amp) parts.add(AugmentAmplify.INSTANCE);
+            var cast=resolver(h,p,new Spell(parts));cast.spellContext.nextPart();cast.onResolveEffect(h.getLevel(),hit);
+        }
+        @Override public void close() {
+            actors.forEach(Entity::discard);h.getLevel().getScoreboard().removePlayerTeam(team);clean(h,p);
+            for(int x=-18;x<=18;x++) for(int z=-18;z<=18;z++) for(int y=0;y<=3;y++)
+                h.getLevel().setBlockAndUpdate(base.offset(x,y,z),Blocks.AIR.defaultBlockState());
+            for(var chunk:forced) h.getLevel().setChunkForced(chunk.x,chunk.z,false);
+        }
+    }
+    @GameTest(template="empty",batch="cat_mon_quake",timeoutTicks=100)
+    public static void bossQuakeDamageOwnershipLowHealthAndRefund(GameTestHelper h) {
+        try(var a=new Arena(h)) {
+            var victim=a.target(a.center.add(0,0,2),false);var ally=a.target(a.center.add(0,0,2),true);
+            var mana=CapabilityRegistry.getMana(a.p);double before=mana.getCurrentMana();
+            a.p.setHealth(5);a.cast(GlyphCatalog.QUAKE,block(a.center),true);
+            double attack=25*com.github.L_Ender.cataclysm.config.CMCommonConfig.NetheriteMonstrosity.attackMultiplier;
+            double expected=attack+Math.min(attack,500*com.github.L_Ender.cataclysm.config.CMCommonConfig.NetheriteMonstrosity.SmashHpdamage)+Resources.damageBonus(1);
+            close(h,500-victim.getHealth(),expected,"Quake uses Boss base and capped target-health damage, plus flat amplification");
+            h.assertTrue(victim.getLastDamageSource().getEntity()==a.p && victim.getDeltaMovement().y>0 && victim.isOnFire(),"Owner, native launch and berserk ignition preserved");
+            close(h,ally.getHealth(),500,"Allied targets excluded");close(h,before-mana.getCurrentMana(),CataclysmConfig.cost(Ability.EARTHQUAKE)+10,"One actual attack pays once");
+            before=mana.getCurrentMana();a.cast(GlyphCatalog.QUAKE,BlockHitResult.miss(a.center,Direction.UP,BlockPos.containing(a.center)),false);
+            close(h,mana.getCurrentMana(),before,"Invalid location refunds the quote");h.succeed();
+        }
+    }
+    @GameTest(template="empty",batch="cat_mon_rings",timeoutTicks=110)
+    public static void pairedNativeFlameRingsOwnerAmplificationAndCleanup(GameTestHelper h) {
+        var a=new Arena(h);a.cast(GlyphCatalog.RINGS,block(a.center),true);
+        var jets=h.getLevel().getEntitiesOfClass(Flame_Jet_Entity.class,new AABB(a.center,a.center).inflate(20));
+        h.assertTrue(jets.size()==56,"Healthy Boss pattern is two sets of seven spokes with four rings");
+        for(var jet:jets) {h.assertTrue(jet.getCaster()==a.p,"Native jet owner is the caster, never a dummy Boss");close(h,jet.getDamage(),CataclysmConfig.groundDamage(Ability.FLAME_JET)+Resources.damageBonus(1),"Ring amplification reaches each native jet");}
+        a.p.setHealth(5);a.cast(GlyphCatalog.RINGS,block(a.center),false);
+        var all=h.getLevel().getEntitiesOfClass(Flame_Jet_Entity.class,new AABB(a.center,a.center).inflate(20));
+        h.assertTrue(all.size()==56+224,"Berserk Boss produces two sets of fourteen spokes and eight rings");
+        h.runAfterDelay(70,()->{try {h.assertTrue(all.stream().allMatch(Entity::isRemoved),"All native delayed jets expire");h.succeed();}finally{a.close();}});
+    }
+    @GameTest(template="empty",batch="cat_mon_fissure",timeoutTicks=100)
+    public static void fissureAdvancesOverTimeAndStopsOnOwnerLoss(GameTestHelper h) {
+        var a=new Arena(h);a.p.setPos(a.center.add(0,2,-22));
+        var near=a.target(a.center.add(0,0,2),false);var far=a.target(a.center.add(0,0,12),false);var ally=a.target(a.center.add(0,0,2),true);
+        a.cast(GlyphCatalog.FISSURE,block(a.center),true);
+        close(h,far.getHealth(),500,"Distant wave has not happened at initial activation");
+        h.runAfterDelay(3,()->{h.assertTrue(near.getHealth()<500,"Near ground shock hits first");close(h,far.getHealth(),500,"Far ground shock remains delayed");});
+        h.runAfterDelay(15,()->{try {
+            h.assertTrue(far.getHealth()<500 && far.getLastDamageSource().getEntity()==a.p,"Wave propagates to distant ground with actual caster attribution");
+            close(h,ally.getHealth(),500,"Fissure protects allies");
+            double before=CapabilityRegistry.getMana(a.p).getCurrentMana();a.cast(GlyphCatalog.FISSURE,block(a.center),false);
+            a.p.discard();ExecutionSessions.tick();close(h,CapabilityRegistry.getMana(a.p).getCurrentMana(),before-CataclysmConfig.cost(Ability.FISSURE),"Repeated wave pays once, not per ground tile");
+            h.succeed();
+        }finally{a.close();}});
+    }
+    @GameTest(template="empty",batch="cat_mon_charge",timeoutTicks=100)
+    public static void shoulderUsesNativeCollisionBoneFractureAndObstacleStop(GameTestHelper h) {
+        try(var a=new Arena(h)) {
+            a.p.setPos(a.center);a.p.setYRot(0);var victim=a.target(a.center.add(0,0,1),false);var ally=a.target(a.center.add(0,0,1),true);
+            a.cast(GlyphCatalog.CHARGE,new EntityHitResult(a.p),true);ExecutionSessions.tick();
+            h.assertTrue(victim.hasEffect(ModEffect.EFFECTBONE_FRACTURE) && victim.getLastDamageSource().getEntity()==a.p,"Native shoulder impact inflicts fracture with actual attribution");
+            close(h,500-victim.getHealth(),25*.4*com.github.L_Ender.cataclysm.config.CMCommonConfig.NetheriteMonstrosity.attackMultiplier+Resources.damageBonus(1),"Native shoulder damage plus Harm amplification");
+            close(h,ally.getHealth(),500,"Shoulder protects allies");h.assertTrue(a.p.getDeltaMovement().z>0 && dev.arsconflux.api.execution.ExecutionSessions.isCasting(a.p),"Caster receives a forward dash during the session");
+            a.p.horizontalCollision=true;ExecutionSessions.tick();h.assertTrue(!ExecutionSessions.isCasting(a.p),"Obstacle stops the dash session");a.p.horizontalCollision=false;
+            a.cast(GlyphCatalog.CHARGE,new EntityHitResult(ally),false);ExecutionSessions.tick();h.assertTrue(ally.getDeltaMovement().z>0,"An allied target can execute the dash");
+            a.p.discard();ExecutionSessions.tick();h.succeed();
+        }
+    }
+    @GameTest(template="empty",batch="cat_mon_absorb",timeoutTicks=100)
+    public static void nativeLavaAbsorptionConsumesThreeWavesAndRefundsEmptyGround(GameTestHelper h) {
+        var a=new Arena(h);a.p.getAttribute(Attributes.MAX_HEALTH).setBaseValue(200);a.p.setHealth(50);
+        var positions=List.of(a.base.offset(3,1,0),a.base.offset(6,1,0),a.base.offset(12,1,0));
+        positions.forEach(p->h.getLevel().setBlockAndUpdate(p,Blocks.LAVA.defaultBlockState()));
+        a.cast(GlyphCatalog.ABSORB,block(a.center),true);
+        h.assertTrue(h.getLevel().getBlockState(positions.getFirst()).isAir() && h.getLevel().getBlockState(positions.getLast()).is(Blocks.LAVA),"First native absorption wave is local");
+        h.runAfterDelay(7,()->{try {
+            h.assertTrue(positions.stream().allMatch(p->h.getLevel().getBlockState(p).isAir()),"All three native lava absorption radii execute");
+            close(h,a.p.getHealth(),50+3*(CataclysmConfig.absorptionHeal()+Resources.damageBonus(1)),"Only successful waves heal with amplification");
+            double before=CapabilityRegistry.getMana(a.p).getCurrentMana();a.cast(GlyphCatalog.ABSORB,block(a.center),false);
+            close(h,CapabilityRegistry.getMana(a.p).getCurrentMana(),before,"Empty area produces no healing and refunds mana");h.succeed();
+        }finally{a.close();}});
+    }
+    @GameTest(template="empty",batch="cat_mon_buff",timeoutTicks=100)
+    public static void monstrousUsesNativeEffectAndFriendlyTargetRules(GameTestHelper h) {
+        var a=new Arena(h);var ally=a.target(a.center,true);ally.getAttribute(Attributes.MAX_HEALTH).setBaseValue(100);ally.setHealth(20);
+        var enemy=a.target(a.center.add(0,0,3),false);a.cast(GlyphCatalog.MONSTROUS,new EntityHitResult(ally),true);
+        var status=ally.getEffect(ModEffect.EFFECTMONSTROUS);
+        h.assertTrue(status!=null && status.getAmplifier()==1 && status.getDuration()==200,"Native level and duration retained");
+        close(h,ally.getAttributeValue(Attributes.ARMOR),6,"Native amplified armor modifier");close(h,ally.getAttributeValue(Attributes.ARMOR_TOUGHNESS),4,"Native amplified toughness");
+        double before=CapabilityRegistry.getMana(a.p).getCurrentMana();a.cast(GlyphCatalog.MONSTROUS,new EntityHitResult(enemy),false);
+        h.assertTrue(!enemy.hasEffect(ModEffect.EFFECTMONSTROUS),"Buff does not apply to an enemy");close(h,CapabilityRegistry.getMana(a.p).getCurrentMana(),before,"Enemy target refunds mana");
+        h.runAfterDelay(52,()->{try {h.assertTrue(ally.getHealth()>20,"Native low-health recovery works");h.succeed();}finally{a.close();}});
+    }
+    @GameTest(template="empty",batch="cat_mon_lava",timeoutTicks=100)
+    public static void lavaBombIndependentPoolsNoSpreadAndOwnerCleanup(GameTestHelper h) {
+        try(var a=new Arena(h)) {
+            var marker=new Marker();var mana=CapabilityRegistry.getMana(a.p);
+            var spell=new Spell(MethodProjectile.INSTANCE,GlyphCatalog.LAVA,AugmentAmplify.INSTANCE,marker);var cast=resolver(h,a.p,spell);cast.spellContext.nextPart();
+            var carrier=new EntityProjectileSpell(h.getLevel(),cast);carrier.setPos(a.center);carrier.setDeltaMovement(new Vec3(0,0,.75));
+            h.assertTrue(ProjectileDispatch.convert(carrier),"Lava bomb uses normal Core dispatch");var visual=(Lava_Bomb_Entity)payloads(h).getFirst();
+            var victim=a.target(a.center.add(0,0,1),false);var ally=a.target(a.center.add(0,0,1),true);
+            NativePayloads.hit(visual,block(a.center));h.assertTrue(visual.isRemoved() && marker.hits==1,"Parent impact continues Ars exactly once");
+            var sources=h.getLevel().getEntitiesOfClass(Lava_Bomb_Entity.class,new AABB(a.center,a.center).inflate(20),Lava_Bomb_Entity::getGround);
+            h.assertTrue(sources.size()==1 && sources.getFirst().getOwner()==a.p,"A separate native grounded bomb owns the pool");
+            var pos=sources.getFirst().getLavaPos();h.assertTrue(h.getLevel().getBlockState(pos).is(Blocks.LAVA) && TemporaryLava.contains(h.getLevel(),pos),"Managed temporary lava is present");
+            h.assertTrue(victim.getHealth()<500 && victim.getLastDamageSource().getEntity()==a.p,"Native explosion damages enemies with caster ownership");close(h,ally.getHealth(),500,"Explosion protects allies");
+            net.minecraft.world.level.material.Fluids.LAVA.tick(h.getLevel(),pos,h.getLevel().getFluidState(pos));
+            h.assertTrue(h.getLevel().getFluidState(pos.relative(Direction.NORTH)).isEmpty(),"Managed lava source cannot spread");
+            close(h,mana.getCurrentMana(),10000-CataclysmConfig.cost(Ability.LAVA_BOMB)-10,"Pool does not pay again after launch");
+            a.p.discard();ExecutionSessions.tick();h.assertTrue(h.getLevel().getBlockState(pos).isAir() && TemporaryLava.count(h.getLevel())==0,"Owner loss clears native pools and tracking");
+            h.succeed();
+        }
+    }
+    @GameTest(template="empty",batch="cat_mon_lava_expiry",timeoutTicks=240)
+    public static void lavaPoolsExpireNaturallyAndDontRemoveReplacedBlocks(GameTestHelper h) {
+        var a=new Arena(h);
+        var original=NativePayloads.projectile(Ability.LAVA_BOMB,h.getLevel(),CastContext.detached(a.p,null,null),0);
+        ((ManagedProjectile)original).confluxCataclysm$mode(2);original.setPos(a.center);NativePayloads.hit(original,block(a.center));
+        var pool=h.getLevel().getEntitiesOfClass(Lava_Bomb_Entity.class,new AABB(a.center,a.center).inflate(20)).getFirst();var pos=pool.getLavaPos();
+        var second=a.center.add(3,0,0);var other=NativePayloads.projectile(Ability.LAVA_BOMB,h.getLevel(),CastContext.detached(a.p,null,null),0);
+        ((ManagedProjectile)other).confluxCataclysm$mode(2);other.setPos(second);NativePayloads.hit(other,block(second));
+        var replacement=BlockPos.containing(second);h.getLevel().setBlockAndUpdate(replacement,Blocks.STONE.defaultBlockState());
+        h.runAfterDelay(CataclysmConfig.lavaLifetime()+4,()->{try {
+            h.assertTrue(pool.isRemoved() && h.getLevel().getBlockState(pos).isAir(),"Native pool and source naturally expire");
+            h.assertTrue(h.getLevel().getBlockState(replacement).is(Blocks.STONE),"Cleanup respects a replacement block");
+            h.assertTrue(TemporaryLava.count(h.getLevel())==0,"No source records leak");h.succeed();
+        }finally{a.close();}});
+    }
+
+
+    @GameTest(template="empty",batch="cat_mon_lava_repeat",timeoutTicks=100)
+    public static void repeatedLavaPaysPerImpactAndKeepsIndependentPools(GameTestHelper h) {
+        try(var a=new Arena(h)) {
+            var mana=CapabilityRegistry.getMana(a.p);var marker=new Marker();
+            var cast=resolver(h,a.p,new Spell(MethodProjectile.INSTANCE,GlyphCatalog.LAVA,marker));cast.spellContext.nextPart();
+            var carrier=new EntityOrbitProjectile(h.getLevel(),cast,a.p);carrier.setPos(a.center.add(0,3,0));
+            h.assertTrue(ProjectileDispatch.convert(carrier),"Orbit dispatches the lava payload");
+            var payload=(Lava_Bomb_Entity)payloads(h).getFirst();var state=(ManagedProjectile)payload;
+            h.assertTrue(state.confluxCataclysm$mode()==1 && state.confluxCataclysm$repeated(),"Lava visual uses the Ars repeated trajectory");
+            state.confluxCataclysm$impact().accept(block(a.center));state.confluxCataclysm$impact().accept(block(a.center.add(3,0,0)));
+            h.assertTrue(!payload.isRemoved() && !payload.getGround() && marker.hits==2,"Carrier continues flying while each hit makes an independent pool");
+            h.assertTrue(h.getLevel().getEntitiesOfClass(Lava_Bomb_Entity.class,new AABB(a.center,a.center).inflate(20),Lava_Bomb_Entity::getGround).size()==2,"Two native pool owners coexist");
+            close(h,mana.getCurrentMana(),10000-2*CataclysmConfig.cost(Ability.LAVA_BOMB),"Exactly one payment per successful repeated impact");
+            mana.setMana(0);state.confluxCataclysm$impact().accept(block(a.center.add(6,0,0)));
+            h.assertTrue(payload.isRemoved() && marker.hits==2,"Empty mana stops the repeated carrier and does not continue Ars");
+            a.p.discard();ExecutionSessions.tick();h.assertTrue(TemporaryLava.count(h.getLevel())==0,"All independent pools clean on owner loss");h.succeed();
+        }
+    }
+    @GameTest(template="empty",batch="cat_mon_lava_recovery",timeoutTicks=100)
+    public static void persistedLavaCleanupSurvivesLostTransientEntities(GameTestHelper h) {
+        try(var a=new Arena(h)) {
+            var original=NativePayloads.projectile(Ability.LAVA_BOMB,h.getLevel(),CastContext.detached(a.p,null,null),0);
+            ((ManagedProjectile)original).confluxCataclysm$mode(2);NativePayloads.hit(original,block(a.center));
+            var pool=h.getLevel().getEntitiesOfClass(Lava_Bomb_Entity.class,new AABB(a.center,a.center).inflate(20)).getFirst();var pos=pool.getLavaPos();
+            var data=TemporaryLavaData.get(h.getLevel(),false);
+            var serialized=data.save(new net.minecraft.nbt.CompoundTag(),h.getLevel().registryAccess());
+            h.assertTrue(!serialized.getList("sources",net.minecraft.nbt.Tag.TAG_COMPOUND).isEmpty(),"Cleanup locations are in SavedData");
+            pool.discard();h.getLevel().setBlockAndUpdate(pos,Blocks.LAVA.defaultBlockState());
+            var recovered=TemporaryLavaData.load(serialized,h.getLevel().registryAccess());
+            h.getLevel().getDataStorage().set("cataclysm_nouveau_temporary_lava",recovered);
+            h.assertTrue(TemporaryLava.contains(h.getLevel(),pos),"Recovered source is prevented from spreading before cleanup");
+            TemporaryLavaData.cleanup(h.getLevel());
+            h.assertTrue(h.getLevel().getBlockState(pos).isAir() && TemporaryLava.count(h.getLevel())==0,"Reloaded records clean without a saved projectile, with no mutation-iteration failure");h.succeed();
+        }
+    }
     private static final class Marker extends AbstractEffect {
         int hits;
         Marker() { super(net.minecraft.resources.ResourceLocation.fromNamespaceAndPath("cataclysm_nouveau","test_marker"),"Marker"); }

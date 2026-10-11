@@ -1,0 +1,16 @@
+{
+  "type": "ars_nouveau:glyph",
+  "exp": 27,
+  "output": {
+    "id": "cataclysm_nouveau:glyph_monstrous",
+    "count": 1
+  },
+  "inputs": [
+    {
+      "item": "cataclysm:monstrous_helm"
+    },
+    {
+      "item": "ars_nouveau:source_gem"
+    }
+  ]
+}

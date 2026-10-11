@@ -15,8 +15,15 @@ public final class GlyphCatalog {
     public static final CataclysmProjectileGlyph ANCHOR=new CataclysmProjectileGlyph(Ability.CERAUNUS);
     public static final CataclysmProjectileGlyph WAVE=new CataclysmProjectileGlyph(Ability.WAVE);
     public static final CataclysmProjectileGlyph FLARE=new CataclysmProjectileGlyph(Ability.FLARE_BOMB);
-    public static final List<CataclysmProjectileGlyph> PROJECTILES=List.of(AMETHYST,SPIKE,ANCHOR,WAVE,FLARE);
-    public static final List<AbstractSpellPart> ALL=List.of(BOLT,RUNE,JET,AMETHYST,SPIKE,ANCHOR,WAVE,FLARE);
+    public static final CataclysmProjectileGlyph LAVA=new CataclysmProjectileGlyph(Ability.LAVA_BOMB);
+    public static final CataclysmEffectGlyph QUAKE=new CataclysmEffectGlyph(Ability.EARTHQUAKE);
+    public static final CataclysmEffectGlyph FISSURE=new CataclysmEffectGlyph(Ability.FISSURE);
+    public static final CataclysmEffectGlyph RINGS=new CataclysmEffectGlyph(Ability.FLAME_RING);
+    public static final CataclysmEffectGlyph CHARGE=new CataclysmEffectGlyph(Ability.SHOULDER_CHECK);
+    public static final CataclysmEffectGlyph ABSORB=new CataclysmEffectGlyph(Ability.LAVA_ABSORPTION);
+    public static final CataclysmEffectGlyph MONSTROUS=new CataclysmEffectGlyph(Ability.MONSTROUS);
+    public static final List<CataclysmProjectileGlyph> PROJECTILES=List.of(AMETHYST,SPIKE,ANCHOR,WAVE,FLARE,LAVA);
+    public static final List<AbstractSpellPart> ALL=List.of(BOLT,RUNE,JET,QUAKE,FISSURE,RINGS,CHARGE,ABSORB,MONSTROUS,AMETHYST,SPIKE,ANCHOR,WAVE,FLARE,LAVA);
     public static CataclysmProjectileGlyph projectile(Ability ability) { return PROJECTILES.stream().filter(g->g.ability==ability).findFirst().orElseThrow(); }
     public static void register() {
         GlyphPresentation.register("cataclysm_nouveau",g->g instanceof CataclysmProjectileGlyph?"1":"0");

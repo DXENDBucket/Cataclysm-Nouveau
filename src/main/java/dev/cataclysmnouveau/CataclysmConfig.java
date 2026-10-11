@@ -11,6 +11,8 @@ public final class CataclysmConfig {
     private static final ModConfigSpec.DoubleValue ANCHOR_DAMAGE, WAVE_DAMAGE;
     private static final ModConfigSpec.IntValue WAVE_LIFETIME;
     private static final ModConfigSpec.DoubleValue FLARE_DIRECT_DAMAGE, FLARE_JET_DAMAGE;
+    private static final ModConfigSpec.DoubleValue QUAKE_RADIUS, ABSORPTION_HEAL, CHARGE_SPEED;
+    private static final ModConfigSpec.IntValue LAVA_LIFETIME;
     private static final ModConfigSpec.BooleanValue COOLDOWNS, CREATIVE_COOLDOWN;
     private static final EnumMap<Ability, ModConfigSpec.IntValue> COOLDOWN_TICKS = new EnumMap<>(Ability.class);
     static {
@@ -42,6 +44,11 @@ public final class CataclysmConfig {
                 .defineInRange("direct_damage",7.0,0,100000);
         FLARE_JET_DAMAGE=b.comment("Damage per generated jet; each impact creates the native four-arm pattern, up to 40 jets.")
                 .defineInRange("jet_damage",7.0,0,100000);b.pop();
+        b.push("monstrosity");
+        QUAKE_RADIUS=b.comment("Native Boss quake centered at the resolved location.").defineInRange("quake_radius",6.25,1,32);
+        ABSORPTION_HEAL=b.comment("Healing per absorption wave that actually removes lava. There are three native waves.").defineInRange("absorption_heal",15.0,0,100000);
+        CHARGE_SPEED=b.comment("Horizontal blocks per tick during the collision-limited shoulder charge.").defineInRange("charge_speed",.75,.1,2.0);
+        LAVA_LIFETIME=b.comment("Lifetime of each native grounded lava bomb; managed sources cannot spread.").defineInRange("lava_lifetime_ticks",200,1,1200);b.pop();
         b.push("cooldowns");
         COOLDOWNS=b.comment("Gate new active uses through Conflux; existing trajectories keep running.").define("enabled",true);
         CREATIVE_COOLDOWN=b.define("creative_cooldown",false);
@@ -78,12 +85,16 @@ public final class CataclysmConfig {
     public static float flareDirectDamage() {return SPEC.isLoaded()?FLARE_DIRECT_DAMAGE.get().floatValue():7;}
     public static float flareJetDamage() {return SPEC.isLoaded()?FLARE_JET_DAMAGE.get().floatValue():7;}
     private static int defaultCooldown(Ability ability) {
-        return switch(ability) {case CERAUNUS->40;case WAVE->100;case FLARE_BOMB->160;default->0;};
+        return switch(ability) {case CERAUNUS->40;case WAVE->100;case FLARE_BOMB->160;case LAVA_BOMB->100;case EARTHQUAKE->160;case FISSURE->200;case FLAME_RING->200;case SHOULDER_CHECK->80;case LAVA_ABSORPTION->400;case MONSTROUS->350;default->0;};
     }
     public static int cooldownTicks(Ability ability) {
         return SPEC.isLoaded()?COOLDOWN_TICKS.get(ability).get():defaultCooldown(ability);
     }
     public static boolean cooldownsEnabled() { return !SPEC.isLoaded() || COOLDOWNS.get(); }
     public static boolean creativeCooldown() { return SPEC.isLoaded() && CREATIVE_COOLDOWN.get(); }
+    public static double quakeRadius() {return SPEC.isLoaded()?QUAKE_RADIUS.get():6.25;}
+    public static float absorptionHeal() {return SPEC.isLoaded()?ABSORPTION_HEAL.get().floatValue():15;}
+    public static double chargeSpeed() {return SPEC.isLoaded()?CHARGE_SPEED.get():.75;}
+    public static int lavaLifetime() {return SPEC.isLoaded()?LAVA_LIFETIME.get():200;}
     private CataclysmConfig() {}
 }

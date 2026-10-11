@@ -22,8 +22,14 @@ public final class CataclysmEffectGlyph extends AbstractEffect implements Trigge
     public CataclysmEffectGlyph(Ability ability) {
         super(CarrierRegistry.id("cataclysm_nouveau:glyph_" + ability.id), ability.name);
         this.ability = ability;
-        augmentDescriptions.put(AugmentAmplify.INSTANCE, Component.translatable("cataclysm_nouveau.augment.increase_damage"));
-        augmentDescriptions.put(AugmentDampen.INSTANCE, Component.translatable("cataclysm_nouveau.augment.decrease_damage"));
+        if (ability == Ability.MONSTROUS || ability == Ability.SHOULDER_CHECK) {
+            compatibleAugments.add(AugmentExtendTime.INSTANCE);
+            compatibleAugments.add(AugmentDurationDown.INSTANCE);
+            augmentDescriptions.put(AugmentExtendTime.INSTANCE, Component.translatable("cataclysm_nouveau.augment.duration_up"));
+            augmentDescriptions.put(AugmentDurationDown.INSTANCE, Component.translatable("cataclysm_nouveau.augment.duration_down"));
+        }
+        augmentDescriptions.put(AugmentAmplify.INSTANCE, Component.translatable(ability == Ability.LAVA_ABSORPTION ? "cataclysm_nouveau.augment.healing_up" : ability == Ability.MONSTROUS ? "cataclysm_nouveau.augment.effect_up" : "cataclysm_nouveau.augment.increase_damage"));
+        augmentDescriptions.put(AugmentDampen.INSTANCE, Component.translatable(ability == Ability.LAVA_ABSORPTION ? "cataclysm_nouveau.augment.healing_down" : ability == Ability.MONSTROUS ? "cataclysm_nouveau.augment.effect_down" : "cataclysm_nouveau.augment.decrease_damage"));
     }
 
     @Override
@@ -32,8 +38,9 @@ public final class CataclysmEffectGlyph extends AbstractEffect implements Trigge
         if (!(level instanceof ServerLevel world) || !isEnabled()) return;
         var frame = CastContext.of(context, hit, null);
         if (frame.caster() == null || !frame.caster().isAlive()) return;
-        firstCharge(context, stats.getAugments()).trigger(
-                () -> NativePayloads.effect(ability, world, frame, stats.getAmpMultiplier()));
+        firstCharge(context, stats.getAugments()).trigger(() -> MonstrosityCasting.supports(ability)
+                ? MonstrosityCasting.effect(ability, world, frame, stats.getAmpMultiplier(), stats.getDurationMultiplier())
+                : NativePayloads.effect(ability, world, frame, stats.getAmpMultiplier()));
     }
 
     public ResourceCharge firstCharge(SpellContext context, List<AbstractAugment> augments) {
