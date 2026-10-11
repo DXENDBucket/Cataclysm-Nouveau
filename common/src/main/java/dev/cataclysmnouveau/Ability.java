@@ -16,7 +16,13 @@ public enum Ability {
     LAVA_ABSORPTION("lava_absorption", "Lava Absorption", 300),
     MONSTROUS("monstrous", "Monstrous", 120),
     BONE_FRACTURE("bone_fracture", "Bone Fracture", 40),
-    LAVA_WALKING("lava_walking", "Lava Walking", 80);
+    LAVA_WALKING("lava_walking", "Lava Walking", 80),
+    WATER_SPEAR("water_spear", "Water Spear", 90),
+    LIGHTNING_SPEAR("lightning_spear", "Lightning Spear", 110),
+    STORM_SERPENT("storm_serpent", "Storm Serpents", 160),
+    LIGHTNING_STORM("lightning_storm", "Lightning Storm", 180),
+    LIGHTNING_FIELD("lightning_field", "Lightning Field", 160),
+    STORM_BURST("storm_burst", "Stormburst", 500);
     public final String id, name;
     public final int mana;
     Ability(String id, String name, int mana) { this.id=id; this.name=name; this.mana=mana; }

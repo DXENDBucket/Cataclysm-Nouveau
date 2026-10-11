@@ -476,7 +476,8 @@ public final class NativeAbilityTests {
         a.p.setHealth(5);a.cast(GlyphCatalog.RINGS,block(a.center),false);
         var all=h.getLevel().getEntitiesOfClass(Flame_Jet_Entity.class,new AABB(a.center,a.center).inflate(20));
         h.assertTrue(all.size()==56+224,"Berserk Boss produces two sets of fourteen spokes and eight rings");
-        h.runAfterDelay(70,()->{try {h.assertTrue(all.stream().allMatch(Entity::isRemoved),"All native delayed jets expire");h.succeed();}finally{a.close();}});
+        // Forced chunks may need a few ticks to become entity-ticking; allow that activation margin.
+        h.runAfterDelay(90,()->{try {h.assertTrue(all.stream().allMatch(Entity::isRemoved),"All native delayed jets expire; remaining ages: "+all.stream().filter(e->!e.isRemoved()).map(e->e.tickCount).toList());h.succeed();}finally{a.close();}});
     }
     @GameTest(template="empty",batch="cat_mon_fissure",timeoutTicks=100)
     public static void fissureAdvancesOverTimeAndStopsOnOwnerLoss(GameTestHelper h) {
@@ -677,6 +678,114 @@ public final class NativeAbilityTests {
             clean(h,p);
             for(int x=-1;x<=1;x++) for(int z=-1;z<=1;z++) h.getLevel().setBlockAndUpdate(pos.offset(x,0,z),Blocks.AIR.defaultBlockState());
         }});
+    }
+    @GameTest(template="empty",batch="cat_scylla_spears",timeoutTicks=100)
+    public static void scyllaNativeSpearsBounceWetnessAndBlockChildren(GameTestHelper h) {
+        try(var a=new Arena(h)) {
+            var victim=a.target(a.center.add(0,1,3),false);
+            var frame=CastContext.detached(a.p,null,null);
+            var water=(Water_Spear_Entity)SpearCasting.create(Ability.WATER_SPEAR,h.getLevel(),frame,new Vec3(1,0,0),1,0);
+            ((ManagedProjectile)water).confluxCataclysm$mode(2);
+            ((ProjectileHitAccess)water).confluxCataclysm$nativeHit(new EntityHitResult(victim));
+            close(h,500-victim.getHealth(),CataclysmConfig.scyllaSpearDamage()+Resources.damageBonus(1),"Native spear damage and amplification");
+            h.assertTrue(victim.hasEffect(ModEffect.EFFECTWETNESS) && victim.getEffect(ModEffect.EFFECTWETNESS).getDuration()==200,"Native Wetness retained");
+            ((ProjectileHitAccess)water).confluxCataclysm$nativeHit(new BlockHitResult(a.center,Direction.WEST,BlockPos.containing(a.center),false));
+            h.assertTrue(water.getTotalBounces()==7 && water.getDeltaMovement().x<0,"Native water reflection and bounce budget retained");
+            var lightning=(Lightning_Spear_Entity)SpearCasting.create(Ability.LIGHTNING_SPEAR,h.getLevel(),frame,new Vec3(0,0,1),1,0);
+            ((ManagedProjectile)lightning).confluxCataclysm$mode(2);
+            ((ProjectileHitAccess)lightning).confluxCataclysm$nativeHit(block(a.center));
+            var box=new AABB(a.center,a.center).inflate(12);
+            var storms=h.getLevel().getEntitiesOfClass(com.github.L_Ender.cataclysm.entity.effect.Lightning_Storm_Entity.class,box);
+            var fields=h.getLevel().getEntitiesOfClass(com.github.L_Ender.cataclysm.entity.effect.Lightning_Area_Effect_Entity.class,box);
+            h.assertTrue(lightning.isRemoved() && storms.size()==1 && fields.size()==1,"Lightning block impact creates both native subeffects");
+            h.assertTrue(storms.getFirst().getCaster()==a.p && fields.getFirst().getOwner()==a.p,"Child damage ownership stays with the caster");
+            close(h,storms.getFirst().getDamage(),CataclysmConfig.scyllaFieldDamage()+Resources.damageBonus(1),"Native spear landing damage uses its area damage parameter");
+            h.assertTrue(!storms.getFirst().shouldBeSaved() && !fields.getFirst().shouldBeSaved(),"Transient child context is not saved");
+            var ordinary=new Water_Spear_Entity(a.p,new Vec3(0,0,1),h.getLevel(),3,2);
+            h.assertTrue(((ManagedProjectile)ordinary).confluxCataclysm$mode()==0 && ordinary.shouldBeSaved(),"Ordinary Boss spears remain unmanaged");
+            h.succeed();
+        }
+    }
+    @GameTest(template="empty",batch="cat_scylla_repeated",timeoutTicks=100)
+    public static void scyllaSpearCarrierPaymentContinuationsAndEmptyMana(GameTestHelper h) {
+        try(var a=new Arena(h)) {
+            var mana=CapabilityRegistry.getMana(a.p);
+            for(var glyph:List.of(GlyphCatalog.WATER_SPEAR,GlyphCatalog.LIGHTNING_SPEAR)) {
+                mana.setMana(10000);var marker=new Marker();
+                var cast=resolver(h,a.p,new Spell(MethodProjectile.INSTANCE,glyph,marker));cast.spellContext.nextPart();
+                var carrier=new EntityProjectileSpell(h.getLevel(),cast);carrier.setPos(a.center.add(0,2,0));carrier.setDeltaMovement(new Vec3(0,0,1));
+                ProjectileDispatch.convert(carrier);
+                var box=new AABB(a.center,a.center).inflate(20);
+                var spear=h.getLevel().getEntitiesOfClass(Elemental_Spear_Entity.class,box).getFirst();
+                close(h,spear.getDeltaMovement().length(),2,"Native spear launch speed retained");
+                close(h,mana.getCurrentMana(),10000-CataclysmConfig.cost(glyph.ability),"Native launch pays once");
+                ((ProjectileHitAccess)spear).confluxCataclysm$nativeHit(block(a.center.add(0,0,2)));
+                h.assertTrue(marker.hits==1,"Native impact continues once");
+                close(h,mana.getCurrentMana(),10000-CataclysmConfig.cost(glyph.ability),"Native impact does not double charge");
+                spear.discard();ExecutionSessions.tick();
+                mana.setMana(10000);marker=new Marker();cast=resolver(h,a.p,new Spell(MethodProjectile.INSTANCE,glyph,marker));cast.spellContext.nextPart();
+                var orbit=new EntityOrbitProjectile(h.getLevel(),cast,a.p);orbit.setPos(a.center.add(0,2,0));
+                ProjectileDispatch.convert(orbit);spear=h.getLevel().getEntitiesOfClass(Elemental_Spear_Entity.class,box).getFirst();
+                var before=spear.position();spear.tick();close(h,spear.position().distanceTo(before),0,"Ars-driven spear has no duplicate native movement");
+                h.assertTrue(spear.getState()==1,"Native spawn animation state retained");
+                close(h,mana.getCurrentMana(),10000,"Orbit charges at impact, not creation");
+                for(int i=1;i<=2;i++) {
+                    ArsSpellAccess.resolver(orbit).onResolveEffect(h.getLevel(),block(a.center));
+                    h.assertTrue(marker.hits==i && !spear.isRemoved(),"Recurring native impact continues once and keeps the carrier");
+                    close(h,mana.getCurrentMana(),10000-i*CataclysmConfig.cost(glyph.ability),"Each recurring impact pays");
+                }
+                mana.setMana(0);ArsSpellAccess.resolver(orbit).onResolveEffect(h.getLevel(),block(a.center));
+                h.assertTrue(spear.isRemoved() && orbit.isRemoved() && marker.hits==2,"Empty mana stops spear and trajectory");ExecutionSessions.tick();
+            }
+            a.p.setGameMode(GameType.CREATIVE);mana.setMana(0);
+            var creativeCast=resolver(h,a.p,new Spell(MethodProjectile.INSTANCE,GlyphCatalog.WATER_SPEAR));creativeCast.spellContext.nextPart();
+            var creative=new EntityProjectileSpell(h.getLevel(),creativeCast);creative.setPos(a.center.add(0,2,0));
+            ProjectileDispatch.convert(creative);
+            h.assertTrue(!h.getLevel().getEntitiesOfClass(Elemental_Spear_Entity.class,new AABB(a.center,a.center).inflate(20)).isEmpty(),"Creative spears bypass mana");
+            h.succeed();
+        }
+    }
+    @GameTest(template="empty",batch="cat_scylla_storms",timeoutTicks=110)
+    public static void scyllaFieldsBurstOwnershipAlliesAndCleanup(GameTestHelper h) {
+        var a=new Arena(h);
+        var victim=a.target(a.center,false);var ally=a.target(a.center,true);
+        a.cast(GlyphCatalog.STORM,new EntityHitResult(victim),true);
+        a.cast(GlyphCatalog.FIELD,block(a.center),true);
+        double mana=CapabilityRegistry.getMana(a.p).getCurrentMana();
+        a.cast(GlyphCatalog.BURST,block(a.center),true);
+        close(h,CapabilityRegistry.getMana(a.p).getCurrentMana(),mana-CataclysmConfig.cost(Ability.STORM_BURST)-CataclysmConfig.amplifyCost(),"Full burst pays once");
+        var box=new AABB(a.center,a.center).inflate(20);
+        var storms=h.getLevel().getEntitiesOfClass(com.github.L_Ender.cataclysm.entity.effect.Lightning_Storm_Entity.class,box);
+        var sparks=h.getLevel().getEntitiesOfClass(Spark_Entity.class,box);
+        var fields=h.getLevel().getEntitiesOfClass(com.github.L_Ender.cataclysm.entity.effect.Lightning_Area_Effect_Entity.class,box);
+        h.assertTrue(storms.size()==36 && sparks.size()==2,"Native burst produces 35 delayed strikes and two sparks, besides standalone storm");
+        h.assertTrue(storms.stream().allMatch(e->e.getCaster()==a.p) && sparks.stream().allMatch(e->e.getOwner()==a.p),"No detached Boss retains damage ownership");
+        h.assertTrue(h.getLevel().getEntitiesOfClass(com.github.L_Ender.cataclysm.entity.InternalAnimationMonster.IABossMonsters.Scylla.Scylla_Entity.class,box).isEmpty(),"Invocation frame is never spawned");
+        close(h,fields.getFirst().getDamage(),CataclysmConfig.scyllaFieldDamage()+Resources.damageBonus(1),"Field amplification");
+        h.runAfterDelay(32,()->{
+            h.assertTrue(victim.getHealth()<500 && victim.getLastDamageSource().getEntity()==a.p,"Native storm/field damage reaches the target with caster credit");
+            close(h,ally.getHealth(),500,"Storm and field skip allies");
+        });
+        h.runAfterDelay(65,()->{try {
+            h.assertTrue(storms.stream().allMatch(Entity::isRemoved),"Native delayed strikes naturally expire");
+            a.p.discard();fields.forEach(Entity::tick);sparks.forEach(Entity::tick);
+            h.assertTrue(fields.stream().allMatch(Entity::isRemoved) && sparks.stream().allMatch(Entity::isRemoved),"Owner departure cleans fields and sparks");
+            h.succeed();
+        } finally {a.close();}});
+    }
+    @GameTest(template="empty",batch="cat_scylla_snakes",timeoutTicks=110)
+    public static void scyllaSerpentsAimStrikeWetnessAndExpiry(GameTestHelper h) {
+        var a=new Arena(h);var victim=a.target(a.center,false);var ally=a.target(a.center,true);
+        a.cast(GlyphCatalog.SERPENT,new EntityHitResult(victim),false);
+        var snakes=h.getLevel().getEntitiesOfClass(Storm_Serpent_Entity.class,new AABB(a.center,a.center).inflate(20));
+        h.assertTrue(snakes.size()==2 && snakes.stream().allMatch(e->e.getCaster()==a.p && !e.shouldBeSaved()),"Two transient native serpents carry actual caster ownership");
+        h.runAfterDelay(65,()->{
+            h.assertTrue(victim.getHealth()<500 && victim.hasEffect(ModEffect.EFFECTWETNESS) && victim.getEffect(ModEffect.EFFECTWETNESS).getAmplifier()==4,"Native aim and delayed strike reach selection and apply Wetness V");
+            close(h,ally.getHealth(),500,"Serpents skip allies");
+        });
+        h.runAfterDelay(95,()->{try {
+            h.assertTrue(snakes.stream().allMatch(Entity::isRemoved),"Native serpents complete their disappearance");h.succeed();
+        } finally {a.close();}});
     }
     private static final class Marker extends AbstractEffect {
         int hits;

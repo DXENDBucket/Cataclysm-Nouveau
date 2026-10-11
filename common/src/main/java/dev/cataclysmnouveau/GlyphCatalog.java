@@ -24,8 +24,14 @@ public final class GlyphCatalog {
     public static final CataclysmEffectGlyph MONSTROUS=new CataclysmEffectGlyph(Ability.MONSTROUS);
     public static final CataclysmEffectGlyph FRACTURE=new CataclysmEffectGlyph(Ability.BONE_FRACTURE);
     public static final CataclysmEffectGlyph LAVA_WALKING=new CataclysmEffectGlyph(Ability.LAVA_WALKING);
-    public static final List<CataclysmProjectileGlyph> PROJECTILES=List.of(AMETHYST,SPIKE,ANCHOR,WAVE,FLARE,LAVA);
-    public static final List<AbstractSpellPart> ALL=List.of(BOLT,RUNE,JET,QUAKE,FISSURE,RINGS,CHARGE,ABSORB,MONSTROUS,FRACTURE,LAVA_WALKING,AMETHYST,SPIKE,ANCHOR,WAVE,FLARE,LAVA);
+    public static final CataclysmProjectileGlyph WATER_SPEAR=new CataclysmProjectileGlyph(Ability.WATER_SPEAR);
+    public static final CataclysmProjectileGlyph LIGHTNING_SPEAR=new CataclysmProjectileGlyph(Ability.LIGHTNING_SPEAR);
+    public static final CataclysmEffectGlyph SERPENT=new CataclysmEffectGlyph(Ability.STORM_SERPENT);
+    public static final CataclysmEffectGlyph STORM=new CataclysmEffectGlyph(Ability.LIGHTNING_STORM);
+    public static final CataclysmEffectGlyph FIELD=new CataclysmEffectGlyph(Ability.LIGHTNING_FIELD);
+    public static final CataclysmEffectGlyph BURST=new CataclysmEffectGlyph(Ability.STORM_BURST);
+    public static final List<CataclysmProjectileGlyph> PROJECTILES=List.of(AMETHYST,SPIKE,ANCHOR,WAVE,FLARE,LAVA,WATER_SPEAR,LIGHTNING_SPEAR);
+    public static final List<AbstractSpellPart> ALL=List.of(BOLT,RUNE,JET,QUAKE,FISSURE,RINGS,CHARGE,ABSORB,MONSTROUS,FRACTURE,LAVA_WALKING,SERPENT,STORM,FIELD,BURST,AMETHYST,SPIKE,ANCHOR,WAVE,FLARE,LAVA,WATER_SPEAR,LIGHTNING_SPEAR);
     public static CataclysmProjectileGlyph projectile(Ability ability) { return PROJECTILES.stream().filter(g->g.ability==ability).findFirst().orElseThrow(); }
     public static void register() {
         GlyphPresentation.register("cataclysm_nouveau",g->g instanceof CataclysmProjectileGlyph?"1":"0");

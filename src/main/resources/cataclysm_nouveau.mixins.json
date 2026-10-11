@@ -23,7 +23,15 @@
     "LavaBombMixin",
     "TemporaryLavaFlowMixin",
     "TemporaryLavaBlockMixin",
-    "LavaWalkingMixin"
+    "LavaWalkingMixin",
+    "ScyllaAdapterMixin",
+    "ScyllaEffectStateMixin",
+    "ScyllaAllianceMixin",
+    "ScyllaChildMixin",
+    "SparkChildMixin",
+    "SpearStateMixin",
+    "SpearMovementMixin",
+    "SpearVisualAccess"
   ],
   "injectors": {
     "defaultRequire": 1
