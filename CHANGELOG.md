@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.1.0-dev.2
+
+- Fix missing Ars glyph-name localization keys in Chinese and English.
+- Validate registered ability name and description translations before packaging.
+
 ## 0.1.0-dev.1
 
 - Start the independent NeoForge 1.21.1 addon, requiring the original Cataclysm.

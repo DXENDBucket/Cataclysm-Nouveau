@@ -36,6 +36,11 @@ relocation.
 
 ## Visual resources
 
+Ars glyph names use `cataclysm_nouveau.glyph_name.<registry path>` in the language
+files, including both spellbook labels and glyph item names. Ordinary `item.*`
+translations alone do not satisfy that contract. `verifyGlyphLocalization` checks
+the names and descriptions in English and Chinese before packaging.
+
 Only three independently authored item-model JSON files exist. Each has a single
 `parent` reference into the installed Cataclysm namespace. Native entity renderers,
 entity events, particles and sounds are supplied by the original mod. This project

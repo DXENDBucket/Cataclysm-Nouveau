@@ -7,5 +7,8 @@
   "item.cataclysm_nouveau.glyph_bolt_strike": "Bolt Strike",
   "cataclysm_nouveau.glyph_desc.glyph_bolt_strike": "Summons a native lightning column at the selected location after a short delay. Amplify changes damage as for Harm.",
   "cataclysm_nouveau.augment.increase_damage": "Increases damage by the configured Harm amplification amount.",
-  "cataclysm_nouveau.augment.decrease_damage": "Decreases damage by the configured Harm amplification amount."
+  "cataclysm_nouveau.augment.decrease_damage": "Decreases damage by the configured Harm amplification amount.",
+  "cataclysm_nouveau.glyph_name.glyph_amethyst_cluster": "Amethyst Cluster",
+  "cataclysm_nouveau.glyph_name.glyph_lionfish_spike": "Lionfish Spike",
+  "cataclysm_nouveau.glyph_name.glyph_bolt_strike": "Bolt Strike"
 }

@@ -39,7 +39,37 @@ dependencies {
     runtimeOnly fileTree(dir: 'libs', include: '*.jar')
 }
 tasks.withType(JavaCompile).configureEach { options.encoding = 'UTF-8' }
+def verifyGlyphLocalization = tasks.register('verifyGlyphLocalization') {
+    group = 'verification'
+    description = 'Check Ars glyph-name and description translations for every ability.'
+    def abilitySource = file('common/src/main/java/dev/cataclysmnouveau/Ability.java')
+    def languageRoot = file('common/src/main/resources/assets/cataclysm_nouveau/lang')
+    inputs.file abilitySource
+    inputs.dir languageRoot
+    doLast {
+        // Ars AbstractSpellPart uses <namespace>.glyph_name.<registry path>, not item.*.
+        def ids = (abilitySource.getText('UTF-8') =~ /\b[A-Z_]+\("([a-z_]+)"/).collect { it[1] }
+        if (ids.isEmpty()) throw new GradleException('No ability IDs found for localization validation')
+        ['en_us', 'zh_cn'].each { locale ->
+            def entries = new groovy.json.JsonSlurper().parse(new File(languageRoot, "${locale}.json"), 'UTF-8')
+            ids.each { id ->
+                ['glyph_name', 'glyph_desc'].each { kind ->
+                    def key = "cataclysm_nouveau.${kind}.glyph_${id}"
+                    def value = entries[key]
+                    if (!(value instanceof String) || value.isBlank() || value == key)
+                        throw new GradleException("Missing glyph translation: ${locale}: ${key}")
+                }
+            }
+            entries.each { key, value ->
+                if (value instanceof String && (value.contains('\uFFFD') || value.contains('??')))
+                    throw new GradleException("Corrupt glyph translation: ${locale}: ${key}")
+            }
+        }
+        logger.lifecycle("Verified Ars glyph names and descriptions: ${ids.size()} glyphs, en_us + zh_cn")
+    }
+}
 processResources {
+    dependsOn verifyGlyphLocalization
     inputs.property 'version', project.version
     filesMatching('META-INF/neoforge.mods.toml') { expand(version: project.version) }
 }
@@ -47,7 +77,7 @@ tasks.named('jar') {
     from('LICENSE', 'THIRD_PARTY_NOTICES.md')
     archiveFileName = "cataclysm-nouveau-${project.version}-mc1.21.1-neoforge.jar"
 }
-tasks.named('sourcesJar') { from('LICENSE', 'THIRD_PARTY_NOTICES.md') }
+tasks.named('sourcesJar') { dependsOn verifyGlyphLocalization; from('LICENSE', 'THIRD_PARTY_NOTICES.md') }
 // Only adapter code, JSON path references and metadata; never dependencies or upstream media.
 tasks.register('verifyDistributions') {
     dependsOn tasks.named('jar'), tasks.named('sourcesJar')
