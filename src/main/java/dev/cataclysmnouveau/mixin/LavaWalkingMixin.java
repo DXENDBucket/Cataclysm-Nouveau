@@ -22,15 +22,22 @@ public abstract class LavaWalkingMixin {
     @Inject(method="tick",at=@At("TAIL"))
     private void confluxCataclysm$buoyancy(CallbackInfo ci) {
         var actor=(LivingEntity)(Object)this;
-        if(!actor.hasEffect(CataclysmEffects.LAVA_WALKING) || !actor.isInLava()) return;
-        actor.clearFire();
-        actor.fallDistance=0;
+        if(!actor.hasEffect(CataclysmEffects.LAVA_WALKING)) return;
+        if(actor.isInLava()) {actor.clearFire();actor.fallDistance=0;}
         if(actor.isShiftKeyDown() || actor.isPassenger() || actor.isNoGravity()) return;
         var at=actor.blockPosition();
         var fluid=actor.level().getFluidState(at);
-        if(fluid.is(FluidTags.LAVA) && actor.getY()<at.getY()+fluid.getHeight(actor.level(),at)-.01) {
+        if(!fluid.is(FluidTags.LAVA)) {at=at.below();fluid=actor.level().getFluidState(at);}
+        if(fluid.is(FluidTags.LAVA)) {
+            double surface=at.getY()+fluid.getHeight(actor.level(),at);
             var motion=actor.getDeltaMovement();
-            actor.setDeltaMovement(motion.x,Math.max(motion.y,.12),motion.z);
+            if(actor.getY()>=surface-.125 && actor.getY()<=surface+.125 && motion.y<=.12
+                    && !actor.level().getFluidState(at.above()).is(FluidTags.LAVA)) {
+                actor.setOnGround(true);
+                actor.fallDistance=0;
+                // Stop the small buoyancy impulse at the surface; preserve a real jump's larger velocity.
+                if(motion.y>0 && motion.y<=.12) actor.setDeltaMovement(motion.x,0,motion.z);
+            } else if(actor.isInLava() && actor.getY()<surface-.01) actor.setDeltaMovement(motion.x,Math.max(motion.y,.12),motion.z);
         }
     }
 }

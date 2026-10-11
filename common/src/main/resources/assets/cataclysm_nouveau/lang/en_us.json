@@ -81,5 +81,14 @@
   "item.cataclysm_nouveau.glyph_lightning_field": "Lightning Field",
   "cataclysm_nouveau.glyph_name.glyph_storm_burst": "Stormburst",
   "cataclysm_nouveau.glyph_desc.glyph_storm_burst": "Unleashes Scylla's native stormburst at the selected ground position: 35 delayed lightning strikes along seven spokes, accompanied by two electric sparks that leave fields on landing.",
-  "item.cataclysm_nouveau.glyph_storm_burst": "Stormburst"
+  "item.cataclysm_nouveau.glyph_storm_burst": "Stormburst",
+  "cataclysm_nouveau.glyph_name.glyph_spark": "Electric Spark",
+  "cataclysm_nouveau.glyph_desc.glyph_spark": "Replaces the projectile with an arcing electric spark and native lightning trail. Landing creates a lightning strike and shrinking field; the spark itself has no direct entity damage.",
+  "item.cataclysm_nouveau.glyph_spark": "Electric Spark",
+  "cataclysm_nouveau.glyph_name.glyph_lightning_row": "Lightning Rows",
+  "cataclysm_nouveau.glyph_desc.glyph_lightning_row": "Calls two rows of nine lightning strikes. Entity targets retain native movement prediction; location targets use the trigger direction to orient the rows. Subsequent effects proceed normally.",
+  "item.cataclysm_nouveau.glyph_lightning_row": "Lightning Rows",
+  "cataclysm_nouveau.glyph_name.glyph_thunder_cloud": "Thundercloud",
+  "cataclysm_nouveau.glyph_desc.glyph_thunder_cloud": "Forms a thundercloud above the selected location. After a default two-second formation period, rains native water and lightning spears with bounces, Wetness and landing fields. Duration augments affect the rain interval.",
+  "item.cataclysm_nouveau.glyph_thunder_cloud": "Thundercloud"
 }

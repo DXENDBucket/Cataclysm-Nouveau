@@ -31,7 +31,9 @@
     "SparkChildMixin",
     "SpearStateMixin",
     "SpearMovementMixin",
-    "SpearVisualAccess"
+    "SpearVisualAccess",
+    "ScyllaCloudGoalMixin",
+    "SparkStateMixin"
   ],
   "injectors": {
     "defaultRequire": 1

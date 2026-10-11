@@ -22,7 +22,7 @@ public final class CataclysmEffectGlyph extends AbstractEffect implements Trigge
     public CataclysmEffectGlyph(Ability ability) {
         super(CarrierRegistry.id("cataclysm_nouveau:glyph_" + ability.id), ability.name);
         this.ability = ability;
-        if (ability == Ability.MONSTROUS || ability == Ability.SHOULDER_CHECK || ability == Ability.BONE_FRACTURE || ability == Ability.LAVA_WALKING || ability == Ability.LIGHTNING_FIELD) {
+        if (ability == Ability.MONSTROUS || ability == Ability.SHOULDER_CHECK || ability == Ability.BONE_FRACTURE || ability == Ability.LAVA_WALKING || ability == Ability.LIGHTNING_FIELD || ability == Ability.THUNDER_CLOUD) {
             compatibleAugments.add(AugmentExtendTime.INSTANCE);
             compatibleAugments.add(AugmentDurationDown.INSTANCE);
             augmentDescriptions.put(AugmentExtendTime.INSTANCE, Component.translatable("cataclysm_nouveau.augment.duration_up"));

@@ -24,13 +24,13 @@ public final class GlyphClientExtensions {
             @Override public boolean renderInventoryIcon(net.minecraft.world.effect.MobEffectInstance instance,
                     net.minecraft.client.gui.screens.inventory.EffectRenderingInventoryScreen<?> screen,
                     net.minecraft.client.gui.GuiGraphics graphics,int x,int y,int z) {
-                graphics.blit(x,y,z,18,18,Minecraft.getInstance().getMobEffectTextures().get(net.minecraft.world.effect.MobEffects.FIRE_RESISTANCE));
+                graphics.blit(x,y+7,z,18,18,Minecraft.getInstance().getMobEffectTextures().get(net.minecraft.world.effect.MobEffects.FIRE_RESISTANCE));
                 return true;
             }
             @Override public boolean renderGuiIcon(net.minecraft.world.effect.MobEffectInstance instance,
                     net.minecraft.client.gui.Gui gui,net.minecraft.client.gui.GuiGraphics graphics,
                     int x,int y,float z,float alpha) {
-                graphics.blit(x,y,(int)z,18,18,Minecraft.getInstance().getMobEffectTextures().get(net.minecraft.world.effect.MobEffects.FIRE_RESISTANCE),1,1,1,alpha);
+                graphics.blit(x+3,y+3,(int)z,18,18,Minecraft.getInstance().getMobEffectTextures().get(net.minecraft.world.effect.MobEffects.FIRE_RESISTANCE),1,1,1,alpha);
                 return true;
             }
         },dev.cataclysmnouveau.CataclysmEffects.LAVA_WALKING);

@@ -17,6 +17,7 @@ public final class CataclysmConfig {
     private static final EnumMap<Ability, ModConfigSpec.IntValue> COOLDOWN_TICKS = new EnumMap<>(Ability.class);
     private static final ModConfigSpec.DoubleValue SCYLLA_SPEAR, SCYLLA_STORM, SCYLLA_FIELD, SCYLLA_SNAKE, SCYLLA_HP;
     private static final ModConfigSpec.IntValue SCYLLA_DELAY, SCYLLA_FIELD_DURATION;
+    private static final ModConfigSpec.IntValue SCYLLA_CLOUD_WARMUP;
     static {
         var b = new ModConfigSpec.Builder(); b.push("mana");
         for (var a : Ability.values()) COSTS.put(a, b.comment("Ars mana per actual launch or repeated impact.").defineInRange(a.id, a.mana, 0, 100000));
@@ -62,7 +63,8 @@ public final class CataclysmConfig {
         SCYLLA_SNAKE=b.comment("Damage per serpent strike; -1 follows Scylla SnakeDamage.").defineInRange("serpent_damage",-1.0,-1,100000);
         SCYLLA_HP=b.comment("Maximum-health fraction added by lightning storms; -1 follows Scylla StormHpDamage.").defineInRange("storm_health_fraction",-1.0,-1,1);
         SCYLLA_DELAY=b.comment("Initial delay for the standalone storm, before its native strike animation.").defineInRange("storm_delay_ticks",10,0,1200);
-        SCYLLA_FIELD_DURATION=b.comment("Standalone electric field duration before duration augments; radius shrinks across this interval.").defineInRange("field_duration_ticks",160,20,1200);b.pop();
+        SCYLLA_FIELD_DURATION=b.comment("Standalone electric field duration before duration augments; radius shrinks across this interval.").defineInRange("field_duration_ticks",160,20,1200);
+        SCYLLA_CLOUD_WARMUP=b.comment("Cloud formation delay before native water/lightning spear rain. Default shortens the Boss windup; use 115 for native timing.").defineInRange("cloud_warmup_ticks",40,0,1200);b.pop();
         b.push("cooldowns");
         COOLDOWNS=b.comment("Gate new active uses through Conflux; existing trajectories keep running.").define("enabled",true);
         CREATIVE_COOLDOWN=b.define("creative_cooldown",false);
@@ -99,7 +101,7 @@ public final class CataclysmConfig {
     public static float flareDirectDamage() {return SPEC.isLoaded()?FLARE_DIRECT_DAMAGE.get().floatValue():7;}
     public static float flareJetDamage() {return SPEC.isLoaded()?FLARE_JET_DAMAGE.get().floatValue():7;}
     private static int defaultCooldown(Ability ability) {
-        return switch(ability) {case CERAUNUS->40;case WAVE->100;case FLARE_BOMB->160;case LAVA_BOMB->100;case EARTHQUAKE->160;case FISSURE->200;case FLAME_RING->200;case SHOULDER_CHECK->80;case LAVA_ABSORPTION->400;case MONSTROUS->350;case WATER_SPEAR->40;case LIGHTNING_SPEAR->60;case STORM_SERPENT->120;case LIGHTNING_STORM->80;case LIGHTNING_FIELD->100;case STORM_BURST->240;default->0;};
+        return switch(ability) {case CERAUNUS->40;case WAVE->100;case FLARE_BOMB->160;case LAVA_BOMB->100;case EARTHQUAKE->160;case FISSURE->200;case FLAME_RING->200;case SHOULDER_CHECK->80;case LAVA_ABSORPTION->400;case MONSTROUS->350;case WATER_SPEAR->40;case LIGHTNING_SPEAR->60;case STORM_SERPENT->120;case LIGHTNING_STORM->80;case LIGHTNING_FIELD->100;case STORM_BURST->240;case SPARK->60;case THUNDER_CLOUD->400;case LIGHTNING_ROW->200;default->0;};
     }
     public static int cooldownTicks(Ability ability) {
         return SPEC.isLoaded()?COOLDOWN_TICKS.get(ability).get():defaultCooldown(ability);
@@ -122,5 +124,6 @@ public final class CataclysmConfig {
     public static float scyllaHpDamage() {return scyllaValue(SCYLLA_HP,com.github.L_Ender.cataclysm.config.CMCommonConfig.Scylla.StormHpDamage);}
     public static int scyllaStormDelay() {return SPEC.isLoaded()?SCYLLA_DELAY.get():10;}
     public static int scyllaFieldDuration() {return SPEC.isLoaded()?SCYLLA_FIELD_DURATION.get():160;}
+    public static int scyllaCloudWarmup() {return SPEC.isLoaded()?SCYLLA_CLOUD_WARMUP.get():40;}
     private CataclysmConfig() {}
 }

@@ -10,7 +10,7 @@ import org.spongepowered.asm.mixin.*;
 import org.spongepowered.asm.mixin.injection.*;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
-@Mixin(value={Lightning_Storm_Entity.class,Lightning_Area_Effect_Entity.class,Storm_Serpent_Entity.class,Spark_Entity.class},remap=false)
+@Mixin(value={Lightning_Storm_Entity.class,Lightning_Area_Effect_Entity.class,Storm_Serpent_Entity.class},remap=false)
 public abstract class ScyllaEffectStateMixin extends Entity implements ScyllaPayload {
     @Unique private CastContext confluxScylla$cast;
     @Unique private Level confluxScylla$ownerWorld;

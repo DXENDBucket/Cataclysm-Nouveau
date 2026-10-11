@@ -18,6 +18,13 @@ public final class NativePayloads {
             case LIONFISH_SPIKE -> new Lionfish_Spike_Entity(world,frame.caster());
             case LAVA_BOMB -> new Lava_Bomb_Entity(ModEntities.LAVA_BOMB.get(),world,frame.caster());
             case FLARE_BOMB -> new Flare_Bomb_Entity(ModEntities.FLARE_BOMB.get(),world,frame.caster());
+            case SPARK -> {
+                var spark=new Spark_Entity(world,frame.damageOwner());
+                spark.setDamage(Math.max(0,CataclysmConfig.scyllaStormDamage()+Resources.damageBonus(amplify)));
+                spark.setAreaDamage(Math.max(0,CataclysmConfig.scyllaFieldDamage()+Resources.damageBonus(amplify)));
+                spark.setAreaRadius(2);spark.setHpDamage(CataclysmConfig.scyllaHpDamage());
+                yield ScyllaCasting.manage(spark,frame);
+            }
             default -> throw new IllegalArgumentException("Not a projectile: "+ability);
         };
         result.setOwner(frame.damageOwner());

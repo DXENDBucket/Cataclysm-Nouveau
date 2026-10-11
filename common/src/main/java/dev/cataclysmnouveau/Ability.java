@@ -22,7 +22,10 @@ public enum Ability {
     STORM_SERPENT("storm_serpent", "Storm Serpents", 160),
     LIGHTNING_STORM("lightning_storm", "Lightning Storm", 180),
     LIGHTNING_FIELD("lightning_field", "Lightning Field", 160),
-    STORM_BURST("storm_burst", "Stormburst", 500);
+    STORM_BURST("storm_burst", "Stormburst", 500),
+    SPARK("spark", "Electric Spark", 120),
+    THUNDER_CLOUD("thunder_cloud", "Thundercloud", 900),
+    LIGHTNING_ROW("lightning_row", "Lightning Rows", 320);
     public final String id, name;
     public final int mana;
     Ability(String id, String name, int mana) { this.id=id; this.name=name; this.mana=mana; }
@@ -36,7 +39,7 @@ public enum Ability {
             case FLAME_JET,FLARE_BOMB,LAVA_BOMB,EARTHQUAKE,FISSURE,FLAME_RING,
                     SHOULDER_CHECK,LAVA_ABSORPTION,MONSTROUS,BONE_FRACTURE,LAVA_WALKING -> Series.MONSTROSITY;
             case BOLT_STRIKE,CERAUNUS,WAVE,WATER_SPEAR,LIGHTNING_SPEAR,
-                    STORM_SERPENT,LIGHTNING_STORM,LIGHTNING_FIELD,STORM_BURST -> Series.SCYLLA;
+                    STORM_SERPENT,LIGHTNING_STORM,LIGHTNING_FIELD,STORM_BURST,SPARK,THUNDER_CLOUD,LIGHTNING_ROW -> Series.SCYLLA;
         };
     }
     public enum Series { AMETHYST_CRAB, LIONFISH, ENDER_GOLEM, MONSTROSITY, SCYLLA }

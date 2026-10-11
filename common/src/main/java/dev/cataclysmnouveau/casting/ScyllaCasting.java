@@ -13,14 +13,14 @@ import net.minecraft.world.phys.*;
 /** Installed native entities own animation, attack windows and expiry. */
 public final class ScyllaCasting {
     public static boolean supports(Ability ability) {
-        return switch(ability) {case STORM_SERPENT,LIGHTNING_STORM,LIGHTNING_FIELD,STORM_BURST->true;default->false;};
+        return switch(ability) {case STORM_SERPENT,LIGHTNING_STORM,LIGHTNING_FIELD,STORM_BURST,THUNDER_CLOUD,LIGHTNING_ROW->true;default->false;};
     }
     public static <T extends Entity> T manage(T entity,CastContext cast) {
         ((ScyllaPayload)entity).confluxScylla$cast(cast);
         if(entity instanceof Lightning_Storm_Entity storm) storm.setCaster(cast.damageOwner());
         if(entity instanceof Lightning_Area_Effect_Entity field) field.setOwner(cast.damageOwner());
         if(entity instanceof Storm_Serpent_Entity snake) snake.setCaster(cast.damageOwner());
-        if(entity instanceof Spark_Entity spark) spark.setOwner(cast.damageOwner());
+        if(entity instanceof Spark_Entity spark) {spark.setOwner(cast.damageOwner());((ManagedProjectile)spark).confluxCataclysm$mode(2);}
         return entity;
     }
     public static Entity bossChild(Entity entity,SpellScylla boss) {
@@ -31,10 +31,20 @@ public final class ScyllaCasting {
             spark.setDamage(Math.max(0,CataclysmConfig.scyllaStormDamage()+boss.bonus));
             spark.setAreaDamage(Math.max(0,CataclysmConfig.scyllaFieldDamage()+boss.bonus));
             spark.setHpDamage(CataclysmConfig.scyllaHpDamage());
+        } else if(entity instanceof Elemental_Spear_Entity spear) {
+            spear.setDamage(Math.max(0,spear.getDamage()+boss.bonus));
+            spear.setOwner(boss.cast.damageOwner());
+            ((ManagedProjectile)spear).confluxCataclysm$mode(2);
+            if(spear instanceof Lightning_Spear_Entity lightning) {
+                lightning.setAreaDamage(Math.max(0,CataclysmConfig.scyllaFieldDamage()+boss.bonus));
+                lightning.setHpDamage(CataclysmConfig.scyllaHpDamage());
+            }
         }
         return entity instanceof ScyllaPayload?manage(entity,boss.cast):entity;
     }
     public static boolean effect(Ability ability,ServerLevel world,CastContext cast,double amp,double duration) {
+        if(ability==Ability.THUNDER_CLOUD || ability==Ability.LIGHTNING_ROW)
+            return ScyllaTimedCasting.effect(ability,world,cast,amp,duration);
         Vec3 point=NativePayloads.groundPoint(world,cast);
         if(point==null) return false;
         float bonus=Resources.damageBonus(amp);

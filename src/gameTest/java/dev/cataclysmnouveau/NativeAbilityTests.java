@@ -669,6 +669,13 @@ public final class NativeAbilityTests {
         actor.addEffect(new net.minecraft.world.effect.MobEffectInstance(CataclysmEffects.LAVA_WALKING,40));
         h.runAfterDelay(25,()->{
             h.assertTrue(actor.getY()>pos.getY()+.8,"Submerged actor rises to the lava surface");
+            // This cow's FloatGoal can jump after reaching the surface. Check standing separately,
+            // rather than requiring an airborne swimmer to remain grounded at an arbitrary tick.
+            ((net.minecraft.world.entity.Mob)actor).setNoAi(true);
+            actor.setPos(Vec3.atBottomCenterOf(pos).add(0,.95,0));actor.setDeltaMovement(Vec3.ZERO);actor.setOnGround(false);actor.tick();
+            h.assertTrue(actor.onGround(),"Lava surface walking counts as grounded: height="+(actor.getY()-pos.getY())+", velocity="+actor.getDeltaMovement());
+            actor.setDeltaMovement(0,.42,0);actor.tick();
+            h.assertTrue(actor.getDeltaMovement().y>.12,"Surface grounding preserves a real jump's upward velocity");
             h.assertTrue(!actor.isNoGravity(),"Buoyancy does not change permanent gravity flags");
         });
         h.runAfterDelay(45,()->{try {
@@ -786,6 +793,82 @@ public final class NativeAbilityTests {
         h.runAfterDelay(95,()->{try {
             h.assertTrue(snakes.stream().allMatch(Entity::isRemoved),"Native serpents complete their disappearance");h.succeed();
         } finally {a.close();}});
+    }
+    @GameTest(template="empty",batch="cat_scylla_spark",timeoutTicks=100)
+    public static void electricSparkNativeLandingAndRepeatedPayment(GameTestHelper h) {
+        try(var a=new Arena(h)) {
+            var victim=a.target(a.center.add(0,1,2),false);
+            var spark=NativePayloads.projectile(Ability.SPARK,h.getLevel(),CastContext.detached(a.p,null,null),1);
+            spark.setPos(a.center);
+            var state=(ManagedProjectile)spark;state.confluxCataclysm$mode(2);
+            NativePayloads.hit(spark,new EntityHitResult(victim));close(h,victim.getHealth(),500,"Native spark has no direct entity damage");
+            NativePayloads.hit(spark,block(a.center));
+            var box=new AABB(a.center,a.center).inflate(20);
+            var storms=h.getLevel().getEntitiesOfClass(com.github.L_Ender.cataclysm.entity.effect.Lightning_Storm_Entity.class,box);
+            var fields=h.getLevel().getEntitiesOfClass(com.github.L_Ender.cataclysm.entity.effect.Lightning_Area_Effect_Entity.class,box);
+            h.assertTrue(spark.isRemoved() && storms.size()==1 && fields.size()==1,"Native spark landing generates both complete subeffects");
+            close(h,storms.getFirst().getDamage(),CataclysmConfig.scyllaStormDamage()+Resources.damageBonus(1),"Spark strike amplification");
+            h.assertTrue(storms.getFirst().getCaster()==a.p && fields.getFirst().getOwner()==a.p,"Spark subeffects retain real ownership");
+            var mana=CapabilityRegistry.getMana(a.p);mana.setMana(10000);var marker=new Marker();
+            var cast=resolver(h,a.p,new Spell(MethodProjectile.INSTANCE,GlyphCatalog.SPARK,marker));cast.spellContext.nextPart();
+            var orbit=new EntityOrbitProjectile(h.getLevel(),cast,a.p);orbit.setPos(a.center.add(0,2,0));
+            ProjectileDispatch.convert(orbit);
+            var visual=h.getLevel().getEntitiesOfClass(Spark_Entity.class,box).getFirst();
+            var before=visual.position();visual.tick();close(h,visual.position().distanceTo(before),0,"Ars drives spark movement once");
+            for(int i=1;i<=2;i++) {
+                ArsSpellAccess.resolver(orbit).onResolveEffect(h.getLevel(),block(a.center));
+                h.assertTrue(marker.hits==i && !visual.isRemoved(),"Recurring spark resolves once and retains the carrier");
+                close(h,mana.getCurrentMana(),10000-i*CataclysmConfig.cost(Ability.SPARK),"Recurring spark pays once per impact, not per child");
+            }
+            mana.setMana(0);ArsSpellAccess.resolver(orbit).onResolveEffect(h.getLevel(),block(a.center));
+            h.assertTrue(visual.isRemoved() && orbit.isRemoved() && marker.hits==2,"Empty mana stops both spark and trajectory");
+            h.succeed();
+        }
+    }
+    @GameTest(template="empty",batch="cat_scylla_cloud",timeoutTicks=200)
+    public static void nativeThundercloudRainsBothSpearsAndOwnerLossStopsIt(GameTestHelper h) {
+        var a=new Arena(h);var victim=a.target(a.center,false);var spears=new ArrayList<Elemental_Spear_Entity>();
+        java.util.function.Consumer<net.neoforged.neoforge.event.entity.EntityJoinLevelEvent> observer=event->{
+            if(event.getEntity() instanceof Elemental_Spear_Entity spear && spear.getOwner()==a.p) spears.add(spear);
+        };
+        net.neoforged.neoforge.common.NeoForge.EVENT_BUS.addListener(observer);
+        double before=CapabilityRegistry.getMana(a.p).getCurrentMana();
+        a.cast(GlyphCatalog.CLOUD,new EntityHitResult(victim),true);
+        close(h,CapabilityRegistry.getMana(a.p).getCurrentMana(),before-CataclysmConfig.cost(Ability.THUNDER_CLOUD)-CataclysmConfig.amplifyCost(),"Whole thundercloud charges once");
+        h.runAfterDelay(CataclysmConfig.scyllaCloudWarmup()+36,()->{try {
+            long waters=spears.stream().filter(Water_Spear_Entity.class::isInstance).count();
+            long lightnings=spears.stream().filter(Lightning_Spear_Entity.class::isInstance).count();
+            h.assertTrue(waters==31 && lightnings==31,"Native cloud completes 31 paired water/lightning volleys");
+            for(var spear:spears) {
+                h.assertTrue(spear.getOwner()==a.p && !spear.shouldBeSaved(),"Cloud spear belongs to caster and is transient");
+                double base=spear instanceof Water_Spear_Entity?com.github.L_Ender.cataclysm.config.CMCommonConfig.Scylla.SpearDamage:com.github.L_Ender.cataclysm.config.CMCommonConfig.Scylla.SnakeDamage;
+                close(h,spear.getDamage(),base+Resources.damageBonus(1),"Cloud preserves its native per-type damage plus amplification");
+            }
+            close(h,CapabilityRegistry.getMana(a.p).getCurrentMana(),before-CataclysmConfig.cost(Ability.THUNDER_CLOUD)-CataclysmConfig.amplifyCost(),"No per-spear hidden extra fee");
+            int completed=spears.size();a.cast(GlyphCatalog.CLOUD,new EntityHitResult(victim),false);
+            a.p.discard();ExecutionSessions.tick();spears.stream().filter(e->!e.isRemoved()).forEach(Entity::tick);
+            h.assertTrue(spears.size()==completed && spears.stream().allMatch(Entity::isRemoved),"Owner loss stops charging cloud and its remaining native spears");
+            h.succeed();
+        } finally {net.neoforged.neoforge.common.NeoForge.EVENT_BUS.unregister(observer);a.close();}});
+    }
+    @GameTest(template="empty",batch="cat_scylla_rows",timeoutTicks=110)
+    public static void nativeLightningRowsCompleteBothWavesAndExpire(GameTestHelper h) {
+        var a=new Arena(h);var victim=a.target(a.center,false);
+        var strikes=new ArrayList<com.github.L_Ender.cataclysm.entity.effect.Lightning_Storm_Entity>();
+        java.util.function.Consumer<net.neoforged.neoforge.event.entity.EntityJoinLevelEvent> observer=event->{
+            if(event.getEntity() instanceof com.github.L_Ender.cataclysm.entity.effect.Lightning_Storm_Entity storm && storm.getCaster()==a.p) strikes.add(storm);
+        };
+        net.neoforged.neoforge.common.NeoForge.EVENT_BUS.addListener(observer);
+        a.cast(GlyphCatalog.ROW,new EntityHitResult(victim),true);
+        h.runAfterDelay(30,()->h.assertTrue(strikes.size()==9,"Native first row contains nine strikes"));
+        h.runAfterDelay(80,()->{try {
+            h.assertTrue(strikes.size()==18 && strikes.stream().allMatch(Entity::isRemoved),"Both nine-strike native waves complete and expire");
+            for(var storm:strikes) {
+                close(h,storm.getDamage(),CataclysmConfig.scyllaStormDamage()+Resources.damageBonus(1),"Row strike amplification");
+                h.assertTrue(storm.getCaster()==a.p && !storm.shouldBeSaved(),"Rows retain true damage ownership without a Boss");
+            }
+            h.succeed();
+        } finally {net.neoforged.neoforge.common.NeoForge.EVENT_BUS.unregister(observer);a.close();}});
     }
     private static final class Marker extends AbstractEffect {
         int hits;

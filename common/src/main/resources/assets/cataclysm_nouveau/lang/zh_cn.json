@@ -81,5 +81,14 @@
   "item.cataclysm_nouveau.glyph_lightning_field": "雷电场",
   "cataclysm_nouveau.glyph_name.glyph_storm_burst": "放射雷暴",
   "cataclysm_nouveau.glyph_desc.glyph_storm_burst": "在选定地面引发斯库拉的原生雷暴爆发，向七个方向分波次展开共 35 次落雷，并释放两枚落地布场的电火花。",
-  "item.cataclysm_nouveau.glyph_storm_burst": "放射雷暴"
+  "item.cataclysm_nouveau.glyph_storm_burst": "放射雷暴",
+  "cataclysm_nouveau.glyph_name.glyph_spark": "电火花",
+  "cataclysm_nouveau.glyph_desc.glyph_spark": "以原生抛物线电火花替换弹射物，保留电弧拖尾；落地生成落雷和收缩雷电场，不自带实体直击伤害。",
+  "item.cataclysm_nouveau.glyph_spark": "电火花",
+  "cataclysm_nouveau.glyph_name.glyph_lightning_row": "连排落雷",
+  "cataclysm_nouveau.glyph_desc.glyph_lightning_row": "分两波各召来九道落雷；实体目标保留原生移动预判，位置目标沿触发方向排布。后续效果正常接续。",
+  "item.cataclysm_nouveau.glyph_lightning_row": "连排落雷",
+  "cataclysm_nouveau.glyph_name.glyph_thunder_cloud": "雷暴云",
+  "cataclysm_nouveau.glyph_desc.glyph_thunder_cloud": "在选定位置上方聚集雷云，默认两秒后连续倾泻水矛和雷矛，保留反弹、潮湿和落地雷电场。时效增强改变倾泻时长。",
+  "item.cataclysm_nouveau.glyph_thunder_cloud": "雷暴云"
 }

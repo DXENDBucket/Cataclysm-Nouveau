@@ -38,6 +38,7 @@ public final class ProjectileCasting {
         private final boolean repeated;
         private final float acceleration;
         private Vec3 direction;
+        private final java.util.Set<java.util.UUID> sparkTargets=new java.util.HashSet<>();
         Flight(Ability ability,ThrowableProjectile payload,EntityProjectileSpell carrier,boolean arsDriven,boolean repeated,double acceleration) {
             this.ability=ability;this.payload=payload;this.carrier=carrier;this.repeated=repeated;this.acceleration=(float)acceleration;
             trajectory=arsDriven?new ArsTrajectory(payload,carrier):null;direction=TriggerGeometry.direction(carrier);
@@ -49,7 +50,7 @@ public final class ProjectileCasting {
             state.confluxCataclysm$impact(hit->impact(session,hit));
             if (trajectory!=null) return trajectory.start(session.world(),()->{},hit->impact(session,hit));
             payload.setPos(carrier.position());
-            float speed=(ability==Ability.AMETHYST_CLUSTER?.8F:(ability==Ability.FLARE_BOMB || ability==Ability.LAVA_BOMB)?1F:.35F)*Math.max(.1F,1+acceleration/.75F);
+            float speed=(ability==Ability.AMETHYST_CLUSTER?.8F:(ability==Ability.FLARE_BOMB || ability==Ability.LAVA_BOMB || ability==Ability.SPARK)?1F:.35F)*Math.max(.1F,1+acceleration/.75F);
             payload.shoot(direction.x,direction.y,direction.z,speed,0);
             return session.world().addFreshEntity(payload);
         }
@@ -60,7 +61,9 @@ public final class ProjectileCasting {
             state.confluxCataclysm$resolving(true);
             try {
                 if (!session.activate(()->{
-                    payload.setPos(hit.getLocation());NativePayloads.hit(payload,hit);session.impact(hit);return true;
+                    payload.setPos(hit.getLocation());NativePayloads.hit(payload,hit);
+                    if(ability!=Ability.SPARK || repeated || !(hit instanceof EntityHitResult target) || sparkTargets.add(target.getEntity().getUUID())) session.impact(hit);
+                    return true;
                 })) session.finish(ExecutionSession.EndReason.DENIED);
             } finally { state.confluxCataclysm$resolving(false); }
         }
