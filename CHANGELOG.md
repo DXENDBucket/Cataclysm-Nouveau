@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.1.0-dev.9
+
+- Keep Monstrous Horn only for Earthbreaker and Flame Rings in the Monstrosity series. Craft Quake, Shoulder Check, Bone Fracture and Monstrous from Lava Power Cell instead; all eight remaining series glyphs now use cells.
+- Preserve all glyph icons, one Source Gem and 27 experience per Scribe recipe.
+
 ## 0.1.0-dev.8
 
 - Require Lava Power Cell plus Source Gem for Flare Bomb, replacing the craftable Monstrous Eye with a direct Boss drop. Retain the existing eye icon and 27 experience cost.
