@@ -14,7 +14,9 @@ public enum Ability {
     FLAME_RING("flame_ring", "Flame Rings", 300),
     SHOULDER_CHECK("shoulder_check", "Shoulder Check", 160),
     LAVA_ABSORPTION("lava_absorption", "Lava Absorption", 300),
-    MONSTROUS("monstrous", "Monstrous", 120);
+    MONSTROUS("monstrous", "Monstrous", 120),
+    BONE_FRACTURE("bone_fracture", "Bone Fracture", 40),
+    LAVA_WALKING("lava_walking", "Lava Walking", 80);
     public final String id, name;
     public final int mana;
     Ability(String id, String name, int mana) { this.id=id; this.name=name; this.mana=mana; }

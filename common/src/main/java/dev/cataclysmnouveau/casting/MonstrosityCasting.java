@@ -19,10 +19,23 @@ import net.minecraft.world.phys.*;
 /** Native Boss attacks use detached invocation frames; Conflux owns all delayed executions. */
 public final class MonstrosityCasting {
     public static boolean supports(Ability ability) {
-        return switch(ability) {case EARTHQUAKE,FISSURE,FLAME_RING,SHOULDER_CHECK,LAVA_ABSORPTION,MONSTROUS->true;default->false;};
+        return switch(ability) {case EARTHQUAKE,FISSURE,FLAME_RING,SHOULDER_CHECK,LAVA_ABSORPTION,MONSTROUS,BONE_FRACTURE,LAVA_WALKING->true;default->false;};
     }
     public static boolean effect(Ability ability,ServerLevel world,CastContext cast,double amp,double duration) {
         if(cast.caster()==null || !cast.caster().isAlive()) return false;
+        if(ability==Ability.BONE_FRACTURE || ability==Ability.LAVA_WALKING) {
+            if(!(cast.target() instanceof EntityHitResult hit) || !(hit.getEntity() instanceof LivingEntity target)
+                    || !target.isAlive()) return false;
+            boolean allied=Allies.areAllies(cast.caster(),target);
+            if(ability==Ability.BONE_FRACTURE) {
+                if(allied) return false;
+                return target.addEffect(new MobEffectInstance(ModEffect.EFFECTBONE_FRACTURE,
+                        scaledTicks(CataclysmConfig.fractureDuration(),duration),Math.max(0,Math.min(10,(int)Math.floor(amp))),false,true),cast.caster());
+            }
+            if(!allied) return false;
+            return target.addEffect(new MobEffectInstance(CataclysmEffects.LAVA_WALKING,
+                    scaledTicks(CataclysmConfig.lavaWalkingDuration(),duration),0,false,true),cast.caster());
+        }
         if(ability==Ability.MONSTROUS) {
             if(!(cast.target() instanceof EntityHitResult hit) || !(hit.getEntity() instanceof LivingEntity target)
                     || !Allies.areAllies(cast.caster(),target)) return false;

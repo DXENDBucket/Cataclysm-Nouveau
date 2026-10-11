@@ -603,6 +603,81 @@ public final class NativeAbilityTests {
             h.assertTrue(h.getLevel().getBlockState(pos).isAir() && TemporaryLava.count(h.getLevel())==0,"Reloaded records clean without a saved projectile, with no mutation-iteration failure");h.succeed();
         }
     }
+    @GameTest(template="empty",batch="cat_status",timeoutTicks=100)
+    public static void fractureNativeAttributesDurationAndRefund(GameTestHelper h) {
+        try(var a=new Arena(h)) {
+            var enemy=a.target(a.center.add(3,0,0),false);
+            double speed=enemy.getAttributeValue(Attributes.MOVEMENT_SPEED);
+            a.cast(GlyphCatalog.FRACTURE,new EntityHitResult(enemy),true);
+            var status=enemy.getEffect(ModEffect.EFFECTBONE_FRACTURE);
+            h.assertTrue(status!=null && status.getDuration()==100 && status.getAmplifier()==1,"Native fracture level and duration");
+            close(h,enemy.getAttributeValue(Attributes.MOVEMENT_SPEED),speed-.04,"Native fracture applies amplified movement penalty");
+            close(h,CapabilityRegistry.getMana(a.p).getCurrentMana(),10000-40-CataclysmConfig.amplifyCost(),"Fracture charges once");
+            var ally=a.target(a.center.add(-3,0,0),true);
+            double mana=CapabilityRegistry.getMana(a.p).getCurrentMana();
+            a.cast(GlyphCatalog.FRACTURE,new EntityHitResult(ally),false);
+            a.cast(GlyphCatalog.FRACTURE,block(a.center),false);
+            h.assertTrue(!ally.hasEffect(ModEffect.EFFECTBONE_FRACTURE),"Fracture excludes allies");
+            close(h,CapabilityRegistry.getMana(a.p).getCurrentMana(),mana,"Ally and block failures refund");
+            var spell=new Spell(MethodTouch.INSTANCE,GlyphCatalog.FRACTURE,com.hollingsworth.arsnouveau.common.spell.augment.AugmentExtendTime.INSTANCE);
+            var r=resolver(h,a.p,spell);r.spellContext.nextPart();r.onResolveEffect(h.getLevel(),new EntityHitResult(enemy));
+            // A weaker, longer status is kept by vanilla as a hidden effect.
+            enemy.removeEffect(ModEffect.EFFECTBONE_FRACTURE);
+            var r2=resolver(h,a.p,spell);r2.spellContext.nextPart();r2.onResolveEffect(h.getLevel(),new EntityHitResult(enemy));
+            h.assertTrue(enemy.getEffect(ModEffect.EFFECTBONE_FRACTURE).getDuration()==150,"Extend Time increases native duration");
+            h.succeed();
+        }
+    }
+    @GameTest(template="empty",batch="cat_status",timeoutTicks=100)
+    public static void lavaWalkingAlliesCostsCollisionAndDamageExpiry(GameTestHelper h) {
+        try(var a=new Arena(h)) {
+            var ally=a.target(a.center,true);var enemy=a.target(a.center.add(3,0,0),false);
+            a.cast(GlyphCatalog.LAVA_WALKING,new EntityHitResult(ally),false);
+            h.assertTrue(ally.hasEffect(CataclysmEffects.LAVA_WALKING) && ally.getEffect(CataclysmEffects.LAVA_WALKING).getDuration()==600,"Synced ally status lasts 30 seconds");
+            double mana=CapabilityRegistry.getMana(a.p).getCurrentMana();
+            a.cast(GlyphCatalog.LAVA_WALKING,new EntityHitResult(enemy),false);
+            a.cast(GlyphCatalog.LAVA_WALKING,block(a.center),false);
+            close(h,CapabilityRegistry.getMana(a.p).getCurrentMana(),mana,"Enemy and block failures refund");
+            h.assertTrue(!enemy.hasEffect(CataclysmEffects.LAVA_WALKING),"Buff excludes enemies");
+            h.getLevel().setBlockAndUpdate(a.base,Blocks.LAVA.defaultBlockState());
+            var lava=h.getLevel().getFluidState(a.base);
+            h.assertTrue(ally.canStandOnFluid(lava) && !ally.canStandOnFluid(Blocks.WATER.defaultBlockState().getFluidState()),"Only lava surface becomes solid");
+            ally.setPos(a.base.getX()+.5,a.base.getY()+1.2,a.base.getZ()+.5);
+            ally.move(MoverType.SELF,new Vec3(0,-2,0));
+            h.assertTrue(ally.getY()>=a.base.getY()+.49,"Real fluid collision supports the actor");
+            double health=ally.getHealth();ally.hurt(h.getLevel().damageSources().lava(),4);
+            close(h,ally.getHealth(),health,"Lava damage blocked during buff");
+            ally.hurt(h.getLevel().damageSources().onFire(),1);
+            close(h,ally.getHealth(),health,"Lingering burns blocked during buff");
+            ally.setShiftKeyDown(true);h.assertTrue(!ally.canStandOnFluid(lava),"Crouch allows diving");ally.setShiftKeyDown(false);
+            ally.removeEffect(CataclysmEffects.LAVA_WALKING);
+            h.assertTrue(!ally.canStandOnFluid(lava),"Removing effect restores normal fluid collision");
+            ally.invulnerableTime=0;ally.hurt(h.getLevel().damageSources().lava(),4);
+            h.assertTrue(ally.getHealth()<health,"Damage protection ends with the effect");
+            a.cast(GlyphCatalog.LAVA_WALKING,new EntityHitResult(a.p),false);
+            h.assertTrue(a.p.canStandOnFluid(lava),"Player self-cast uses the same status");
+            h.succeed();
+        }
+    }
+    @GameTest(template="empty",batch="cat_status_buoyancy",timeoutTicks=80)
+    public static void lavaWalkingRisesAndExpiresWithoutPermanentFlags(GameTestHelper h) {
+        var p=player(h);var pos=BlockPos.containing(scene(h));
+        for(int x=-1;x<=1;x++) for(int z=-1;z<=1;z++) h.getLevel().setBlockAndUpdate(pos.offset(x,0,z),Blocks.LAVA.defaultBlockState());
+        var actor=cow(h,Vec3.atBottomCenterOf(pos).add(0,.2,0));((net.minecraft.world.entity.Mob)actor).setNoAi(false);actor.setNoGravity(false);
+        actor.getAttribute(Attributes.MOVEMENT_SPEED).setBaseValue(0);
+        actor.addEffect(new net.minecraft.world.effect.MobEffectInstance(CataclysmEffects.LAVA_WALKING,40));
+        h.runAfterDelay(25,()->{
+            h.assertTrue(actor.getY()>pos.getY()+.8,"Submerged actor rises to the lava surface");
+            h.assertTrue(!actor.isNoGravity(),"Buoyancy does not change permanent gravity flags");
+        });
+        h.runAfterDelay(45,()->{try {
+            h.assertTrue(!actor.hasEffect(CataclysmEffects.LAVA_WALKING) && !actor.canStandOnFluid(Blocks.LAVA.defaultBlockState().getFluidState()),"Natural expiry restores normal lava behavior");
+            h.succeed();
+        } finally {
+            clean(h,p);
+            for(int x=-1;x<=1;x++) for(int z=-1;z<=1;z++) h.getLevel().setBlockAndUpdate(pos.offset(x,0,z),Blocks.AIR.defaultBlockState());
+        }});
+    }
     private static final class Marker extends AbstractEffect {
         int hits;
         Marker() { super(net.minecraft.resources.ResourceLocation.fromNamespaceAndPath("cataclysm_nouveau","test_marker"),"Marker"); }

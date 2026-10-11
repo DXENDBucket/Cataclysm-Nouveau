@@ -22,14 +22,20 @@ public final class CataclysmEffectGlyph extends AbstractEffect implements Trigge
     public CataclysmEffectGlyph(Ability ability) {
         super(CarrierRegistry.id("cataclysm_nouveau:glyph_" + ability.id), ability.name);
         this.ability = ability;
-        if (ability == Ability.MONSTROUS || ability == Ability.SHOULDER_CHECK) {
+        if (ability == Ability.MONSTROUS || ability == Ability.SHOULDER_CHECK || ability == Ability.BONE_FRACTURE || ability == Ability.LAVA_WALKING) {
             compatibleAugments.add(AugmentExtendTime.INSTANCE);
             compatibleAugments.add(AugmentDurationDown.INSTANCE);
             augmentDescriptions.put(AugmentExtendTime.INSTANCE, Component.translatable("cataclysm_nouveau.augment.duration_up"));
             augmentDescriptions.put(AugmentDurationDown.INSTANCE, Component.translatable("cataclysm_nouveau.augment.duration_down"));
         }
-        augmentDescriptions.put(AugmentAmplify.INSTANCE, Component.translatable(ability == Ability.LAVA_ABSORPTION ? "cataclysm_nouveau.augment.healing_up" : ability == Ability.MONSTROUS ? "cataclysm_nouveau.augment.effect_up" : "cataclysm_nouveau.augment.increase_damage"));
-        augmentDescriptions.put(AugmentDampen.INSTANCE, Component.translatable(ability == Ability.LAVA_ABSORPTION ? "cataclysm_nouveau.augment.healing_down" : ability == Ability.MONSTROUS ? "cataclysm_nouveau.augment.effect_down" : "cataclysm_nouveau.augment.decrease_damage"));
+        augmentDescriptions.put(AugmentAmplify.INSTANCE, Component.translatable(ability == Ability.LAVA_ABSORPTION ? "cataclysm_nouveau.augment.healing_up" : (ability == Ability.MONSTROUS || ability == Ability.BONE_FRACTURE) ? "cataclysm_nouveau.augment.effect_up" : "cataclysm_nouveau.augment.increase_damage"));
+        augmentDescriptions.put(AugmentDampen.INSTANCE, Component.translatable(ability == Ability.LAVA_ABSORPTION ? "cataclysm_nouveau.augment.healing_down" : (ability == Ability.MONSTROUS || ability == Ability.BONE_FRACTURE) ? "cataclysm_nouveau.augment.effect_down" : "cataclysm_nouveau.augment.decrease_damage"));
+        if (ability == Ability.LAVA_WALKING) {
+            compatibleAugments.remove(AugmentAmplify.INSTANCE);
+            compatibleAugments.remove(AugmentDampen.INSTANCE);
+            augmentDescriptions.remove(AugmentAmplify.INSTANCE);
+            augmentDescriptions.remove(AugmentDampen.INSTANCE);
+        }
     }
 
     @Override
@@ -55,6 +61,7 @@ public final class CataclysmEffectGlyph extends AbstractEffect implements Trigge
     }
 
     public void addAugmentDescriptions(Map<AbstractAugment, String> descriptions) {
+        // Ars invokes this from its superclass constructor, before ability is assigned.
         descriptions.put(AugmentAmplify.INSTANCE, Component.translatable("cataclysm_nouveau.augment.increase_damage").getString());
         descriptions.put(AugmentDampen.INSTANCE, Component.translatable("cataclysm_nouveau.augment.decrease_damage").getString());
     }

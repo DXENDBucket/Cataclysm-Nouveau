@@ -56,5 +56,12 @@
   "cataclysm_nouveau.augment.effect_up": "Increases effect level.",
   "cataclysm_nouveau.augment.effect_down": "Decreases effect level.",
   "cataclysm_nouveau.augment.healing_up": "Increases healing per successful wave.",
-  "cataclysm_nouveau.augment.healing_down": "Decreases healing per successful wave."
+  "cataclysm_nouveau.augment.healing_down": "Decreases healing per successful wave.",
+  "cataclysm_nouveau.glyph_name.glyph_bone_fracture": "Bone Fracture",
+  "item.cataclysm_nouveau.glyph_bone_fracture": "Bone Fracture",
+  "cataclysm_nouveau.glyph_desc.glyph_bone_fracture": "Fracture an enemy, reducing movement and attack speed. Lasts 5 seconds; Amplify increases the effect level and Extend Time increases duration.",
+  "cataclysm_nouveau.glyph_name.glyph_lava_walking": "Lava Walking",
+  "item.cataclysm_nouveau.glyph_lava_walking": "Lava Walking",
+  "cataclysm_nouveau.glyph_desc.glyph_lava_walking": "Let an ally walk on lava and resist lava and lingering burning damage for 30 seconds. Crouch to dive.",
+  "effect.cataclysm_nouveau.lava_walking": "Lava Walking"
 }

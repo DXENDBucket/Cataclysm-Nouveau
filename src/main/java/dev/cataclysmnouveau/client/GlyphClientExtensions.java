@@ -19,6 +19,21 @@ import net.neoforged.neoforge.client.extensions.common.RegisterClientExtensionsE
 public final class GlyphClientExtensions {
     @SubscribeEvent
     public static void register(RegisterClientExtensionsEvent event) {
+        // Use a vanilla status sprite at runtime; neither upstream pixels nor a new atlas are bundled.
+        event.registerMobEffect(new net.neoforged.neoforge.client.extensions.common.IClientMobEffectExtensions() {
+            @Override public boolean renderInventoryIcon(net.minecraft.world.effect.MobEffectInstance instance,
+                    net.minecraft.client.gui.screens.inventory.EffectRenderingInventoryScreen<?> screen,
+                    net.minecraft.client.gui.GuiGraphics graphics,int x,int y,int z) {
+                graphics.blit(x,y,z,18,18,Minecraft.getInstance().getMobEffectTextures().get(net.minecraft.world.effect.MobEffects.FIRE_RESISTANCE));
+                return true;
+            }
+            @Override public boolean renderGuiIcon(net.minecraft.world.effect.MobEffectInstance instance,
+                    net.minecraft.client.gui.Gui gui,net.minecraft.client.gui.GuiGraphics graphics,
+                    int x,int y,float z,float alpha) {
+                graphics.blit(x,y,(int)z,18,18,Minecraft.getInstance().getMobEffectTextures().get(net.minecraft.world.effect.MobEffects.FIRE_RESISTANCE),1,1,1,alpha);
+                return true;
+            }
+        },dev.cataclysmnouveau.CataclysmEffects.LAVA_WALKING);
         event.registerItem(new IClientItemExtensions() {
             private BlockEntityWithoutLevelRenderer renderer;
             @Override public BlockEntityWithoutLevelRenderer getCustomRenderer() {

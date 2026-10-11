@@ -56,5 +56,12 @@
   "cataclysm_nouveau.augment.effect_up": "提升状态效果等级。",
   "cataclysm_nouveau.augment.effect_down": "降低状态效果等级。",
   "cataclysm_nouveau.augment.healing_up": "提升每波恢复的生命。",
-  "cataclysm_nouveau.augment.healing_down": "降低每波恢复的生命。"
+  "cataclysm_nouveau.augment.healing_down": "降低每波恢复的生命。",
+  "cataclysm_nouveau.glyph_name.glyph_bone_fracture": "骨裂",
+  "item.cataclysm_nouveau.glyph_bone_fracture": "骨裂",
+  "cataclysm_nouveau.glyph_desc.glyph_bone_fracture": "使敌人骨裂，降低移动速度和攻击速度。基础持续5秒，增强提升等级，延长时效延长持续时间。",
+  "cataclysm_nouveau.glyph_name.glyph_lava_walking": "熔岩行走",
+  "item.cataclysm_nouveau.glyph_lava_walking": "熔岩行走",
+  "cataclysm_nouveau.glyph_desc.glyph_lava_walking": "让友军在熔岩表面行走，免受熔岩和持续燃烧伤害。基础持续30秒，潜行时可下潜。",
+  "effect.cataclysm_nouveau.lava_walking": "熔岩行走"
 }

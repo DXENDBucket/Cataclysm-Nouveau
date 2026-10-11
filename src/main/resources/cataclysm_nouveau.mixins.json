@@ -22,7 +22,8 @@
     "LavaStateMixin",
     "LavaBombMixin",
     "TemporaryLavaFlowMixin",
-    "TemporaryLavaBlockMixin"
+    "TemporaryLavaBlockMixin",
+    "LavaWalkingMixin"
   ],
   "injectors": {
     "defaultRequire": 1

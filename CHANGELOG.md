@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.1.0-dev.7
+
+- Add Bone Fracture as a native enemy status effect (40 Mana, 5 seconds), with amplification and duration modifiers.
+- Add temporary Lava Walking for self/allies (80 Mana, 30 seconds), synchronized fluid collision, buoyancy, crouch-to-dive and scoped lava/burning protection. All behavior ends with the status.
+- Add configurable durations, bilingual descriptions and real Scribe recipes using Monstrous Horn / Lava Power Cell plus Source Gem. Runtime-reference icons only.
+- Fix shared carrier duration descriptions incorrectly mentioning Wave for all projectile replacements.
+- All 26 server GameTests and binary/source resource-boundary checks pass; client visuals remain unverified.
+
 ## 0.1.0-dev.6
 
 - 接入巨兽的熔岩炸弹、巨兽震地、撼地裂波、环形焰柱、巨兽肩撞、熔岩汲取，以及恶兽头盔的骇人之恶；共 15 个魔符。

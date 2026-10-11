@@ -22,8 +22,10 @@ public final class GlyphCatalog {
     public static final CataclysmEffectGlyph CHARGE=new CataclysmEffectGlyph(Ability.SHOULDER_CHECK);
     public static final CataclysmEffectGlyph ABSORB=new CataclysmEffectGlyph(Ability.LAVA_ABSORPTION);
     public static final CataclysmEffectGlyph MONSTROUS=new CataclysmEffectGlyph(Ability.MONSTROUS);
+    public static final CataclysmEffectGlyph FRACTURE=new CataclysmEffectGlyph(Ability.BONE_FRACTURE);
+    public static final CataclysmEffectGlyph LAVA_WALKING=new CataclysmEffectGlyph(Ability.LAVA_WALKING);
     public static final List<CataclysmProjectileGlyph> PROJECTILES=List.of(AMETHYST,SPIKE,ANCHOR,WAVE,FLARE,LAVA);
-    public static final List<AbstractSpellPart> ALL=List.of(BOLT,RUNE,JET,QUAKE,FISSURE,RINGS,CHARGE,ABSORB,MONSTROUS,AMETHYST,SPIKE,ANCHOR,WAVE,FLARE,LAVA);
+    public static final List<AbstractSpellPart> ALL=List.of(BOLT,RUNE,JET,QUAKE,FISSURE,RINGS,CHARGE,ABSORB,MONSTROUS,FRACTURE,LAVA_WALKING,AMETHYST,SPIKE,ANCHOR,WAVE,FLARE,LAVA);
     public static CataclysmProjectileGlyph projectile(Ability ability) { return PROJECTILES.stream().filter(g->g.ability==ability).findFirst().orElseThrow(); }
     public static void register() {
         GlyphPresentation.register("cataclysm_nouveau",g->g instanceof CataclysmProjectileGlyph?"1":"0");
@@ -41,9 +43,9 @@ public final class GlyphCatalog {
             profile.glyph().compatibleAugments.add(AugmentExtendTime.INSTANCE);
             profile.glyph().compatibleAugments.add(AugmentDurationDown.INSTANCE);
             profile.glyph().augmentDescriptions.putIfAbsent(AugmentExtendTime.INSTANCE,
-                    net.minecraft.network.chat.Component.translatable("cataclysm_nouveau.augment.wave_duration_up"));
+                    net.minecraft.network.chat.Component.translatable("cataclysm_nouveau.augment.duration_up"));
             profile.glyph().augmentDescriptions.putIfAbsent(AugmentDurationDown.INSTANCE,
-                    net.minecraft.network.chat.Component.translatable("cataclysm_nouveau.augment.wave_duration_down"));
+                    net.minecraft.network.chat.Component.translatable("cataclysm_nouveau.augment.duration_down"));
         }
     }
     private GlyphCatalog() {}

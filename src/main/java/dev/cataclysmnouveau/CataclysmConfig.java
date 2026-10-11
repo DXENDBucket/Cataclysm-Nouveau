@@ -12,7 +12,7 @@ public final class CataclysmConfig {
     private static final ModConfigSpec.IntValue WAVE_LIFETIME;
     private static final ModConfigSpec.DoubleValue FLARE_DIRECT_DAMAGE, FLARE_JET_DAMAGE;
     private static final ModConfigSpec.DoubleValue QUAKE_RADIUS, ABSORPTION_HEAL, CHARGE_SPEED;
-    private static final ModConfigSpec.IntValue LAVA_LIFETIME;
+    private static final ModConfigSpec.IntValue LAVA_LIFETIME, FRACTURE_DURATION, LAVA_WALKING_DURATION;
     private static final ModConfigSpec.BooleanValue COOLDOWNS, CREATIVE_COOLDOWN;
     private static final EnumMap<Ability, ModConfigSpec.IntValue> COOLDOWN_TICKS = new EnumMap<>(Ability.class);
     static {
@@ -49,6 +49,10 @@ public final class CataclysmConfig {
         ABSORPTION_HEAL=b.comment("Healing per absorption wave that actually removes lava. There are three native waves.").defineInRange("absorption_heal",15.0,0,100000);
         CHARGE_SPEED=b.comment("Horizontal blocks per tick during the collision-limited shoulder charge.").defineInRange("charge_speed",.75,.1,2.0);
         LAVA_LIFETIME=b.comment("Lifetime of each native grounded lava bomb; managed sources cannot spread.").defineInRange("lava_lifetime_ticks",200,1,1200);b.pop();
+        b.push("bone_fracture");
+        FRACTURE_DURATION=b.comment("Base duration of the native fracture effect, before duration augments.").defineInRange("duration_ticks",100,2,1200);b.pop();
+        b.push("lava_walking");
+        LAVA_WALKING_DURATION=b.comment("Base duration of lava surface walking and lava/burning protection; crouching allows diving.").defineInRange("duration_ticks",600,2,1200);b.pop();
         b.push("cooldowns");
         COOLDOWNS=b.comment("Gate new active uses through Conflux; existing trajectories keep running.").define("enabled",true);
         CREATIVE_COOLDOWN=b.define("creative_cooldown",false);
@@ -96,5 +100,7 @@ public final class CataclysmConfig {
     public static float absorptionHeal() {return SPEC.isLoaded()?ABSORPTION_HEAL.get().floatValue():15;}
     public static double chargeSpeed() {return SPEC.isLoaded()?CHARGE_SPEED.get():.75;}
     public static int lavaLifetime() {return SPEC.isLoaded()?LAVA_LIFETIME.get():200;}
+    public static int fractureDuration() {return SPEC.isLoaded()?FRACTURE_DURATION.get():100;}
+    public static int lavaWalkingDuration() {return SPEC.isLoaded()?LAVA_WALKING_DURATION.get():600;}
     private CataclysmConfig() {}
 }

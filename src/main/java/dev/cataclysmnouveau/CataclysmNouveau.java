@@ -12,6 +12,7 @@ import net.neoforged.neoforge.registries.DeferredRegister;
 public final class CataclysmNouveau {
     public CataclysmNouveau(IEventBus bus,ModContainer container) {
         container.registerConfig(ModConfig.Type.SERVER,CataclysmConfig.SPEC);
+        CataclysmEffects.register(bus);
         GlyphCatalog.register();
         bus.addListener((FMLCommonSetupEvent event)->event.enqueueWork(GlyphCatalog::configureCarriers));
         var tabs=DeferredRegister.create(Registries.CREATIVE_MODE_TAB,"cataclysm_nouveau");
