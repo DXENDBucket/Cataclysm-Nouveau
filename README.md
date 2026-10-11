@@ -168,3 +168,7 @@
 空中受益者不再被着地条件拒绝。动作中临时让受益者按动作重力运动、让 Mob AI 暂时让出控制，不修改 NoAI 标记；结束、取消或所有者消失时恢复原有 noGravity。FlyingMob 的特殊飞行移动单独补下降冲量。真正的 Iron SummonedSwordEntity 已验证接受动作、当前朝向抛锚、所有者链条和结束恢复浮空；客户端操控与画面仍待人工确认。
 
 41 项服务端 GameTest 通过（含真实 Ars ’n Spells 3.3.5／Iron 3.16.3 环境），发行与源码包资源检查通过。没有修改 Conflux。
+
+## Core 伤害 API 接入（dev.16）
+
+最低需要 Conflux 0.1.18。原生伤害的 Ars 装备加成、Pre/Post 和同步爆炸作用域交给 Core，删除本附属的重复伤害处理与 LivingEntity 爆炸钩子。原生钩子、伤害类型、基础数值、费用和冷却保持现有规则。

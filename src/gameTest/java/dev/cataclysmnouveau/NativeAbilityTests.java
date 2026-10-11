@@ -1,4 +1,5 @@
 package dev.cataclysmnouveau;
+import dev.arsconflux.api.damage.NativeSpellDamage;
 
 import com.github.L_Ender.cataclysm.entity.projectile.*;
 import com.github.L_Ender.cataclysm.entity.effect.Bolt_strike_Entity;
@@ -1003,7 +1004,7 @@ public final class NativeAbilityTests {
             var enemy=a.target(a.center.add(0,0,1),false);
             var r=resolver(h,a.p,new Spell(MethodTouch.INSTANCE,GlyphCatalog.WAVE));
             var frame=CastContext.of(r.spellContext,new EntityHitResult(enemy),null);
-            var wave=ArsDamage.bind(new Wave_Entity(h.getLevel(),a.p,80,9),frame);((ManagedProjectile)wave).confluxCataclysm$mode(2);wave.setPos(a.center);wave.setState(1);h.getLevel().addFreshEntity(wave);
+            var wave=NativeSpellDamage.bind(new Wave_Entity(h.getLevel(),a.p,80,9),frame);((ManagedProjectile)wave).confluxCataclysm$mode(2);wave.setPos(a.center);wave.setState(1);h.getLevel().addFreshEntity(wave);
             wave.tick();h.assertTrue(enemy.getHealth()<500,"Real native wave contact occurs");
             close(h,500-enemy.getHealth(),18,"Installed Ars n Spells maps 2x Iron power onto native contact exactly once");h.succeed();
         }

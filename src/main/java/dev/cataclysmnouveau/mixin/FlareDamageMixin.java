@@ -23,7 +23,7 @@ public abstract class FlareDamageMixin {
         var state=(ManagedProjectile)this;
         if(state.confluxCataclysm$mode()!=0 && entity instanceof Flame_Jet_Entity jet)
             jet.setDamage(Math.max(0,CataclysmConfig.flareJetDamage()+state.confluxCataclysm$bonus()));
-        dev.cataclysmnouveau.casting.ArsDamage.bind(entity,dev.cataclysmnouveau.casting.ArsDamage.context((Entity)(Object)this));
+        dev.arsconflux.api.damage.NativeSpellDamage.bind(entity,dev.cataclysmnouveau.casting.NativeDamageContexts.context((Entity)(Object)this));
         return entity;
     }
 }

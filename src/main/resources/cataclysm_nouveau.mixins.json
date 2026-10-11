@@ -35,7 +35,6 @@
     "ScyllaCloudGoalMixin",
     "SparkStateMixin",
     "NativeArsDamageMixin",
-    "ArsExplosionDamageMixin",
     "LeapActorAiMixin"
   ],
   "injectors": {

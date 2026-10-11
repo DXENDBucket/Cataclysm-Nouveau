@@ -1,4 +1,5 @@
 package dev.cataclysmnouveau.casting;
+import dev.arsconflux.api.damage.NativeSpellDamage;
 
 import com.github.L_Ender.cataclysm.entity.projectile.Lava_Bomb_Entity;
 import com.github.L_Ender.cataclysm.init.ModEntities;
@@ -17,7 +18,7 @@ public final class LavaCasting {
         if(!(carrier.level() instanceof ServerLevel world) || !(carrier.getOwner() instanceof LivingEntity owner)) return;
         var state=(ManagedProjectile)carrier;
         var frame=CastContexts.current();if(frame==null) frame=CastContext.detached(owner,hit,null);
-        var pool=ArsDamage.bind(new Lava_Bomb_Entity(ModEntities.LAVA_BOMB.get(),world,owner),frame);
+        var pool=NativeSpellDamage.bind(new Lava_Bomb_Entity(ModEntities.LAVA_BOMB.get(),world,owner),frame);
         pool.setPos(hit.getLocation());pool.maxLavaTime=CataclysmConfig.lavaLifetime();
         var poolState=(ManagedProjectile)pool;poolState.confluxCataclysm$mode(2);poolState.confluxCataclysm$bonus(state.confluxCataclysm$bonus());
         // A separate grounded native bomb owns each pool, including orbit/repeated impacts.
@@ -35,7 +36,7 @@ public final class LavaCasting {
     }
     public static Explosion explosion(Lava_Bomb_Entity bomb,Level level,double x,double y,double z,float radius) {
         var owner=bomb.getOwner();float bonus=((ManagedProjectile)bomb).confluxCataclysm$bonus();
-        return ArsDamage.scoped(ArsDamage.context(bomb),()->level.explode(owner,null,new ExplosionDamageCalculator() {
+        return NativeSpellDamage.during(NativeDamageContexts.context(bomb),()->level.explode(owner,null,new ExplosionDamageCalculator() {
             @Override public boolean shouldDamageEntity(Explosion explosion,Entity target) {return !Allies.areAllies(owner,target);}
             @Override public float getKnockbackMultiplier(Entity target) {return Allies.areAllies(owner,target)?0:super.getKnockbackMultiplier(target);}
             @Override public float getEntityDamageAmount(Explosion explosion,Entity target) {return Math.max(0,super.getEntityDamageAmount(explosion,target)+bonus);}

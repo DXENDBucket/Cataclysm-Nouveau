@@ -1,4 +1,5 @@
 package dev.cataclysmnouveau.casting;
+import dev.arsconflux.api.damage.NativeSpellDamage;
 import com.github.L_Ender.cataclysm.config.CMCommonConfig;
 import com.github.L_Ender.cataclysm.entity.projectile.*;
 import com.github.L_Ender.cataclysm.entity.effect.Bolt_strike_Entity;
@@ -29,7 +30,7 @@ public final class NativePayloads {
         };
         result.setOwner(frame.damageOwner());
         ((ManagedProjectile)result).confluxCataclysm$bonus(Resources.damageBonus(amplify));
-        return ArsDamage.bind(result,frame);
+        return NativeSpellDamage.bind(result,frame);
     }
     public static void hit(ThrowableProjectile projectile,HitResult hit) {
         if (projectile instanceof Lava_Bomb_Entity lava && ((ManagedProjectile)lava).confluxCataclysm$mode() > 0
@@ -42,7 +43,7 @@ public final class NativePayloads {
         Vec3 point=frame.target() instanceof EntityHitResult entity?entity.getEntity().position():frame.origin();
         var bolt=new Bolt_strike_Entity(world,point.x,point.y,point.z,0,CataclysmConfig.boltWarmup(),Math.max(0,CataclysmConfig.boltDamage()+Resources.damageBonus(amplify)),frame.damageOwner());
         bolt.setR(80);bolt.setG(170);bolt.setB(255);
-        return world.addFreshEntity(ArsDamage.bind(bolt,frame));
+        return world.addFreshEntity(NativeSpellDamage.bind(bolt,frame));
     }
 
     public static boolean effect(Ability ability, ServerLevel world, CastContext frame, double amplify) {
@@ -58,7 +59,7 @@ public final class NativePayloads {
                     CataclysmConfig.groundWarmup(ability), damage, frame.damageOwner());
             default -> throw new IllegalArgumentException("Not a ground effect: " + ability);
         };
-        return world.addFreshEntity(ArsDamage.bind(entity,frame));
+        return world.addFreshEntity(NativeSpellDamage.bind(entity,frame));
     }
 
     /** Local ground projection only: never scan a cave column or cause chunk loading. */

@@ -1,4 +1,5 @@
 package dev.cataclysmnouveau.casting;
+import dev.arsconflux.api.damage.NativeSpellDamage;
 
 import com.github.L_Ender.cataclysm.entity.effect.Wave_Entity;
 import com.github.L_Ender.cataclysm.entity.projectile.Player_Ceraunus_Entity;
@@ -36,7 +37,7 @@ public final class NativeCarrierCasting {
             var wave=new Wave_Entity(world,frame.damageOwner(),duration,Math.max(0,CataclysmConfig.waveDamage()+Resources.damageBonus(stats.getAmpMultiplier())));
             wave.setState(1);payload=wave;
         }
-        ArsDamage.bind(payload,frame);
+        NativeSpellDamage.bind(payload,frame);
         var driver=new Flight(payload,carrier,profile.arsDriven(),profile.repeated(),stats.getAccMultiplier());
         var continuation=resolver.clone();
         var session=new ExecutionSession<>(world,frame.withAccount(quote.account()),payload,duration+2,driver,
