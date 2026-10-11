@@ -26,4 +26,18 @@ public enum Ability {
     public final String id, name;
     public final int mana;
     Ability(String id, String name, int mana) { this.id=id; this.name=name; this.mana=mana; }
+
+    /** Acquisition/source families, shared by all presentation surfaces. */
+    public Series series() {
+        return switch(this) {
+            case AMETHYST_CLUSTER -> Series.AMETHYST_CRAB;
+            case LIONFISH_SPIKE -> Series.LIONFISH;
+            case VOID_RUNE -> Series.ENDER_GOLEM;
+            case FLAME_JET,FLARE_BOMB,LAVA_BOMB,EARTHQUAKE,FISSURE,FLAME_RING,
+                    SHOULDER_CHECK,LAVA_ABSORPTION,MONSTROUS,BONE_FRACTURE,LAVA_WALKING -> Series.MONSTROSITY;
+            case BOLT_STRIKE,CERAUNUS,WAVE,WATER_SPEAR,LIGHTNING_SPEAR,
+                    STORM_SERPENT,LIGHTNING_STORM,LIGHTNING_FIELD,STORM_BURST -> Series.SCYLLA;
+        };
+    }
+    public enum Series { AMETHYST_CRAB, LIONFISH, ENDER_GOLEM, MONSTROSITY, SCYLLA }
 }
