@@ -6,6 +6,8 @@ import com.github.L_Ender.cataclysm.init.ModEntities;
 import dev.arsconflux.api.context.CastContext;
 import dev.cataclysmnouveau.*;
 import dev.cataclysmnouveau.mixin.ProjectileHitAccess;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.projectile.ThrowableProjectile;
 import net.minecraft.world.phys.*;
@@ -29,6 +31,46 @@ public final class NativePayloads {
         var bolt=new Bolt_strike_Entity(world,point.x,point.y,point.z,0,CataclysmConfig.boltWarmup(),Math.max(0,CataclysmConfig.boltDamage()+Resources.damageBonus(amplify)),frame.damageOwner());
         bolt.setR(80);bolt.setG(170);bolt.setB(255);
         return world.addFreshEntity(bolt);
+    }
+
+    public static boolean effect(Ability ability, ServerLevel world, CastContext frame, double amplify) {
+        if (ability == Ability.BOLT_STRIKE) return bolt(world, frame, amplify);
+        Vec3 point = groundPoint(world, frame);
+        if (point == null) return false;
+        float yaw = frame.damageOwner() == null ? 0 : (float)Math.toRadians(frame.damageOwner().getYRot());
+        float damage = Math.max(0, CataclysmConfig.groundDamage(ability) + Resources.damageBonus(amplify));
+        var entity = switch (ability) {
+            case VOID_RUNE -> new Void_Rune_Entity(world, point.x, point.y, point.z, yaw,
+                    CataclysmConfig.groundWarmup(ability), damage, frame.damageOwner());
+            case FLAME_JET -> new Flame_Jet_Entity(world, point.x, point.y, point.z, yaw,
+                    CataclysmConfig.groundWarmup(ability), damage, frame.damageOwner());
+            default -> throw new IllegalArgumentException("Not a ground effect: " + ability);
+        };
+        return world.addFreshEntity(entity);
+    }
+
+    /** Local ground projection only: never scan a cave column or cause chunk loading. */
+    private static Vec3 groundPoint(ServerLevel world, CastContext frame) {
+        if (frame.target() == null || frame.target().getType() == HitResult.Type.MISS) return null;
+        Vec3 point = frame.target() instanceof EntityHitResult hit ? hit.getEntity().position() : frame.origin();
+        BlockPos start = BlockPos.containing(point.add(0, 0.01, 0));
+        for (int offset = 0; offset <= 4; offset++) {
+            BlockPos pos = start.below(offset);
+            if (!world.isInWorldBounds(pos) || !world.hasChunkAt(pos)) return null;
+            var shape = world.getBlockState(pos).getCollisionShape(world, pos);
+            if (shape.isEmpty()) continue;
+            double x = point.x - pos.getX(), z = point.z - pos.getZ();
+            double top = shape.toAabbs().stream()
+                    .filter(box -> x >= box.minX && x <= box.maxX && z >= box.minZ && z <= box.maxZ)
+                    .mapToDouble(box -> box.maxY).max().orElse(Double.NaN);
+            if (Double.isNaN(top)) continue;
+            double y = pos.getY() + top;
+            // A ceiling's underside is not an upward-facing casting surface.
+            if (frame.target() instanceof BlockHitResult hit && hit.getDirection() == Direction.DOWN
+                    && offset == 0) continue;
+            return new Vec3(point.x, y, point.z);
+        }
+        return null;
     }
     private NativePayloads() {}
 }

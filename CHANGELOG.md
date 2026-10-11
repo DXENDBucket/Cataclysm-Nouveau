@@ -1,5 +1,14 @@
 # Changelog
 
+## 0.1.0-dev.3
+
+- Add Void Rune and Flame Jet position-effect glyphs using native registered entities.
+- Retain native animation events, particles, sounds, damage windows, alliance checks and ignition.
+- Share effect context and trigger-time payment with Bolt Strike; no Conflux changes.
+- Project ground effects onto nearby collision surfaces, including slabs; failed placement does not charge.
+- Add Scribe recipes, runtime-only native icon references, Chinese/English text and balance configuration.
+- Add integration coverage for delayed damage, fire, allies, cleanup, insufficient mana, creative and owner separation.
+
 ## 0.1.0-dev.2
 
 - Fix missing Ars glyph-name localization keys in Chinese and English.

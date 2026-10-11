@@ -6,6 +6,7 @@ import com.hollingsworth.arsnouveau.api.spell.*;
 import com.hollingsworth.arsnouveau.api.spell.wrapped_caster.LivingCaster;
 import com.hollingsworth.arsnouveau.common.entity.*;
 import com.hollingsworth.arsnouveau.common.spell.method.*;
+import com.hollingsworth.arsnouveau.common.spell.augment.AugmentAmplify;
 import com.hollingsworth.arsnouveau.setup.registry.CapabilityRegistry;
 import dev.arsconflux.api.context.CastContext;
 import dev.arsconflux.api.execution.ExecutionSessions;
@@ -21,6 +22,7 @@ import net.minecraft.world.entity.projectile.ThrowableProjectile;
 import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.*;
+import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.phys.*;
 import net.neoforged.neoforge.gametest.*;
 import java.util.*;
@@ -144,6 +146,82 @@ public final class NativeAbilityTests {
             try { close(h,500-target.getHealth(),CataclysmConfig.boltDamage(),"Native delayed lightning damage");h.succeed(); }
             finally {clean(h,p);}
         });
+    }
+
+    @GameTest(template="empty",batch="cat_ground",timeoutTicks=100)
+    public static void nativeGroundEffectsDamageFireAlliesAndCleanup(GameTestHelper h) {
+        var p=player(h);var mana=CapabilityRegistry.getMana(p);
+        Vec3 runePoint=scene(h).add(0,0,0), jetPoint=scene(h).add(6,0,0);
+        h.getLevel().setBlockAndUpdate(BlockPos.containing(runePoint).below(),Blocks.STONE.defaultBlockState());
+        h.getLevel().setBlockAndUpdate(BlockPos.containing(jetPoint).below(),Blocks.STONE.defaultBlockState());
+        var runeTarget=cow(h,runePoint);var jetTarget=cow(h,jetPoint);
+        var ally=cow(h,jetPoint.add(.1,0,0));
+        var scoreboard=h.getLevel().getScoreboard();
+        var team=scoreboard.addPlayerTeam("cat_"+p.getUUID().toString().substring(0,8));
+        scoreboard.addPlayerToTeam(p.getScoreboardName(),team);
+        scoreboard.addPlayerToTeam(ally.getScoreboardName(),team);
+        var marker=new Marker();
+        var runeCast=resolver(h,p,new Spell(MethodTouch.INSTANCE,GlyphCatalog.RUNE,AugmentAmplify.INSTANCE,marker));
+        runeCast.spellContext.nextPart();runeCast.onResolveEffect(h.getLevel(),new EntityHitResult(runeTarget));
+        var jetCast=resolver(h,p,new Spell(MethodTouch.INSTANCE,GlyphCatalog.JET,AugmentAmplify.INSTANCE));
+        jetCast.spellContext.nextPart();jetCast.onResolveEffect(h.getLevel(),new EntityHitResult(jetTarget));
+        var area=new AABB(scene(h),scene(h)).inflate(15);
+        var runes=h.getLevel().getEntitiesOfClass(Void_Rune_Entity.class,area);
+        var jets=h.getLevel().getEntitiesOfClass(Flame_Jet_Entity.class,area);
+        h.assertTrue(runes.size()==1 && jets.size()==1,"Actual registered native ground entities spawned");
+        var rune=runes.get(0);var jet=jets.get(0);
+        h.assertTrue(rune.getCaster()==p && jet.getCaster()==p,"Native damage attribution follows caster");
+        h.assertTrue(marker.hits==1,"Later Ars effects resolve immediately, independent of native warmup");
+        close(h,rune.getDamage(),CataclysmConfig.groundDamage(Ability.VOID_RUNE)+Resources.damageBonus(1),"Rune amplification");
+        close(h,jet.getDamage(),CataclysmConfig.groundDamage(Ability.FLAME_JET)+Resources.damageBonus(1),"Jet amplification");
+        close(h,mana.getCurrentMana(),10000-CataclysmConfig.cost(Ability.VOID_RUNE)-CataclysmConfig.cost(Ability.FLAME_JET)-2*CataclysmConfig.amplifyCost(),"Each actual spawn pays its own quote once");
+        close(h,runeTarget.getHealth(),500,"Rune has no immediate damage");
+        close(h,jetTarget.getHealth(),500,"Jet has no immediate damage");
+        h.runAfterDelay(CataclysmConfig.groundWarmup(Ability.FLAME_JET)+9,()->{
+            close(h,500-jetTarget.getHealth(),jet.getDamage(),"Native jet attacks after its animation delay");
+            h.assertTrue(jetTarget.isOnFire(),"Native five-second ignition retained");
+            close(h,ally.getHealth(),500,"Native alliance filtering retained");
+            h.assertTrue(!ally.isOnFire(),"Allies are not ignited");
+        });
+        h.runAfterDelay(CataclysmConfig.groundWarmup(Ability.VOID_RUNE)+17,()->{
+            close(h,500-runeTarget.getHealth(),rune.getDamage(),"Native rune attack window and amplified damage retained");
+        });
+        h.runAfterDelay(Math.max(CataclysmConfig.groundWarmup(Ability.VOID_RUNE)+36,CataclysmConfig.groundWarmup(Ability.FLAME_JET)+24),()->{
+            try {
+                h.assertTrue(rune.isRemoved() && jet.isRemoved(),"Native lifetime removes both effects");
+                h.succeed();
+            } finally {scoreboard.removePlayerTeam(team);clean(h,p);}
+        });
+    }
+
+    @GameTest(template="empty",batch="cat_ground_budget",timeoutTicks=100)
+    public static void groundFailureBudgetsBlockPlacementAndDamageOwner(GameTestHelper h) {
+        var p=player(h);var mana=CapabilityRegistry.getMana(p);
+        Vec3 point=scene(h);var area=new AABB(point,point).inflate(12);
+        var cast=resolver(h,p,new Spell(MethodTouch.INSTANCE,GlyphCatalog.RUNE));cast.spellContext.nextPart();
+        try {
+            cast.onResolveEffect(h.getLevel(),block(point));
+            close(h,mana.getCurrentMana(),10000,"Missing local surface does not charge");
+            h.assertTrue(h.getLevel().getEntitiesOfClass(Void_Rune_Entity.class,area).isEmpty(),"No ground means no rune");
+            h.getLevel().setBlockAndUpdate(BlockPos.containing(point),Blocks.STONE_SLAB.defaultBlockState());
+            Vec3 top=point.add(0,.5,0);
+            mana.setMana(0);cast.onResolveEffect(h.getLevel(),block(top));
+            h.assertTrue(h.getLevel().getEntitiesOfClass(Void_Rune_Entity.class,area).isEmpty(),"Unaffordable cast creates no effect");
+            p.setGameMode(GameType.CREATIVE);cast.onResolveEffect(h.getLevel(),block(top));
+            var runes=h.getLevel().getEntitiesOfClass(Void_Rune_Entity.class,area);
+            h.assertTrue(runes.size()==1,"Creative bypasses empty mana");
+            close(h,runes.get(0).getY(),top.y,"Ground placement respects slab surface");
+            runes.get(0).discard();p.setGameMode(GameType.SURVIVAL);mana.setMana(10000);
+            var damageOwner=cow(h,point.add(-5,0,0));
+            h.assertTrue(NativePayloads.effect(Ability.VOID_RUNE,h.getLevel(),CastContext.detached(p,block(top),null).withDamageOwner(damageOwner),0),"Scoped owner effect succeeds");
+            var owned=h.getLevel().getEntitiesOfClass(Void_Rune_Entity.class,area).get(0);
+            h.assertTrue(owned.getCaster()==damageOwner,"Executor and damage owner remain distinct");owned.discard();
+            for(int i=1;i<=2;i++) {
+                cast.onResolveEffect(h.getLevel(),block(top));
+                close(h,mana.getCurrentMana(),10000-i*CataclysmConfig.cost(Ability.VOID_RUNE),"Repeated triggers each pay once");
+            }
+            h.succeed();
+        } finally {clean(h,p);}
     }
     private static final class Marker extends AbstractEffect {
         int hits;

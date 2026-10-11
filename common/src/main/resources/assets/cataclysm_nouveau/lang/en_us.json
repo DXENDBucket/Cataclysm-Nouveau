@@ -10,5 +10,11 @@
   "cataclysm_nouveau.augment.decrease_damage": "Decreases damage by the configured Harm amplification amount.",
   "cataclysm_nouveau.glyph_name.glyph_amethyst_cluster": "Amethyst Cluster",
   "cataclysm_nouveau.glyph_name.glyph_lionfish_spike": "Lionfish Spike",
-  "cataclysm_nouveau.glyph_name.glyph_bolt_strike": "Bolt Strike"
+  "cataclysm_nouveau.glyph_name.glyph_bolt_strike": "Bolt Strike",
+  "item.cataclysm_nouveau.glyph_void_rune": "Void Rune",
+  "cataclysm_nouveau.glyph_name.glyph_void_rune": "Void Rune",
+  "cataclysm_nouveau.glyph_desc.glyph_void_rune": "Raises a native Void Rune on nearby ground at the selected location, retaining its attack animation and damage timing. Amplify increases each hit by the same amount as Harm.",
+  "item.cataclysm_nouveau.glyph_flame_jet": "Flame Jet",
+  "cataclysm_nouveau.glyph_name.glyph_flame_jet": "Flame Jet",
+  "cataclysm_nouveau.glyph_desc.glyph_flame_jet": "Erupts a native Flame Jet from nearby ground at the selected location. Retains native particles, sound and five-second ignition. Amplify increases direct damage by the same amount as Harm."
 }

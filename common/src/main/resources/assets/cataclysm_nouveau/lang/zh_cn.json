@@ -10,5 +10,11 @@
   "cataclysm_nouveau.augment.decrease_damage": "按照伤害魔符的增强数值降低伤害。",
   "cataclysm_nouveau.glyph_name.glyph_amethyst_cluster": "紫水晶簇",
   "cataclysm_nouveau.glyph_name.glyph_lionfish_spike": "狮子鱼刺",
-  "cataclysm_nouveau.glyph_name.glyph_bolt_strike": "雷击柱"
+  "cataclysm_nouveau.glyph_name.glyph_bolt_strike": "雷击柱",
+  "item.cataclysm_nouveau.glyph_void_rune": "虚空符文",
+  "cataclysm_nouveau.glyph_name.glyph_void_rune": "虚空符文",
+  "cataclysm_nouveau.glyph_desc.glyph_void_rune": "在选定位置附近的地面升起虚空符文，保留灾变原有的攻击动画与伤害判定。增强对每次伤害的提升与伤害魔符一致。",
+  "item.cataclysm_nouveau.glyph_flame_jet": "烈焰喷柱",
+  "cataclysm_nouveau.glyph_name.glyph_flame_jet": "烈焰喷柱",
+  "cataclysm_nouveau.glyph_desc.glyph_flame_jet": "在选定位置附近的地面喷出烈焰，命中后点燃目标5秒，保留灾变原有粒子与音效。增强对直接伤害的提升与伤害魔符一致。"
 }
