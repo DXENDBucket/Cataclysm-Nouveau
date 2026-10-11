@@ -2,6 +2,8 @@ package dev.cataclysmnouveau;
 
 import com.github.L_Ender.cataclysm.entity.projectile.*;
 import com.github.L_Ender.cataclysm.entity.effect.Bolt_strike_Entity;
+import com.github.L_Ender.cataclysm.entity.effect.Wave_Entity;
+import com.github.L_Ender.cataclysm.init.ModEffect;
 import com.hollingsworth.arsnouveau.api.spell.*;
 import com.hollingsworth.arsnouveau.api.spell.wrapped_caster.LivingCaster;
 import com.hollingsworth.arsnouveau.common.entity.*;
@@ -9,10 +11,12 @@ import com.hollingsworth.arsnouveau.common.spell.method.*;
 import com.hollingsworth.arsnouveau.common.spell.augment.AugmentAmplify;
 import com.hollingsworth.arsnouveau.setup.registry.CapabilityRegistry;
 import dev.arsconflux.api.context.CastContext;
+import dev.arsconflux.api.casting.*;
 import dev.arsconflux.api.execution.ExecutionSessions;
 import dev.arsconflux.api.glyph.ArsSpellAccess;
 import dev.arsconflux.api.projectile.*;
 import dev.cataclysmnouveau.casting.*;
+import dev.cataclysmnouveau.mixin.ProjectileHitAccess;
 import net.minecraft.core.*;
 import net.minecraft.gametest.framework.*;
 import net.minecraft.server.level.ServerPlayer;
@@ -87,7 +91,7 @@ public final class NativeAbilityTests {
     public static void nativeFlightPaymentContinuationAndCreative(GameTestHelper h) {
         var p=player(h);var mana=CapabilityRegistry.getMana(p);
         try {
-            for(var glyph:GlyphCatalog.PROJECTILES) {
+            for(var glyph:List.of(GlyphCatalog.AMETHYST,GlyphCatalog.SPIKE)) {
                 mana.setMana(10000);var marker=new Marker();var cast=resolver(h,p,new Spell(MethodProjectile.INSTANCE,glyph,marker));cast.spellContext.nextPart();
                 var carrier=new EntityProjectileSpell(h.getLevel(),cast);carrier.setPos(scene(h).add(0,2,0));carrier.setDeltaMovement(new Vec3(0,0,.75));
                 h.assertTrue(ProjectileDispatch.convert(carrier),"Core dispatches the registered native payload");
@@ -113,7 +117,7 @@ public final class NativeAbilityTests {
     public static void arsDrivenRepeatedImpactsPayAndStopOnEmptyMana(GameTestHelper h) {
         var p=player(h);var mana=CapabilityRegistry.getMana(p);
         try {
-            for(var glyph:GlyphCatalog.PROJECTILES) {
+            for(var glyph:List.of(GlyphCatalog.AMETHYST,GlyphCatalog.SPIKE)) {
                 mana.setMana(10000);var marker=new Marker();var cast=resolver(h,p,new Spell(MethodProjectile.INSTANCE,glyph,marker));cast.spellContext.nextPart();
                 var carrier=new EntityOrbitProjectile(h.getLevel(),cast,p);carrier.setPos(scene(h).add(0,2,0));
                 h.assertTrue(ProjectileDispatch.convert(carrier),"Core recognizes orbit");
@@ -220,6 +224,117 @@ public final class NativeAbilityTests {
                 cast.onResolveEffect(h.getLevel(),block(top));
                 close(h,mana.getCurrentMana(),10000-i*CataclysmConfig.cost(Ability.VOID_RUNE),"Repeated triggers each pay once");
             }
+            h.succeed();
+        } finally {clean(h,p);}
+    }
+    private static Entity newPayload(GameTestHelper h) {
+        return h.getLevel().getEntities((Entity)null,new AABB(scene(h),scene(h)).inflate(24),
+                e->e instanceof ManagedProjectile state && state.confluxCataclysm$mode()>0).get(0);
+    }
+    @GameTest(template="empty",batch="cat_anchor",timeoutTicks=120)
+    public static void anchorRetainsReturnAndSingleContinuation(GameTestHelper h) {
+        var p=player(h);var mana=CapabilityRegistry.getMana(p);var marker=new Marker();
+        p.getAttribute(Attributes.ATTACK_DAMAGE).setBaseValue(500);
+        var target=cow(h,scene(h).add(0,2,5));
+        var cast=resolver(h,p,new Spell(MethodProjectile.INSTANCE,GlyphCatalog.ANCHOR,AugmentAmplify.INSTANCE,marker));cast.spellContext.nextPart();
+        var carrier=new EntityProjectileSpell(h.getLevel(),cast);carrier.setPos(scene(h).add(0,2,0));carrier.setDeltaMovement(new Vec3(0,0,.75));
+        h.assertTrue(ProjectileDispatch.convert(carrier),"Anchor dispatches through Core");
+        var anchor=(Player_Ceraunus_Entity)newPayload(h);var state=(ManagedProjectile)anchor;
+        close(h,anchor.getDeltaMovement().length(),2.5,"Native anchor launch speed retained");
+        int quote=Resources.quote(cast.spellContext,Ability.CERAUNUS,List.of(AugmentAmplify.INSTANCE)).amount();
+        close(h,mana.getCurrentMana(),10000-quote,"Only launch pays");
+        ((ProjectileHitAccess)anchor).confluxCataclysm$nativeHit(new EntityHitResult(target));
+        close(h,500-target.getHealth(),CataclysmConfig.anchorDamage()+Resources.damageBonus(1),"Anchor base ignores caster melee and follows Harm amplification");
+        h.assertTrue(anchor.getReturn() && !anchor.isRemoved(),"Native return survives impact");
+        h.assertTrue(marker.hits==1 && anchor.getOwner()==p,"Native ownership and exactly one continuation");
+        state.confluxCataclysm$impact().accept(new EntityHitResult(target));
+        h.assertTrue(marker.hits==1,"Returning anchor cannot repeat Ars phrase");
+        ExecutionSessions.tick();h.assertTrue(!anchor.isRemoved(),"Session retains return stage");
+        // Freeze the owner and exercise native close-range retrieval directly, avoiding falling fake-player timing.
+        anchor.setPos(p.position().add(0,1,0));anchor.setDeltaMovement(Vec3.ZERO);anchor.tick();
+        h.assertTrue(anchor.isRemoved(),"Native return removes anchor near its owner");
+        clean(h,p);h.succeed();
+    }
+    @GameTest(template="empty",batch="cat_anchor_wave_orbit",timeoutTicks=100)
+    public static void repeatingAnchorAndWavePayWithoutAmbientDamage(GameTestHelper h) {
+        var p=player(h);var mana=CapabilityRegistry.getMana(p);
+        try {
+            for(var glyph:List.of(GlyphCatalog.ANCHOR,GlyphCatalog.WAVE)) {
+                mana.setMana(10000);var marker=new Marker();var target=cow(h,scene(h).add(0,2,0));
+                var cast=resolver(h,p,new Spell(MethodProjectile.INSTANCE,glyph,marker));cast.spellContext.nextPart();
+                var carrier=new EntityOrbitProjectile(h.getLevel(),cast,p);carrier.setPos(target.position());
+                h.assertTrue(ProjectileDispatch.convert(carrier),"Core converts repeated anchor/wave");
+                var payload=newPayload(h);var state=(ManagedProjectile)payload;var start=payload.position();
+                payload.tick();close(h,payload.position().distanceTo(start),0,"Native tick cannot move an Ars-driven payload");
+                close(h,target.getHealth(),500,"Repeating wave has no unpaid ambient contact damage");
+                close(h,mana.getCurrentMana(),10000,"Repeated carrier creation is uncharged");
+                int fee=Resources.quote(cast.spellContext,glyph.ability,List.of()).amount();
+                ArsSpellAccess.resolver(carrier).onResolveEffect(h.getLevel(),new EntityHitResult(target));
+                close(h,mana.getCurrentMana(),10000-fee,"Repeated impact pays once");
+                h.assertTrue(marker.hits==1 && !payload.isRemoved(),"Paid hit continues Ars and retains carrier");
+                if(payload instanceof Player_Ceraunus_Entity anchor) h.assertTrue(!anchor.getReturn(),"Orbit does not switch to native return");
+                if(payload instanceof Wave_Entity) h.assertTrue(target.hasEffect(ModEffect.EFFECTWETNESS),"Paid wave retains native Wetness");
+                mana.setMana(0);ArsSpellAccess.resolver(carrier).onResolveEffect(h.getLevel(),new EntityHitResult(target));
+                h.assertTrue(marker.hits==1 && payload.isRemoved() && carrier.isRemoved(),"Empty mana closes trajectory without a free continuation");
+                target.discard();ExecutionSessions.tick();
+            }
+            h.succeed();
+        } finally {clean(h,p);}
+    }
+    @GameTest(template="empty",batch="cat_native_wave",timeoutTicks=100)
+    public static void nativeWaveContactsAlliesDedupAndLifetime(GameTestHelper h) {
+        var p=player(h);var mana=CapabilityRegistry.getMana(p);var marker=new Marker();
+        var target=cow(h,scene(h).add(0,0,1));var ally=cow(h,target.position());
+        var scoreboard=h.getLevel().getScoreboard();var team=scoreboard.addPlayerTeam("wave_"+p.getUUID().toString().substring(0,8));
+        scoreboard.addPlayerToTeam(p.getScoreboardName(),team);scoreboard.addPlayerToTeam(ally.getScoreboardName(),team);
+        var cast=resolver(h,p,new Spell(MethodProjectile.INSTANCE,GlyphCatalog.WAVE,marker));cast.spellContext.nextPart();
+        var carrier=new EntityProjectileSpell(h.getLevel(),cast);carrier.setPos(target.position());carrier.setDeltaMovement(new Vec3(0,0,.75));
+        h.assertTrue(ProjectileDispatch.convert(carrier),"Native wave conversion");
+        var wave=(Wave_Entity)newPayload(h);var control=(WaveControl)wave;
+        h.assertTrue(wave.getOwner()==p && wave.getState()==1,"Native owner and spawn animation retained");
+        close(h,wave.getDamage(),9,"Scylla damage baseline");
+        close(h,mana.getCurrentMana(),10000-CataclysmConfig.cost(Ability.WAVE),"Whole wave pays once at creation");
+        control.confluxCataclysm$attack(1.5,0,-1);
+        close(h,500-target.getHealth(),wave.getDamage(),"Native contact damage");
+        h.assertTrue(target.hasEffect(ModEffect.EFFECTWETNESS),"Native Wetness retained");
+        close(h,ally.getHealth(),500,"Native allied filtering retained");
+        target.invulnerableTime=0;control.confluxCataclysm$attack(1.5,0,-1);
+        close(h,500-target.getHealth(),2*wave.getDamage(),"Native repeated damage remains possible");
+        h.assertTrue(marker.hits==1,"One native wave continues only once per target");
+        close(h,mana.getCurrentMana(),10000-CataclysmConfig.cost(Ability.WAVE),"Native contact does not bill repeatedly");
+        h.runAfterDelay(CataclysmConfig.waveLifetime()+3,()->{
+            try {h.assertTrue(wave.isRemoved(),"Wave retains bounded native lifespan");h.succeed();}
+            finally {scoreboard.removePlayerTeam(team);clean(h,p);}
+        });
+    }
+    @GameTest(template="empty",batch="cat_wave_duration",timeoutTicks=140)
+    public static void waveDurationAndRecipeValidation(GameTestHelper h) {
+        var p=player(h);
+        var extend=com.hollingsworth.arsnouveau.common.spell.augment.AugmentExtendTime.INSTANCE;
+        var spell=new Spell(MethodProjectile.INSTANCE,GlyphCatalog.WAVE,extend);
+        h.assertTrue(dev.arsconflux.api.glyph.SpellValidators.validate(ArsSpellAccess.parts(spell)).isEmpty(),"Wave accepts duration augmentation");
+        h.assertTrue(!dev.arsconflux.api.glyph.SpellValidators.validate(ArsSpellAccess.parts(new Spell(MethodProjectile.INSTANCE,GlyphCatalog.ANCHOR,extend))).isEmpty(),"Anchor does not accept native-wave duration");
+        h.assertTrue(!dev.arsconflux.api.glyph.SpellValidators.validate(ArsSpellAccess.parts(new Spell(MethodProjectile.INSTANCE,extend))).isEmpty(),"Unrelated Ars projectile duration stays restricted");
+        var cast=resolver(h,p,spell);cast.spellContext.nextPart();
+        var carrier=new EntityProjectileSpell(h.getLevel(),cast);carrier.setPos(scene(h));carrier.setDeltaMovement(new Vec3(0,0,.75));
+        h.assertTrue(ProjectileDispatch.convert(carrier),"Extended wave converts");
+        var wave=(Wave_Entity)newPayload(h);
+        int duration=NativeCarrierCasting.waveDuration(1);
+        h.assertTrue(wave.getMaxTicks()==duration && duration==120,"Four-second wave gains two seconds from Extend Time");
+        h.runAfterDelay(85,()->h.assertTrue(!wave.isRemoved(),"Extended wave survives beyond baseline lifespan"));
+        h.runAfterDelay(duration+3,()->{try {h.assertTrue(wave.isRemoved(),"Extended wave removes after its modified lifespan");h.succeed();}finally{clean(h,p);}});
+    }
+    @GameTest(template="empty",batch="cat_cooldowns",timeoutTicks=100)
+    public static void activeCooldownsAndCreativeBypass(GameTestHelper h) {
+        var p=player(h);
+        try {
+            var provider=new CataclysmActiveCasts();var spell=new Spell(MethodProjectile.INSTANCE,GlyphCatalog.WAVE);
+            var request=new ActiveCastRequest(spell,p,ActiveCastSource.CASTER_TOOL);
+            h.assertTrue(provider.allowed(request),"Ready active recipe accepted");
+            provider.released(request,List.of(spell,spell));
+            h.assertTrue(CataclysmActiveCasts.remaining(p,Ability.WAVE)==100 && !provider.allowed(request),"Duplicate branches commit a single shared deadline");
+            h.assertTrue(!provider.supports(new Spell(MethodProjectile.INSTANCE,com.hollingsworth.arsnouveau.common.spell.effect.EffectHarm.INSTANCE)),"Pure Ars spell is unaffected");
+            p.setGameMode(GameType.CREATIVE);h.assertTrue(provider.allowed(request),"Creative bypasses cooldown");
             h.succeed();
         } finally {clean(h,p);}
     }

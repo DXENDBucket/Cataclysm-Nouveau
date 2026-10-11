@@ -4,7 +4,7 @@ import net.minecraft.world.entity.projectile.*;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.*;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
-@Mixin(ThrowableProjectile.class)
+@Mixin({ThrowableProjectile.class,AbstractArrow.class})
 public abstract class ManagedMovementMixin {
     @Inject(method="tick",at=@At("HEAD"),cancellable=true)
     private void confluxCataclysm$movement(CallbackInfo ci) {

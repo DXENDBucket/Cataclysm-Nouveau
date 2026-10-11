@@ -1,5 +1,14 @@
 # Changelog
 
+## 0.1.0-dev.4
+
+- Add Ceraunus and Wave projectile replacements using native registered Cataclysm entities.
+- Keep anchor retrieval after a single impact; repeated carriers keep their trajectories and pay per hit.
+- Keep native wave contact damage, Wetness, knockback, movement and animation; continue the Ars phrase once per target.
+- Set Wave to 9 damage, 4 seconds and 90 Mana; Extend Time adds 50% of the baseline duration per modifier.
+- Add configurable active cooldowns through Conflux: Ceraunus 2 seconds, Wave 5 seconds, creative bypass by default.
+- Add Scribe recipes, runtime-only icon paths, bilingual text, duration validation and native lifecycle tests.
+
 ## 0.1.0-dev.3
 
 - Add Void Rune and Flame Jet position-effect glyphs using native registered entities.

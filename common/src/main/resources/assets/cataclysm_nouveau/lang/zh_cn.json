@@ -16,5 +16,13 @@
   "cataclysm_nouveau.glyph_desc.glyph_void_rune": "在选定位置附近的地面升起虚空符文，保留灾变原有的攻击动画与伤害判定。增强对每次伤害的提升与伤害魔符一致。",
   "item.cataclysm_nouveau.glyph_flame_jet": "烈焰喷柱",
   "cataclysm_nouveau.glyph_name.glyph_flame_jet": "烈焰喷柱",
-  "cataclysm_nouveau.glyph_desc.glyph_flame_jet": "在选定位置附近的地面喷出烈焰，命中后点燃目标5秒，保留灾变原有粒子与音效。增强对直接伤害的提升与伤害魔符一致。"
+  "cataclysm_nouveau.glyph_desc.glyph_flame_jet": "在选定位置附近的地面喷出烈焰，命中后点燃目标5秒，保留灾变原有粒子与音效。增强对直接伤害的提升与伤害魔符一致。",
+  "item.cataclysm_nouveau.glyph_ceraunus": "雷霆战锚",
+  "cataclysm_nouveau.glyph_name.glyph_ceraunus": "雷霆战锚",
+  "cataclysm_nouveau.glyph_desc.glyph_ceraunus": "将弹射物替换为雷霆战锚。单次投掷命中后回收，持续弹射物保持原有轨迹。",
+  "item.cataclysm_nouveau.glyph_wave": "海浪",
+  "cataclysm_nouveau.glyph_name.glyph_wave": "海浪",
+  "cataclysm_nouveau.glyph_desc.glyph_wave": "将弹射物替换为海浪，击退敌人、熄灭火焰并附加湿润。基础持续4秒，延长时效可延长持续时间。",
+  "cataclysm_nouveau.cast.cooldown": "%s尚在冷却（%s秒）。",
+  "cataclysm_nouveau.validation.modifier": "此修饰需要兼容的弹射物替换。"
 }

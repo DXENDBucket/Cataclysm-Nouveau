@@ -1,7 +1,7 @@
 # Native adapter boundary
 
 This addon supplies glyph declarations, native payload selection, a small amount of
-balance data, and opt-in hooks on two Cataclysm projectile classes. Conflux remains
+balance data, and opt-in hooks on selected Cataclysm payload classes. Conflux remains
 the shared source of carrier compatibility, owner/executor distinction, deferred
 continuations, execution cleanup and resource transactions. No Cataclysm-specific
 rule was added to Conflux.
@@ -16,7 +16,7 @@ rule was added to Conflux.
 - Mode 2: native flight with its own gravity. An opt-in impact callback wraps native
   `onHit`, then continues the Ars phrase. A recursion guard prevents duplicate hits.
 
-Only the mode is synchronized. Resolver references, callbacks and damage bonuses
+The mode and wave acceleration multiplier are synchronized. Resolver references, callbacks and damage bonuses
 are transient server state. Managed entities are not saved because their execution
 sessions cannot be reconstructed after a world reload.
 
@@ -74,3 +74,35 @@ synced activation/damage state and entity event 4; Flame Jet uses event 4 to beg
 the native particle animation and sound. The native particle emits eight client
 ticks after this event, matching its server damage timing. Client appearance still
 requires manual verification; a server GameTest cannot establish visual correctness.
+
+## Native anchor and wave (dev.4)
+
+`NativeCarrierCasting` manages `ExecutionSession<Entity>` independently of the
+older ThrowableProjectile driver. Ceraunus uses native AbstractArrow movement,
+registered renderer, owner spawn data, chain and retrieval. Its first impact
+continues once, switches to native return and retains the entity until retrieval
+or the bounded session ends. Repeated Ars carriers prevent native retrieval and
+permit only paid impact handlers. An opt-in entity event delegates block-contact
+client particles directly to native `onHitBlock`; no particle body is copied.
+
+Wave is not a Projectile. Its tick still owns native lifetime/state transitions,
+particles, terrain movement, contact damage, extinguishing, Wetness and knockback.
+Ars-driven carriers suppress only native movement and unpaid ambient attacks;
+the real native contact handler is invoked for paid hits. Ordinary contact hooks
+continue once per entity/block for each wave; later native damage is retained.
+Launch acceleration is applied to the native forward acceleration vector.
+
+Default wave lifetime is 80 ticks. One-shot duration modifiers scale it by
+`1 + 0.5 * durationModifier`, bounded to 40–1200 ticks; recurring carriers already
+include Ars duration modifiers in their expiration time. Validation exposes
+Extend Time/Duration Down for wave payloads without enabling those modifiers for
+unrelated plain Ars projectiles. Other providers retain their own modifier rules.
+
+`CataclysmActiveCasts` uses the existing Core active-cast API and stores cooldown
+expiry in caster data using the overworld clock. It gates new active uses only;
+ongoing paid trajectories keep running. No new Core API, classes or assets were
+modified. Native wave damage can hit more than once during its life, so its
+resource price cannot be compared solely to a single nine-point hit.
+
+Client appearance has not been manually exercised: chain endpoints, custom block
+particle event, ground-wave fade and orbit animation require visual confirmation.

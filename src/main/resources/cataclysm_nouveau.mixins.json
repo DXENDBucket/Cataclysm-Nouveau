@@ -11,7 +11,10 @@
     "NativeHitMixin",
     "ManagedMovementMixin",
     "RepeatedImpactMixin",
-    "SpikeDamageMixin"
+    "SpikeDamageMixin",
+    "AnchorStateMixin",
+    "AnchorHitAccess",
+    "WaveStateMixin"
   ],
   "injectors": {
     "defaultRequire": 1

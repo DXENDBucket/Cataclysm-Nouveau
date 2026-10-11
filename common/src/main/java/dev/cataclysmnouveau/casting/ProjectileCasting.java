@@ -10,6 +10,8 @@ import net.minecraft.world.entity.projectile.ThrowableProjectile;
 import net.minecraft.world.phys.*;
 public final class ProjectileCasting {
     public static boolean replace(Ability ability,EntityProjectileSpell carrier,CarrierProfile profile) {
+        if (ability==Ability.CERAUNUS || ability==Ability.WAVE)
+            return NativeCarrierCasting.replace(ability,carrier,profile);
         if (!(carrier.level() instanceof ServerLevel world)) return false;
         var resolver=ArsSpellAccess.resolver(carrier);
         var frame=CastContext.of(resolver.spellContext,null,null);

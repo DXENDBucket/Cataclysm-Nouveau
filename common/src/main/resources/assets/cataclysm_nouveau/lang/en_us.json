@@ -16,5 +16,13 @@
   "cataclysm_nouveau.glyph_desc.glyph_void_rune": "Raises a native Void Rune on nearby ground at the selected location, retaining its attack animation and damage timing. Amplify increases each hit by the same amount as Harm.",
   "item.cataclysm_nouveau.glyph_flame_jet": "Flame Jet",
   "cataclysm_nouveau.glyph_name.glyph_flame_jet": "Flame Jet",
-  "cataclysm_nouveau.glyph_desc.glyph_flame_jet": "Erupts a native Flame Jet from nearby ground at the selected location. Retains native particles, sound and five-second ignition. Amplify increases direct damage by the same amount as Harm."
+  "cataclysm_nouveau.glyph_desc.glyph_flame_jet": "Erupts a native Flame Jet from nearby ground at the selected location. Retains native particles, sound and five-second ignition. Amplify increases direct damage by the same amount as Harm.",
+  "item.cataclysm_nouveau.glyph_ceraunus": "Ceraunus",
+  "cataclysm_nouveau.glyph_name.glyph_ceraunus": "Ceraunus",
+  "cataclysm_nouveau.glyph_desc.glyph_ceraunus": "Replace the projectile with Ceraunus. A single throw returns after impact; repeating carriers retain their trajectory.",
+  "item.cataclysm_nouveau.glyph_wave": "Wave",
+  "cataclysm_nouveau.glyph_name.glyph_wave": "Wave",
+  "cataclysm_nouveau.glyph_desc.glyph_wave": "Replace a projectile with a wave that pushes enemies, extinguishes fire and applies Wetness. Lasts four seconds by default; Extend Time increases its duration.",
+  "cataclysm_nouveau.cast.cooldown": "%s is cooling down (%s s).",
+  "cataclysm_nouveau.validation.modifier": "This modifier requires a compatible projectile replacement."
 }
