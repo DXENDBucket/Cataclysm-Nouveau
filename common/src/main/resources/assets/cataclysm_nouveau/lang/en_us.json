@@ -24,5 +24,10 @@
   "cataclysm_nouveau.glyph_name.glyph_wave": "Wave",
   "cataclysm_nouveau.glyph_desc.glyph_wave": "Replace a projectile with a wave that pushes enemies, extinguishes fire and applies Wetness. Lasts four seconds by default; Extend Time increases its duration.",
   "cataclysm_nouveau.cast.cooldown": "%s is cooling down (%s s).",
-  "cataclysm_nouveau.validation.modifier": "This modifier requires a compatible projectile replacement."
+  "cataclysm_nouveau.validation.modifier": "This modifier requires a compatible projectile replacement.",
+  "cataclysm_nouveau.augment.wave_duration_up": "Increases a native wave's duration by 50% of its base duration. Repeating carriers follow their own duration.",
+  "cataclysm_nouveau.augment.wave_duration_down": "Decreases a native wave's duration by 50% of its base duration. Repeating carriers follow their own duration.",
+  "item.cataclysm_nouveau.glyph_flare_bomb": "Flare Bomb",
+  "cataclysm_nouveau.glyph_name.glyph_flare_bomb": "Flare Bomb",
+  "cataclysm_nouveau.glyph_desc.glyph_flare_bomb": "Replaces a projectile with the Netherite Monstrosity's Flare Bomb. On impact, native flame jets spread outward in a cross. Amplify increases both direct and jet damage as for Harm."
 }

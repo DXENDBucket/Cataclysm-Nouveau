@@ -9,7 +9,7 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.HitResult;
 import org.spongepowered.asm.mixin.*;
 import java.util.function.Consumer;
-@Mixin(value={Amethyst_Cluster_Projectile_Entity.class,Lionfish_Spike_Entity.class,Player_Ceraunus_Entity.class,Wave_Entity.class},remap=false)
+@Mixin(value={Amethyst_Cluster_Projectile_Entity.class,Lionfish_Spike_Entity.class,Player_Ceraunus_Entity.class,Wave_Entity.class,Flare_Bomb_Entity.class},remap=false)
 public abstract class ManagedStateMixin extends Entity implements ManagedProjectile {
     @Unique private EntityProjectileSpell confluxCataclysm$carrier;
     @Unique private float confluxCataclysm$bonus;

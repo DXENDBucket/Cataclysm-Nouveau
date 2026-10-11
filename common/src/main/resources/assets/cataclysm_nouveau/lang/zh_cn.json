@@ -24,5 +24,10 @@
   "cataclysm_nouveau.glyph_name.glyph_wave": "海浪",
   "cataclysm_nouveau.glyph_desc.glyph_wave": "将弹射物替换为海浪，击退敌人、熄灭火焰并附加湿润。基础持续4秒，延长时效可延长持续时间。",
   "cataclysm_nouveau.cast.cooldown": "%s尚在冷却（%s秒）。",
-  "cataclysm_nouveau.validation.modifier": "此修饰需要兼容的弹射物替换。"
+  "cataclysm_nouveau.validation.modifier": "此修饰需要兼容的弹射物替换。",
+  "cataclysm_nouveau.augment.wave_duration_up": "延长海浪持续时间，每份增加基础时长的50%；持续弹射物遵循自身的持续时间。",
+  "cataclysm_nouveau.augment.wave_duration_down": "缩短海浪持续时间，每份减少基础时长的50%；持续弹射物遵循自身的持续时间。",
+  "item.cataclysm_nouveau.glyph_flare_bomb": "燃光弹",
+  "cataclysm_nouveau.glyph_name.glyph_flare_bomb": "燃光弹",
+  "cataclysm_nouveau.glyph_desc.glyph_flare_bomb": "将弹射物替换为下界合金巨兽的燃光弹，命中后烈焰喷柱沿十字向外展开。增强对直接伤害与喷柱伤害的提升均与伤害魔符一致。"
 }

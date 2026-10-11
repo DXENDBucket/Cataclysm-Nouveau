@@ -22,6 +22,8 @@ public final class CataclysmEffectGlyph extends AbstractEffect implements Trigge
     public CataclysmEffectGlyph(Ability ability) {
         super(CarrierRegistry.id("cataclysm_nouveau:glyph_" + ability.id), ability.name);
         this.ability = ability;
+        augmentDescriptions.put(AugmentAmplify.INSTANCE, Component.translatable("cataclysm_nouveau.augment.increase_damage"));
+        augmentDescriptions.put(AugmentDampen.INSTANCE, Component.translatable("cataclysm_nouveau.augment.decrease_damage"));
     }
 
     @Override

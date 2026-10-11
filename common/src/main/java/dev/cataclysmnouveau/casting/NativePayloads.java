@@ -16,6 +16,7 @@ public final class NativePayloads {
         ThrowableProjectile result=switch(ability) {
             case AMETHYST_CLUSTER -> new Amethyst_Cluster_Projectile_Entity(ModEntities.AMETHYST_CLUSTER_PROJECTILE.get(),world,frame.caster(),Math.max(0,(float)CMCommonConfig.AmethystCrab.AmethystClusterDamage+Resources.damageBonus(amplify)));
             case LIONFISH_SPIKE -> new Lionfish_Spike_Entity(world,frame.caster());
+            case FLARE_BOMB -> new Flare_Bomb_Entity(ModEntities.FLARE_BOMB.get(),world,frame.caster());
             default -> throw new IllegalArgumentException("Not a projectile: "+ability);
         };
         result.setOwner(frame.damageOwner());

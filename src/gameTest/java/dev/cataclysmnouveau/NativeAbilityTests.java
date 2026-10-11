@@ -69,12 +69,12 @@ public final class NativeAbilityTests {
     public static void nativePayloadDamagePoisonOwnershipAndOrdinaryEntities(GameTestHelper h) {
         var p=player(h);
         try {
-            for(var ability:List.of(Ability.AMETHYST_CLUSTER,Ability.LIONFISH_SPIKE)) {
+            for(var ability:List.of(Ability.AMETHYST_CLUSTER,Ability.LIONFISH_SPIKE,Ability.FLARE_BOMB)) {
                 var target=cow(h,scene(h).add(0,1,3));
                 var nativeEntity=NativePayloads.projectile(ability,h.getLevel(),CastContext.detached(p,null,null),1);
                 var state=(ManagedProjectile)nativeEntity;state.confluxCataclysm$mode(2);
                 h.getLevel().addFreshEntity(nativeEntity);NativePayloads.hit(nativeEntity,new EntityHitResult(target));
-                double base=ability==Ability.AMETHYST_CLUSTER?com.github.L_Ender.cataclysm.config.CMCommonConfig.AmethystCrab.AmethystClusterDamage:4;
+                double base=ability==Ability.AMETHYST_CLUSTER?com.github.L_Ender.cataclysm.config.CMCommonConfig.AmethystCrab.AmethystClusterDamage:ability==Ability.FLARE_BOMB?7:4;
                 close(h,500-target.getHealth(),base+Resources.damageBonus(1),"Native damage plus configured Harm amplification");
                 h.assertTrue(nativeEntity.getOwner()==p && nativeEntity.isRemoved(),"Native owner and on-hit removal retained");
                 if (ability==Ability.LIONFISH_SPIKE) h.assertTrue(target.hasEffect(MobEffects.POISON) && target.getEffect(MobEffects.POISON).getDuration()==60,"Native three-second poison retained");
@@ -91,13 +91,13 @@ public final class NativeAbilityTests {
     public static void nativeFlightPaymentContinuationAndCreative(GameTestHelper h) {
         var p=player(h);var mana=CapabilityRegistry.getMana(p);
         try {
-            for(var glyph:List.of(GlyphCatalog.AMETHYST,GlyphCatalog.SPIKE)) {
+            for(var glyph:List.of(GlyphCatalog.AMETHYST,GlyphCatalog.SPIKE,GlyphCatalog.FLARE)) {
                 mana.setMana(10000);var marker=new Marker();var cast=resolver(h,p,new Spell(MethodProjectile.INSTANCE,glyph,marker));cast.spellContext.nextPart();
                 var carrier=new EntityProjectileSpell(h.getLevel(),cast);carrier.setPos(scene(h).add(0,2,0));carrier.setDeltaMovement(new Vec3(0,0,.75));
                 h.assertTrue(ProjectileDispatch.convert(carrier),"Core dispatches the registered native payload");
                 var visual=payloads(h).get(0);var state=(ManagedProjectile)visual;
                 h.assertTrue(state.confluxCataclysm$mode()==2 && !visual.shouldBeSaved(),"Native flight is transient and opt-in");
-                close(h,visual.getDeltaMovement().length(),glyph.ability==Ability.AMETHYST_CLUSTER?.8:.35,"Native initial speed retained");
+                close(h,visual.getDeltaMovement().length(),glyph.ability==Ability.AMETHYST_CLUSTER?.8:glyph.ability==Ability.FLARE_BOMB?1:.35,"Native initial speed retained");
                 int fee=Resources.quote(cast.spellContext,glyph.ability,List.of()).amount();
                 close(h,mana.getCurrentMana(),10000-fee,"Launch charges exactly once");
                 NativePayloads.hit(visual,block(scene(h).add(0,0,3)));
@@ -117,7 +117,7 @@ public final class NativeAbilityTests {
     public static void arsDrivenRepeatedImpactsPayAndStopOnEmptyMana(GameTestHelper h) {
         var p=player(h);var mana=CapabilityRegistry.getMana(p);
         try {
-            for(var glyph:List.of(GlyphCatalog.AMETHYST,GlyphCatalog.SPIKE)) {
+            for(var glyph:List.of(GlyphCatalog.AMETHYST,GlyphCatalog.SPIKE,GlyphCatalog.FLARE)) {
                 mana.setMana(10000);var marker=new Marker();var cast=resolver(h,p,new Spell(MethodProjectile.INSTANCE,glyph,marker));cast.spellContext.nextPart();
                 var carrier=new EntityOrbitProjectile(h.getLevel(),cast,p);carrier.setPos(scene(h).add(0,2,0));
                 h.assertTrue(ProjectileDispatch.convert(carrier),"Core recognizes orbit");
@@ -338,6 +338,88 @@ public final class NativeAbilityTests {
             h.succeed();
         } finally {clean(h,p);}
     }
+    @GameTest(template="empty",batch="cat_descriptions",timeoutTicks=100)
+    public static void augmentDescriptionsReuseResolvableAddonKeys(GameTestHelper h) throws Exception {
+        for(var locale:List.of("en_us","zh_cn")) {
+            try(var stream=NativeAbilityTests.class.getResourceAsStream("/assets/cataclysm_nouveau/lang/"+locale+".json")) {
+                h.assertTrue(stream!=null,"Packaged language exists");
+                var json=com.google.gson.JsonParser.parseReader(new java.io.InputStreamReader(stream,java.nio.charset.StandardCharsets.UTF_8)).getAsJsonObject();
+                var components=new ArrayList<net.minecraft.network.chat.Component>();
+                for(var profile:CarrierRegistry.profiles()) if(profile.glyph()!=null)
+                    for(var form:GlyphCatalog.PROJECTILES) {
+                        var description=profile.glyph().augmentDescriptions.get(form);
+                        h.assertTrue(description!=null,"Every carrier has a projectile-form description");components.add(description);
+                    }
+                for(var glyph:List.of(GlyphCatalog.BOLT,GlyphCatalog.RUNE,GlyphCatalog.JET))
+                    components.addAll(glyph.augmentDescriptions.values());
+                for(var component:components) {
+                    h.assertTrue(component.getContents() instanceof net.minecraft.network.chat.contents.TranslatableContents,"Description remains translatable");
+                    var key=((net.minecraft.network.chat.contents.TranslatableContents)component.getContents()).getKey();
+                    h.assertTrue(json.has(key) && !json.get(key).getAsString().isBlank(),"Tooltip key exists in "+locale+": "+key);
+                }
+            }
+        }
+        h.succeed();
+    }
+
+    @GameTest(template="empty",batch="cat_flare_pattern",timeoutTicks=110)
+    public static void flarePreservesNativePatternAmplificationAlliesAndLifetime(GameTestHelper h) {
+        var p=player(h);p.setNoGravity(true);p.setPos(scene(h).add(-15,4,0));
+        var mana=CapabilityRegistry.getMana(p);var marker=new Marker();
+        var base=BlockPos.containing(scene(h));var impact=scene(h).add(0,1,0);
+        var area=new AABB(impact,impact).inflate(14);
+        var forced=new ArrayList<net.minecraft.world.level.ChunkPos>();
+        // Wide attacks extend beyond the small GameTest template's entity-ticking chunks.
+        for(int x=(base.getX()-14)>>4;x<=(base.getX()+14)>>4;x++)
+            for(int z=(base.getZ()-14)>>4;z<=(base.getZ()+14)>>4;z++) {
+                h.getLevel().setChunkForced(x,z,true);forced.add(new net.minecraft.world.level.ChunkPos(x,z));
+            }
+        for(int x=-12;x<=12;x++) for(int z=-12;z<=12;z++)
+            h.getLevel().setBlockAndUpdate(base.offset(x,0,z),Blocks.STONE.defaultBlockState());
+        // Native Boss projectiles are opt-out, even if an addon bonus field happens to be set.
+        var ordinary=new Flare_Bomb_Entity(com.github.L_Ender.cataclysm.init.ModEntities.FLARE_BOMB.get(),h.getLevel(),p);
+        ordinary.setPos(impact);((ManagedProjectile)ordinary).confluxCataclysm$bonus(100);
+        NativePayloads.hit(ordinary,block(impact));
+        var originalJets=h.getLevel().getEntitiesOfClass(Flame_Jet_Entity.class,area);
+        h.assertTrue(originalJets.size()==40,"Native four-arm pattern creates 40 jets on flat ground");
+        for(var jet:originalJets) {close(h,jet.getDamage(),7,"Original Boss jet damage is unchanged");jet.discard();}
+
+        var spell=new Spell(MethodProjectile.INSTANCE,GlyphCatalog.FLARE,AugmentAmplify.INSTANCE,marker);
+        var cast=resolver(h,p,spell);cast.spellContext.nextPart();
+        var carrier=new EntityProjectileSpell(h.getLevel(),cast);carrier.setPos(impact);carrier.setDeltaMovement(new Vec3(0,0,.75));
+        h.assertTrue(ProjectileDispatch.convert(carrier),"Flare dispatches through Core");
+        var payload=(Flare_Bomb_Entity)payloads(h).getFirst();
+        h.assertTrue(payload.getOwner()==p && !payload.shouldBeSaved(),"Native owner and transient payload retained");
+        close(h,payload.getDeltaMovement().length(),1,"Native flare launch speed retained");
+        NativePayloads.hit(payload,block(impact));
+        var jets=h.getLevel().getEntitiesOfClass(Flame_Jet_Entity.class,area);
+        h.assertTrue(jets.size()==40 && payload.isRemoved() && marker.hits==1,"Native impact expands once and continues Ars once");
+        for(var jet:jets) {
+            h.assertTrue(jet.getCaster()==p,"Generated jets inherit the actual damage owner");
+            close(h,jet.getDamage(),CataclysmConfig.flareJetDamage()+Resources.damageBonus(1),"Amplification reaches secondary attacks");
+        }
+        var outer=jets.stream().max(Comparator.comparingDouble(jet->jet.position().distanceToSqr(impact))).orElseThrow();
+        var target=cow(h,outer.position());var ally=cow(h,outer.position());
+        var scoreboard=h.getLevel().getScoreboard();var team=scoreboard.addPlayerTeam("flare_"+p.getUUID().toString().substring(0,8));
+        scoreboard.addPlayerToTeam(p.getScoreboardName(),team);scoreboard.addPlayerToTeam(ally.getScoreboardName(),team);
+        int quote=Resources.quote(cast.spellContext,Ability.FLARE_BOMB,List.of(AugmentAmplify.INSTANCE)).amount();
+        close(h,mana.getCurrentMana(),10000-quote,"One launch includes all secondary jets without double billing");
+        h.runAfterDelay(65,()->{
+            try {
+                h.assertTrue(target.getHealth()<500 && target.isOnFire(),"Delayed native jets hit and ignite enemies");
+                close(h,ally.getHealth(),500,"Native jet alliance filtering retained");
+                h.assertTrue(jets.stream().allMatch(Entity::isRemoved),"Native delayed jets clean themselves up");
+                h.assertTrue(CataclysmConfig.cooldownTicks(Ability.FLARE_BOMB)==160,"Flare default active cooldown is eight seconds");
+                h.succeed();
+            } finally {
+                scoreboard.removePlayerTeam(team);clean(h,p);
+                for(int x=-12;x<=12;x++) for(int z=-12;z<=12;z++)
+                    h.getLevel().setBlockAndUpdate(base.offset(x,0,z),Blocks.AIR.defaultBlockState());
+                for(var chunk:forced) h.getLevel().setChunkForced(chunk.x,chunk.z,false);
+            }
+        });
+    }
+
     private static final class Marker extends AbstractEffect {
         int hits;
         Marker() { super(net.minecraft.resources.ResourceLocation.fromNamespaceAndPath("cataclysm_nouveau","test_marker"),"Marker"); }

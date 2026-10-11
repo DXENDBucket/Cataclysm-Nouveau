@@ -10,6 +10,7 @@ public final class CataclysmConfig {
     private static final EnumMap<Ability, ModConfigSpec.IntValue> GROUND_WARMUP = new EnumMap<>(Ability.class);
     private static final ModConfigSpec.DoubleValue ANCHOR_DAMAGE, WAVE_DAMAGE;
     private static final ModConfigSpec.IntValue WAVE_LIFETIME;
+    private static final ModConfigSpec.DoubleValue FLARE_DIRECT_DAMAGE, FLARE_JET_DAMAGE;
     private static final ModConfigSpec.BooleanValue COOLDOWNS, CREATIVE_COOLDOWN;
     private static final EnumMap<Ability, ModConfigSpec.IntValue> COOLDOWN_TICKS = new EnumMap<>(Ability.class);
     static {
@@ -36,11 +37,16 @@ public final class CataclysmConfig {
                 .defineInRange("damage",9.0,-1,100000);
         WAVE_LIFETIME=b.comment("Native wave lifespan for one-shot carriers before Extend Time (+50% per modifier); repeating carriers follow their own lifespan.")
                 .defineInRange("lifetime_ticks",80,40,1200);b.pop();
+        b.push("flare_bomb");
+        FLARE_DIRECT_DAMAGE=b.comment("Direct native hit damage; Harm amplification also applies to the generated jets.")
+                .defineInRange("direct_damage",7.0,0,100000);
+        FLARE_JET_DAMAGE=b.comment("Damage per generated jet; each impact creates the native four-arm pattern, up to 40 jets.")
+                .defineInRange("jet_damage",7.0,0,100000);b.pop();
         b.push("cooldowns");
         COOLDOWNS=b.comment("Gate new active uses through Conflux; existing trajectories keep running.").define("enabled",true);
         CREATIVE_COOLDOWN=b.define("creative_cooldown",false);
         b.push("ticks");
-        for(var a:Ability.values()) COOLDOWN_TICKS.put(a,b.defineInRange(a.id,a==Ability.CERAUNUS?40:a==Ability.WAVE?100:0,0,72000));
+        for(var a:Ability.values()) COOLDOWN_TICKS.put(a,b.defineInRange(a.id,defaultCooldown(a),0,72000));
         b.pop();b.pop();
         SPEC=b.build();
     }
@@ -69,8 +75,13 @@ public final class CataclysmConfig {
         return (float)(value>=0?value:com.github.L_Ender.cataclysm.config.CMCommonConfig.Ceraunus.waveDamage);
     }
     public static int waveLifetime() { return SPEC.isLoaded()?WAVE_LIFETIME.get():80; }
+    public static float flareDirectDamage() {return SPEC.isLoaded()?FLARE_DIRECT_DAMAGE.get().floatValue():7;}
+    public static float flareJetDamage() {return SPEC.isLoaded()?FLARE_JET_DAMAGE.get().floatValue():7;}
+    private static int defaultCooldown(Ability ability) {
+        return switch(ability) {case CERAUNUS->40;case WAVE->100;case FLARE_BOMB->160;default->0;};
+    }
     public static int cooldownTicks(Ability ability) {
-        return SPEC.isLoaded()?COOLDOWN_TICKS.get(ability).get():ability==Ability.CERAUNUS?40:ability==Ability.WAVE?100:0;
+        return SPEC.isLoaded()?COOLDOWN_TICKS.get(ability).get():defaultCooldown(ability);
     }
     public static boolean cooldownsEnabled() { return !SPEC.isLoaded() || COOLDOWNS.get(); }
     public static boolean creativeCooldown() { return SPEC.isLoaded() && CREATIVE_COOLDOWN.get(); }

@@ -1,0 +1,9 @@
+{
+  "type": "ars_nouveau:glyph",
+  "exp": 27,
+  "output": { "id": "cataclysm_nouveau:glyph_flare_bomb", "count": 1 },
+  "inputs": [
+    { "item": "cataclysm:monstrous_eye" },
+    { "item": "ars_nouveau:source_gem" }
+  ]
+}

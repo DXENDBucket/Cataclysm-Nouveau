@@ -1,5 +1,15 @@
 # Changelog
 
+## 0.1.0-dev.5
+
+- Fix Ars augment tooltips by supplying actual translated Components, reusing each projectile form's existing description across carriers.
+- Delegate Ceraunus and Wave glyph icons to the native Ceraunus item renderer with a native item stack; builtin/entity model inheritance alone cannot render them.
+- Add Netherite Monstrosity Flare Bomb: native flight, trail, impact event, cross/diagonal pattern and delayed Flame Jets.
+- Apply Harm amplification to both the direct hit and generated jets; retain native, unmanaged Boss projectiles unchanged.
+- Default to 300 trigger Mana and 8 seconds of active cooldown; include all secondary jets in the launch/impact payment.
+- Add a real Scribe recipe from Monstrous Eye plus Source Gem and runtime-only icon reference.
+- Extend ordinary/repeating projectile tests and add tooltip-key and full-pattern lifecycle regressions.
+
 ## 0.1.0-dev.4
 
 - Add Ceraunus and Wave projectile replacements using native registered Cataclysm entities.

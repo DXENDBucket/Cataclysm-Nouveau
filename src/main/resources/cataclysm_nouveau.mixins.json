@@ -14,7 +14,9 @@
     "SpikeDamageMixin",
     "AnchorStateMixin",
     "AnchorHitAccess",
-    "WaveStateMixin"
+    "WaveStateMixin",
+    "FlareStateMixin",
+    "FlareDamageMixin"
   ],
   "injectors": {
     "defaultRequire": 1
