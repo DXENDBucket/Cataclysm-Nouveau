@@ -1,0 +1,11 @@
+{
+  "itemGroup.cataclysm_nouveau": "灾变与新生魔艺",
+  "item.cataclysm_nouveau.glyph_amethyst_cluster": "紫水晶簇",
+  "cataclysm_nouveau.glyph_desc.glyph_amethyst_cluster": "将弹射物替换为灾变的紫水晶簇，保留本体命中粒子与音效。增强对伤害的提升与伤害魔符一致。",
+  "item.cataclysm_nouveau.glyph_lionfish_spike": "狮子鱼刺",
+  "cataclysm_nouveau.glyph_desc.glyph_lionfish_spike": "将弹射物替换为灾变的狮子鱼刺，命中时保留本体的3秒中毒I。增强对直接伤害的提升与伤害魔符一致。",
+  "item.cataclysm_nouveau.glyph_bolt_strike": "雷击柱",
+  "cataclysm_nouveau.glyph_desc.glyph_bolt_strike": "在选定位置召出灾变的雷击柱，短暂延迟后攻击。增强对伤害的提升与伤害魔符一致。",
+  "cataclysm_nouveau.augment.increase_damage": "按照伤害魔符的增强数值提高伤害。",
+  "cataclysm_nouveau.augment.decrease_damage": "按照伤害魔符的增强数值降低伤害。"
+}

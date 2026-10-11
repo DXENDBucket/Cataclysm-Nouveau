@@ -1,0 +1,75 @@
+plugins {
+    id 'java-library'
+    id 'net.neoforged.moddev' version '2.0.146'
+}
+group = 'dev.cataclysmnouveau'
+version = file('VERSION').text.trim()
+base { archivesName = 'cataclysm-nouveau' }
+java { toolchain.languageVersion = JavaLanguageVersion.of(21); withSourcesJar() }
+repositories { mavenCentral() }
+sourceSets.main { java.srcDir 'common/src/main/java'; resources.srcDir 'common/src/main/resources' }
+sourceSets { gameTest { compileClasspath += sourceSets.main.output; runtimeClasspath += sourceSets.main.output } }
+configurations {
+    gameTestImplementation.extendsFrom implementation
+    gameTestCompileOnly.extendsFrom compileOnly
+    gameTestRuntimeOnly.extendsFrom runtimeOnly
+}
+evaluationDependsOn(':ars-conflux')
+neoForge {
+    version = '21.1.250'
+    addModdingDependenciesTo sourceSets.gameTest
+    runs {
+        client { client() }
+        server { server(); programArgument '--nogui' }
+        gameTestServer {
+            type = 'gameTestServer'
+            gameDirectory = file('run/gametest')
+            systemProperty 'neoforge.enabledGameTestNamespaces', 'cataclysm_nouveau'
+            jvmArgument '-Xmx2G'
+        }
+    }
+    mods {
+        ars_conflux { sourceSet project(':ars-conflux').sourceSets.main }
+        cataclysm_nouveau { sourceSet sourceSets.main; sourceSet sourceSets.gameTest }
+    }
+}
+dependencies {
+    implementation(project(':ars-conflux')) { transitive = false }
+    compileOnly fileTree(dir: 'libs', include: '*.jar')
+    runtimeOnly fileTree(dir: 'libs', include: '*.jar')
+}
+tasks.withType(JavaCompile).configureEach { options.encoding = 'UTF-8' }
+processResources {
+    inputs.property 'version', project.version
+    filesMatching('META-INF/neoforge.mods.toml') { expand(version: project.version) }
+}
+tasks.named('jar') {
+    from('LICENSE', 'THIRD_PARTY_NOTICES.md')
+    archiveFileName = "cataclysm-nouveau-${project.version}-mc1.21.1-neoforge.jar"
+}
+tasks.named('sourcesJar') { from('LICENSE', 'THIRD_PARTY_NOTICES.md') }
+// Only adapter code, JSON path references and metadata; never dependencies or upstream media.
+tasks.register('verifyDistributions') {
+    dependsOn tasks.named('jar'), tasks.named('sourcesJar')
+    doLast {
+        [tasks.jar.archiveFile.get().asFile, tasks.sourcesJar.archiveFile.get().asFile].each { artifact ->
+            def zip = new java.util.zip.ZipFile(artifact)
+            try {
+                zip.entries().each { entry ->
+                    if (entry.directory) return
+                    def name = entry.name
+                    if (name.startsWith('assets/') && !name.startsWith('assets/cataclysm_nouveau/'))
+                        throw new GradleException("Foreign asset namespace: ${name}")
+                    if (name.endsWith('.class') && !name.startsWith('dev/cataclysmnouveau/'))
+                        throw new GradleException("Foreign class: ${name}")
+                    if (name.startsWith('com/github/') || name.startsWith('libs/') || name.startsWith('.upstream/'))
+                        throw new GradleException("Foreign source/dependency: ${name}")
+                    if (name ==~ /(?i).*\.(jar|png|ogg|wav|obj|bbmodel|jpeg|jpg|webp|gif)$/)
+                        throw new GradleException("Embedded media/dependency forbidden: ${name}")
+                }
+            } finally { zip.close() }
+            logger.lifecycle("Verified no bundled upstream assets or code: ${artifact.name}")
+        }
+    }
+}
+tasks.named('check') { dependsOn tasks.named('verifyDistributions') }

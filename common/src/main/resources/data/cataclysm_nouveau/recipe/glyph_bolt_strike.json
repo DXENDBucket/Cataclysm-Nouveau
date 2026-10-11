@@ -1,0 +1,16 @@
+{
+  "type": "ars_nouveau:glyph",
+  "exp": 27,
+  "output": {
+    "id": "cataclysm_nouveau:glyph_bolt_strike",
+    "count": 1
+  },
+  "inputs": [
+    {
+      "item": "cataclysm:essence_of_the_storm"
+    },
+    {
+      "item": "ars_nouveau:source_gem"
+    }
+  ]
+}

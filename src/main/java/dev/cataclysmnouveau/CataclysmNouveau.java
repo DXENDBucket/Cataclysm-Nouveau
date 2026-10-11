@@ -1,0 +1,23 @@
+package dev.cataclysmnouveau;
+import net.minecraft.core.registries.Registries;
+import net.minecraft.network.chat.Component;
+import net.minecraft.world.item.CreativeModeTab;
+import net.neoforged.bus.api.IEventBus;
+import net.neoforged.fml.ModContainer;
+import net.neoforged.fml.common.Mod;
+import net.neoforged.fml.config.ModConfig;
+import net.neoforged.fml.event.lifecycle.FMLCommonSetupEvent;
+import net.neoforged.neoforge.registries.DeferredRegister;
+@Mod("cataclysm_nouveau")
+public final class CataclysmNouveau {
+    public CataclysmNouveau(IEventBus bus,ModContainer container) {
+        container.registerConfig(ModConfig.Type.SERVER,CataclysmConfig.SPEC);
+        GlyphCatalog.register();
+        bus.addListener((FMLCommonSetupEvent event)->event.enqueueWork(GlyphCatalog::configureCarriers));
+        var tabs=DeferredRegister.create(Registries.CREATIVE_MODE_TAB,"cataclysm_nouveau");
+        tabs.register("glyphs",()->CreativeModeTab.builder().title(Component.translatable("itemGroup.cataclysm_nouveau"))
+            .icon(()->GlyphCatalog.AMETHYST.getGlyph().getDefaultInstance())
+            .displayItems((params,output)->GlyphCatalog.ALL.forEach(g->output.accept(g.getGlyph()))).build());
+        tabs.register(bus);
+    }
+}

@@ -1,0 +1,19 @@
+{
+  "required": true,
+  "minVersion": "0.8",
+  "package": "dev.cataclysmnouveau.mixin",
+  "compatibilityLevel": "JAVA_21",
+  "mixins": [
+    "ManagedStateMixin",
+    "AmethystStateMixin",
+    "LionfishStateMixin",
+    "ProjectileHitAccess",
+    "NativeHitMixin",
+    "ManagedMovementMixin",
+    "RepeatedImpactMixin",
+    "SpikeDamageMixin"
+  ],
+  "injectors": {
+    "defaultRequire": 1
+  }
+}

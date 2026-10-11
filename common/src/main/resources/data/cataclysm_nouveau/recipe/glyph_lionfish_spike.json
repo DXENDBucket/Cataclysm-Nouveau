@@ -1,0 +1,16 @@
+{
+  "type": "ars_nouveau:glyph",
+  "exp": 27,
+  "output": {
+    "id": "cataclysm_nouveau:glyph_lionfish_spike",
+    "count": 1
+  },
+  "inputs": [
+    {
+      "item": "cataclysm:lionfish_spike"
+    },
+    {
+      "item": "ars_nouveau:source_gem"
+    }
+  ]
+}
