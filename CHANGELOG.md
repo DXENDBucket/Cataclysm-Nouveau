@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.1.0-dev.10
+
+- Craft Monstrous Quake from Infernal Forge plus Source Gem (27 experience), giving the native hammer a glyph use. Keep Boss damage behavior unchanged.
+- Use the native hammer icon, including its builtin/entity renderer with the native item identity. Share the existing item-render delegation with Ceraunus glyphs.
+
 ## 0.1.0-dev.9
 
 - Keep Monstrous Horn only for Earthbreaker and Flame Rings in the Monstrosity series. Craft Quake, Shoulder Check, Bone Fracture and Monstrous from Lava Power Cell instead; all eight remaining series glyphs now use cells.

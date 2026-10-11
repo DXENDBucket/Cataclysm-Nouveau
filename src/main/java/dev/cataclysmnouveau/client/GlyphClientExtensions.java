@@ -34,7 +34,11 @@ public final class GlyphClientExtensions {
                 return true;
             }
         },dev.cataclysmnouveau.CataclysmEffects.LAVA_WALKING);
-        event.registerItem(new IClientItemExtensions() {
+        event.registerItem(nativeItem(() -> ModItems.CERAUNUS.get()),GlyphCatalog.ANCHOR.getGlyph(),GlyphCatalog.WAVE.getGlyph());
+        event.registerItem(nativeItem(() -> ModItems.INFERNAL_FORGE.get()),GlyphCatalog.QUAKE.getGlyph());
+    }
+    private static IClientItemExtensions nativeItem(java.util.function.Supplier<net.minecraft.world.item.Item> source) {
+        return new IClientItemExtensions() {
             private BlockEntityWithoutLevelRenderer renderer;
             @Override public BlockEntityWithoutLevelRenderer getCustomRenderer() {
                 if(renderer==null) {
@@ -42,7 +46,7 @@ public final class GlyphClientExtensions {
                     renderer=new BlockEntityWithoutLevelRenderer(client.getBlockEntityRenderDispatcher(),client.getEntityModels()) {
                         @Override public void renderByItem(ItemStack glyph,ItemDisplayContext context,PoseStack pose,
                                                            MultiBufferSource buffers,int light,int overlay) {
-                            var nativeStack=ModItems.CERAUNUS.get().getDefaultInstance();
+                            var nativeStack=source.get().getDefaultInstance();
                             IClientItemExtensions.of(nativeStack.getItem()).getCustomRenderer()
                                     .renderByItem(nativeStack,context,pose,buffers,light,overlay);
                         }
@@ -50,7 +54,7 @@ public final class GlyphClientExtensions {
                 }
                 return renderer;
             }
-        },GlyphCatalog.ANCHOR.getGlyph(),GlyphCatalog.WAVE.getGlyph());
+        };
     }
     private GlyphClientExtensions() {}
 }
