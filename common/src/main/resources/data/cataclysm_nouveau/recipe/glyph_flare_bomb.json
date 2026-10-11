@@ -3,7 +3,7 @@
   "exp": 27,
   "output": { "id": "cataclysm_nouveau:glyph_flare_bomb", "count": 1 },
   "inputs": [
-    { "item": "cataclysm:monstrous_eye" },
+    { "item": "cataclysm:lava_power_cell" },
     { "item": "ars_nouveau:source_gem" }
   ]
 }

@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.1.0-dev.8
+
+- Require Lava Power Cell plus Source Gem for Flare Bomb, replacing the craftable Monstrous Eye with a direct Boss drop. Retain the existing eye icon and 27 experience cost.
+
 ## 0.1.0-dev.7
 
 - Add Bone Fracture as a native enemy status effect (40 Mana, 5 seconds), with amplification and duration modifiers.
