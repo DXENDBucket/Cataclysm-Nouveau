@@ -13,6 +13,7 @@ import net.minecraft.world.phys.*;
 /** Installed native entities own animation, attack windows and expiry. */
 public final class ScyllaCasting {
     public static boolean supports(Ability ability) {
+        if(ScyllaActions.supports(ability)) return true;
         return switch(ability) {case STORM_SERPENT,LIGHTNING_STORM,LIGHTNING_FIELD,STORM_BURST,THUNDER_CLOUD,LIGHTNING_ROW->true;default->false;};
     }
     public static <T extends Entity> T manage(T entity,CastContext cast) {
@@ -43,6 +44,7 @@ public final class ScyllaCasting {
         return entity instanceof ScyllaPayload?manage(entity,boss.cast):entity;
     }
     public static boolean effect(Ability ability,ServerLevel world,CastContext cast,double amp,double duration) {
+        if(ScyllaActions.supports(ability)) return ScyllaActions.effect(ability,world,cast,amp,duration);
         if(ability==Ability.THUNDER_CLOUD || ability==Ability.LIGHTNING_ROW)
             return ScyllaTimedCasting.effect(ability,world,cast,amp,duration);
         Vec3 point=NativePayloads.groundPoint(world,cast);

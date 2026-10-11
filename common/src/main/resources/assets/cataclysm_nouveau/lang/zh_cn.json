@@ -90,5 +90,18 @@
   "item.cataclysm_nouveau.glyph_lightning_row": "连排落雷",
   "cataclysm_nouveau.glyph_name.glyph_thunder_cloud": "雷暴云",
   "cataclysm_nouveau.glyph_desc.glyph_thunder_cloud": "在选定位置上方聚集雷云，默认两秒后连续倾泻水矛和雷矛，保留反弹、潮湿和落地雷电场。时效增强改变倾泻时长。",
-  "item.cataclysm_nouveau.glyph_thunder_cloud": "雷暴云"
+  "item.cataclysm_nouveau.glyph_thunder_cloud": "雷暴云",
+  "cataclysm_nouveau.glyph_name.glyph_thunder_combo": "雷电重击连段",
+  "cataclysm_nouveau.glyph_desc.glyph_thunder_combo": "自身或友军执行两次前方重击，各释放 16 枚电火花，中间发射五支水矛。保留原生伤害、破盾与落地效果；施法者支付并获得伤害归属。",
+  "item.cataclysm_nouveau.glyph_thunder_combo": "雷电重击连段",
+  "cataclysm_nouveau.glyph_name.glyph_anchor_spin": "旋转挥锚",
+  "cataclysm_nouveau.glyph_desc.glyph_anchor_spin": "自身或友军连续进行三次周围挥击，保留原生破盾和击退。伤害使用 Boss 基准，强化提升每次伤害。",
+  "item.cataclysm_nouveau.glyph_anchor_spin": "旋转挥锚",
+  "cataclysm_nouveau.glyph_name.glyph_anchor_leap": "钩锚跃落",
+  "cataclysm_nouveau.glyph_desc.glyph_anchor_leap": "自身或友军起跳并向视线内的方块抛锚，沿锁链拉向锚点，落地引发雷暴。受益者需着地且能选到有效方块；伤害与耗蓝仍属于施法者。",
+  "item.cataclysm_nouveau.glyph_anchor_leap": "钩锚跃落",
+  "cataclysm_nouveau.glyph_name.glyph_water_walking": "水面行走",
+  "cataclysm_nouveau.glyph_desc.glyph_water_walking": "自身或友军获得 30 秒水面行走。浮到表面后视为着地，保留跳跃；潜行可下潜。延长与缩短时效改变持续时间。",
+  "item.cataclysm_nouveau.glyph_water_walking": "水面行走",
+  "effect.cataclysm_nouveau.water_walking": "水面行走"
 }

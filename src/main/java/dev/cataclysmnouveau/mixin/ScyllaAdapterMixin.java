@@ -2,10 +2,12 @@ package dev.cataclysmnouveau.mixin;
 
 import com.github.L_Ender.cataclysm.entity.InternalAnimationMonster.IABossMonsters.Scylla.Scylla_Entity;
 import com.llamalad7.mixinextras.injector.wrapoperation.*;
+import com.llamalad7.mixinextras.injector.ModifyExpressionValue;
 import dev.cataclysmnouveau.casting.*;
 import net.minecraft.world.entity.*;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.*;
+import java.util.List;
 
 @Mixin(value=Scylla_Entity.class,remap=false)
 public abstract class ScyllaAdapterMixin {
@@ -24,5 +26,17 @@ public abstract class ScyllaAdapterMixin {
     @ModifyArg(method="aiStep",at=@At(value="INVOKE",target="Lnet/minecraft/world/entity/LivingEntity;hurt(Lnet/minecraft/world/damagesource/DamageSource;F)Z"),index=1)
     private float confluxScylla$damage(float original) {
         return (Object)this instanceof SpellScylla frame?Math.max(0,original+frame.bonus):original;
+    }
+    @ModifyArg(method={"AreaAttack","SpinDamage"},at=@At(value="INVOKE",target="Lnet/minecraft/world/damagesource/DamageSources;mobAttack(Lnet/minecraft/world/entity/LivingEntity;)Lnet/minecraft/world/damagesource/DamageSource;"),index=0)
+    private LivingEntity confluxScylla$meleeOwner(LivingEntity original) {
+        return (Object)this instanceof SpellScylla frame?frame.cast.damageOwner():original;
+    }
+    @ModifyArg(method={"AreaAttack","SpinDamage"},at=@At(value="INVOKE",target="Lnet/minecraft/world/entity/LivingEntity;hurt(Lnet/minecraft/world/damagesource/DamageSource;F)Z"),index=1)
+    private float confluxScylla$meleeDamage(float original) {
+        return (Object)this instanceof SpellScylla frame?Math.max(0,original+frame.bonus):original;
+    }
+    @ModifyExpressionValue(method="Stormknockback",at=@At(value="INVOKE",target="Lcom/github/L_Ender/cataclysm/entity/InternalAnimationMonster/IABossMonsters/Scylla/Scylla_Entity;getEntitiesNearby(Ljava/lang/Class;DDDD)Ljava/util/List;"))
+    private List<Entity> confluxScylla$pushAllies(List<Entity> original) {
+        return (Object)this instanceof SpellScylla frame?original.stream().filter(e->!frame.isAlliedTo(e)).toList():original;
     }
 }

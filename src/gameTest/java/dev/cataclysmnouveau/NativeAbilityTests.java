@@ -870,6 +870,90 @@ public final class NativeAbilityTests {
             h.succeed();
         } finally {net.neoforged.neoforge.common.NeoForge.EVENT_BUS.unregister(observer);a.close();}});
     }
+    @GameTest(template="empty",batch="cat_scylla_combo",timeoutTicks=130)
+    public static void thunderComboNativeStrikesSpearsAlliesAndPayment(GameTestHelper h) {
+        var a=new Arena(h);var actor=a.target(a.center,true);actor.setYRot(0);
+        var victim=a.target(a.center.add(0,0,5),false);var ally=a.target(a.center.add(.1,0,5),true);
+        var sparks=new ArrayList<Spark_Entity>();var waters=new ArrayList<Water_Spear_Entity>();
+        java.util.function.Consumer<net.neoforged.neoforge.event.entity.EntityJoinLevelEvent> observer=event->{
+            if(event.getEntity() instanceof Spark_Entity e && e.getOwner()==a.p) sparks.add(e);
+            if(event.getEntity() instanceof Water_Spear_Entity e && e.getOwner()==a.p) waters.add(e);
+        };
+        net.neoforged.neoforge.common.NeoForge.EVENT_BUS.addListener(observer);
+        a.cast(GlyphCatalog.COMBO,new EntityHitResult(actor),true);
+        double paid=10000-CataclysmConfig.cost(Ability.THUNDER_COMBO)-CataclysmConfig.amplifyCost();
+        close(h,CapabilityRegistry.getMana(a.p).getCurrentMana(),paid,"Combo pays once on start");
+        a.cast(GlyphCatalog.COMBO,new EntityHitResult(actor),false);
+        close(h,CapabilityRegistry.getMana(a.p).getCurrentMana(),paid,"Busy recipient rejects and refunds a second action");
+        h.runAfterDelay(25,()->{
+            h.assertTrue(victim.getHealth()<500 && victim.getLastDamageSource().getEntity()==a.p,"Native first melee strike credits payer, not recipient or Boss");
+            close(h,ally.getHealth(),500,"Native melee excludes nearby allies");
+        });
+        h.runAfterDelay(110,()->{try {
+            h.assertTrue(sparks.size()==32 && waters.size()==5,"Native combo produces two 16-spark strikes and five water spears: "+sparks.size()+" / "+waters.size());
+            h.assertTrue(waters.stream().allMatch(e->e.getOwner()==a.p && !e.shouldBeSaved()),"Goal-spawned spears retain root ownership and transient lifecycle");
+            close(h,actor.getHealth(),500,"Ally executor receives no friendly damage");
+            close(h,ally.getHealth(),500,"Combo children also exclude allies");
+            close(h,CapabilityRegistry.getMana(a.p).getCurrentMana(),paid,"Children do not charge additional mana");
+            h.assertTrue(!ExecutionSessions.isCasting(a.p),"Ally action does not occupy original caster");h.succeed();
+        } finally {net.neoforged.neoforge.common.NeoForge.EVENT_BUS.unregister(observer);a.close();}});
+    }
+    @GameTest(template="empty",batch="cat_scylla_spin",timeoutTicks=80)
+    public static void anchorWhirlNativeDamageFriendlyPushAndOwnerCleanup(GameTestHelper h) {
+        var a=new Arena(h);var actor=a.target(a.center,true);actor.setYRot(0);
+        var victim=a.target(a.center.add(0,0,4),false);var ally=a.target(a.center.add(1,0,2),true);
+        a.cast(GlyphCatalog.SPIN,new EntityHitResult(actor),true);
+        h.runAfterDelay(54,()->{try {
+            h.assertTrue(victim.getHealth()<500 && victim.getLastDamageSource().getEntity()==a.p,"Native spin attacks credit the original caster");
+            close(h,actor.getHealth(),500,"Spin excludes actor");close(h,ally.getHealth(),500,"Spin excludes ally damage");
+            close(h,ally.getDeltaMovement().length(),0,"Native cyclone does not push allies");
+            close(h,CapabilityRegistry.getMana(a.p).getCurrentMana(),10000-CataclysmConfig.cost(Ability.ANCHOR_SPIN)-CataclysmConfig.amplifyCost(),"Whole spin pays once");
+            a.cast(GlyphCatalog.SPIN,new EntityHitResult(actor),false);a.p.discard();ExecutionSessions.tick();
+            h.assertTrue(ScyllaActions.effect(Ability.ANCHOR_SPIN,h.getLevel(),CastContext.detached(actor,new EntityHitResult(actor),null),0,0),"Owner loss releases actor lock for another valid caster");
+            actor.discard();ExecutionSessions.tick();h.succeed();
+        } finally {a.close();}});
+    }
+    @GameTest(template="empty",batch="cat_scylla_water",timeoutTicks=100)
+    public static void waterWalkingAlliesDurationSurfaceAndExpiry(GameTestHelper h) {
+        var a=new Arena(h);var actor=a.target(a.center,true);var enemy=a.target(a.center.add(3,0,0),false);
+        var r=resolver(h,a.p,new Spell(MethodTouch.INSTANCE,GlyphCatalog.WATER_WALKING,com.hollingsworth.arsnouveau.common.spell.augment.AugmentExtendTime.INSTANCE));
+        r.spellContext.nextPart();r.onResolveEffect(h.getLevel(),new EntityHitResult(actor));
+        h.assertTrue(actor.getEffect(CataclysmEffects.WATER_WALKING).getDuration()==900,"Water Walking uses standard 50% time extension");
+        double paid=CapabilityRegistry.getMana(a.p).getCurrentMana();a.cast(GlyphCatalog.WATER_WALKING,new EntityHitResult(enemy),false);a.cast(GlyphCatalog.WATER_WALKING,block(a.center),false);
+        close(h,CapabilityRegistry.getMana(a.p).getCurrentMana(),paid,"Invalid water buff targets refund mana");
+        h.getLevel().setBlockAndUpdate(a.base.above(),Blocks.WATER.defaultBlockState());
+        var water=Blocks.WATER.defaultBlockState().getFluidState();
+        h.assertTrue(actor.canStandOnFluid(water) && !actor.canStandOnFluid(Blocks.LAVA.defaultBlockState().getFluidState()),"Water buff solidifies only water");
+        actor.setNoGravity(false);actor.setPos(Vec3.atBottomCenterOf(a.base.above()).add(0,.95,0));actor.setDeltaMovement(Vec3.ZERO);actor.setOnGround(false);actor.tick();
+        h.assertTrue(actor.onGround(),"Water surface is grounded");actor.setDeltaMovement(0,.42,0);actor.tick();
+        h.assertTrue(actor.getDeltaMovement().y>.12,"Water walking preserves jumping");actor.setShiftKeyDown(true);
+        h.assertTrue(!actor.canStandOnFluid(water),"Crouching allows water diving");actor.setShiftKeyDown(false);
+        actor.removeEffect(CataclysmEffects.WATER_WALKING);actor.addEffect(new net.minecraft.world.effect.MobEffectInstance(CataclysmEffects.WATER_WALKING,30));
+        h.runAfterDelay(45,()->{try {
+            h.assertTrue(!actor.hasEffect(CataclysmEffects.WATER_WALKING) && !actor.canStandOnFluid(water) && !actor.isNoGravity(),"Natural expiry restores normal water physics and gravity flags");h.succeed();
+        } finally {a.close();}});
+    }
+    @GameTest(template="empty",batch="cat_scylla_leap",timeoutTicks=180)
+    public static void anchorPlungeUsesNativeJumpChainAndLandingBurst(GameTestHelper h) {
+        var a=new Arena(h);var actor=a.target(a.center,true);actor.setYRot(0);actor.setXRot(20);actor.setOnGround(true);
+        ((Mob)actor).setNoAi(false);actor.setNoGravity(false);actor.getAttribute(Attributes.MOVEMENT_SPEED).setBaseValue(0);
+        var anchors=new ArrayList<Player_Ceraunus_Entity>();var strikes=new ArrayList<com.github.L_Ender.cataclysm.entity.effect.Lightning_Storm_Entity>();
+        java.util.function.Consumer<net.neoforged.neoforge.event.entity.EntityJoinLevelEvent> observer=event->{
+            if(event.getEntity() instanceof Player_Ceraunus_Entity e && e.getOwner()==actor) anchors.add(e);
+            // Spark landing also creates a storm, with native delay -9; count the 35 primary landing strikes separately.
+            if(event.getEntity() instanceof com.github.L_Ender.cataclysm.entity.effect.Lightning_Storm_Entity e && e.getCaster()==a.p && e.getDelay()!=-9) strikes.add(e);
+        };
+        net.neoforged.neoforge.common.NeoForge.EVENT_BUS.addListener(observer);
+        a.cast(GlyphCatalog.LEAP,new EntityHitResult(actor),true);
+        h.assertTrue(actor.getDeltaMovement().y>1 && !actor.onGround(),"Native goal supplies actor's launch impulse");
+        h.runAfterDelay(170,()->{try {
+            h.assertTrue(anchors.size()==1 && anchors.getFirst().isRemoved() && !anchors.getFirst().shouldBeSaved(),"One native chain anchor appears then cleans up");
+            h.assertTrue(actor.position().distanceToSqr(a.center)>4,"Recipient travels using physical jump and pull, not payer movement");
+            h.assertTrue(strikes.size()==35,"Ground landing generates complete native burst: "+strikes.size()+", actor="+actor.position()+", velocity="+actor.getDeltaMovement());
+            close(h,CapabilityRegistry.getMana(a.p).getCurrentMana(),10000-CataclysmConfig.cost(Ability.ANCHOR_LEAP)-CataclysmConfig.amplifyCost(),"Anchor and landing burst cost one action quote");
+            h.assertTrue(strikes.stream().allMatch(e->e.getCaster()==a.p && !e.shouldBeSaved()),"Landing burst damage belongs to root caster");h.succeed();
+        } finally {net.neoforged.neoforge.common.NeoForge.EVENT_BUS.unregister(observer);a.close();}});
+    }
     private static final class Marker extends AbstractEffect {
         int hits;
         Marker() { super(net.minecraft.resources.ResourceLocation.fromNamespaceAndPath("cataclysm_nouveau","test_marker"),"Marker"); }

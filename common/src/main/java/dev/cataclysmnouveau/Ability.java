@@ -25,7 +25,11 @@ public enum Ability {
     STORM_BURST("storm_burst", "Stormburst", 500),
     SPARK("spark", "Electric Spark", 120),
     THUNDER_CLOUD("thunder_cloud", "Thundercloud", 900),
-    LIGHTNING_ROW("lightning_row", "Lightning Rows", 320);
+    LIGHTNING_ROW("lightning_row", "Lightning Rows", 320),
+    THUNDER_COMBO("thunder_combo", "Thunderstrike Combo", 700),
+    ANCHOR_SPIN("anchor_spin", "Anchor Whirl", 300),
+    ANCHOR_LEAP("anchor_leap", "Anchor Plunge", 600),
+    WATER_WALKING("water_walking", "Water Walking", 60);
     public final String id, name;
     public final int mana;
     Ability(String id, String name, int mana) { this.id=id; this.name=name; this.mana=mana; }
@@ -39,7 +43,7 @@ public enum Ability {
             case FLAME_JET,FLARE_BOMB,LAVA_BOMB,EARTHQUAKE,FISSURE,FLAME_RING,
                     SHOULDER_CHECK,LAVA_ABSORPTION,MONSTROUS,BONE_FRACTURE,LAVA_WALKING -> Series.MONSTROSITY;
             case BOLT_STRIKE,CERAUNUS,WAVE,WATER_SPEAR,LIGHTNING_SPEAR,
-                    STORM_SERPENT,LIGHTNING_STORM,LIGHTNING_FIELD,STORM_BURST,SPARK,THUNDER_CLOUD,LIGHTNING_ROW -> Series.SCYLLA;
+                    STORM_SERPENT,LIGHTNING_STORM,LIGHTNING_FIELD,STORM_BURST,SPARK,THUNDER_CLOUD,LIGHTNING_ROW,THUNDER_COMBO,ANCHOR_SPIN,ANCHOR_LEAP,WATER_WALKING -> Series.SCYLLA;
         };
     }
     public enum Series { AMETHYST_CRAB, LIONFISH, ENDER_GOLEM, MONSTROSITY, SCYLLA }

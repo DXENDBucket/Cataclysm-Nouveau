@@ -90,5 +90,18 @@
   "item.cataclysm_nouveau.glyph_lightning_row": "Lightning Rows",
   "cataclysm_nouveau.glyph_name.glyph_thunder_cloud": "Thundercloud",
   "cataclysm_nouveau.glyph_desc.glyph_thunder_cloud": "Forms a thundercloud above the selected location. After a default two-second formation period, rains native water and lightning spears with bounces, Wetness and landing fields. Duration augments affect the rain interval.",
-  "item.cataclysm_nouveau.glyph_thunder_cloud": "Thundercloud"
+  "item.cataclysm_nouveau.glyph_thunder_cloud": "Thundercloud",
+  "cataclysm_nouveau.glyph_name.glyph_thunder_combo": "Thunderstrike Combo",
+  "cataclysm_nouveau.glyph_desc.glyph_thunder_combo": "An allied recipient performs two frontal strikes with sixteen sparks each, and a five-spear fan between them. Native damage, shield breaking and landing effects are retained; payment and damage credit belong to the caster.",
+  "item.cataclysm_nouveau.glyph_thunder_combo": "Thunderstrike Combo",
+  "cataclysm_nouveau.glyph_name.glyph_anchor_spin": "Anchor Whirl",
+  "cataclysm_nouveau.glyph_desc.glyph_anchor_spin": "An allied recipient performs three surrounding strikes with native shield breaking and knockback. Damage uses the Boss baseline; Amplify increases each hit.",
+  "item.cataclysm_nouveau.glyph_anchor_spin": "Anchor Whirl",
+  "cataclysm_nouveau.glyph_name.glyph_anchor_leap": "Anchor Plunge",
+  "cataclysm_nouveau.glyph_desc.glyph_anchor_leap": "An allied, grounded recipient jumps, throws an anchor toward a block in view, follows its chain and unleashes a native stormburst on landing. The caster supplies mana and retains damage credit.",
+  "item.cataclysm_nouveau.glyph_anchor_leap": "Anchor Plunge",
+  "cataclysm_nouveau.glyph_name.glyph_water_walking": "Water Walking",
+  "cataclysm_nouveau.glyph_desc.glyph_water_walking": "Grants an ally Water Walking for 30 seconds. The surface counts as ground, jumping is preserved, and crouching allows diving. Duration augments modify the lifetime.",
+  "item.cataclysm_nouveau.glyph_water_walking": "Water Walking",
+  "effect.cataclysm_nouveau.water_walking": "Water Walking"
 }

@@ -24,18 +24,22 @@ public final class GlyphClientExtensions {
             @Override public boolean renderInventoryIcon(net.minecraft.world.effect.MobEffectInstance instance,
                     net.minecraft.client.gui.screens.inventory.EffectRenderingInventoryScreen<?> screen,
                     net.minecraft.client.gui.GuiGraphics graphics,int x,int y,int z) {
-                graphics.blit(x,y+7,z,18,18,Minecraft.getInstance().getMobEffectTextures().get(net.minecraft.world.effect.MobEffects.FIRE_RESISTANCE));
+                graphics.blit(x,y+7,z,18,18,statusIcon(instance));
                 return true;
             }
             @Override public boolean renderGuiIcon(net.minecraft.world.effect.MobEffectInstance instance,
                     net.minecraft.client.gui.Gui gui,net.minecraft.client.gui.GuiGraphics graphics,
                     int x,int y,float z,float alpha) {
-                graphics.blit(x+3,y+3,(int)z,18,18,Minecraft.getInstance().getMobEffectTextures().get(net.minecraft.world.effect.MobEffects.FIRE_RESISTANCE),1,1,1,alpha);
+                graphics.blit(x+3,y+3,(int)z,18,18,statusIcon(instance),1,1,1,alpha);
                 return true;
             }
-        },dev.cataclysmnouveau.CataclysmEffects.LAVA_WALKING);
-        event.registerItem(nativeItem(() -> ModItems.CERAUNUS.get()),GlyphCatalog.ANCHOR.getGlyph(),GlyphCatalog.WAVE.getGlyph());
+        },dev.cataclysmnouveau.CataclysmEffects.LAVA_WALKING,dev.cataclysmnouveau.CataclysmEffects.WATER_WALKING);
+        event.registerItem(nativeItem(() -> ModItems.CERAUNUS.get()),GlyphCatalog.ANCHOR.getGlyph(),GlyphCatalog.WAVE.getGlyph(),GlyphCatalog.SPIN.getGlyph(),GlyphCatalog.LEAP.getGlyph());
         event.registerItem(nativeItem(() -> ModItems.INFERNAL_FORGE.get()),GlyphCatalog.QUAKE.getGlyph());
+    }
+    private static net.minecraft.client.renderer.texture.TextureAtlasSprite statusIcon(net.minecraft.world.effect.MobEffectInstance instance) {
+        return Minecraft.getInstance().getMobEffectTextures().get(instance.getEffect().value()==dev.cataclysmnouveau.CataclysmEffects.WATER_WALKING.value()
+                ?net.minecraft.world.effect.MobEffects.DOLPHINS_GRACE:net.minecraft.world.effect.MobEffects.FIRE_RESISTANCE);
     }
     private static IClientItemExtensions nativeItem(java.util.function.Supplier<net.minecraft.world.item.Item> source) {
         return new IClientItemExtensions() {
