@@ -36,6 +36,7 @@ public final class NativeCarrierCasting {
             var wave=new Wave_Entity(world,frame.damageOwner(),duration,Math.max(0,CataclysmConfig.waveDamage()+Resources.damageBonus(stats.getAmpMultiplier())));
             wave.setState(1);payload=wave;
         }
+        ArsDamage.bind(payload,frame);
         var driver=new Flight(payload,carrier,profile.arsDriven(),profile.repeated(),stats.getAccMultiplier());
         var continuation=resolver.clone();
         var session=new ExecutionSession<>(world,frame.withAccount(quote.account()),payload,duration+2,driver,

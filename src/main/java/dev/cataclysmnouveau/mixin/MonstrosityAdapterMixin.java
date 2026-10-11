@@ -32,6 +32,10 @@ public abstract class MonstrosityAdapterMixin {
     private float confluxCataclysm$jetDamage(float original) {
         return (Object)this instanceof SpellMonstrosity frame?Math.max(0,original+frame.damageBonus):original;
     }
+    @ModifyArg(method="spawnJet",at=@At(value="INVOKE",target="Lnet/minecraft/world/level/Level;addFreshEntity(Lnet/minecraft/world/entity/Entity;)Z"),index=0)
+    private net.minecraft.world.entity.Entity confluxCataclysm$jetContext(net.minecraft.world.entity.Entity child) {
+        return (Object)this instanceof SpellMonstrosity frame?dev.cataclysmnouveau.casting.ArsDamage.bind(child,frame.cast):child;
+    }
     @WrapOperation(method="aiStep",at=@At(value="INVOKE",target="Lcom/github/L_Ender/cataclysm/entity/InternalAnimationMonster/IABossMonsters/IABoss_monster;aiStep()V"))
     private void confluxCataclysm$noMobTick(Netherite_Monstrosity_Entity boss,Operation<Void> original) {
         if(!((Object)this instanceof SpellMonstrosity)) original.call(boss);

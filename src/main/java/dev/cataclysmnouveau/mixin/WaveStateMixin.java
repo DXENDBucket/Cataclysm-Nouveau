@@ -28,7 +28,7 @@ public abstract class WaveStateMixin implements WaveControl {
     }
     @Redirect(method="attackEntities",at=@At(value="INVOKE",target="Lnet/minecraft/world/entity/LivingEntity;hurt(Lnet/minecraft/world/damagesource/DamageSource;F)Z"))
     private boolean confluxCataclysm$contact(LivingEntity target,DamageSource source,float amount) {
-        boolean result=target.hurt(source,amount);var state=(ManagedProjectile)this;
+        boolean result=dev.cataclysmnouveau.casting.ArsDamage.hurt(dev.cataclysmnouveau.casting.ArsDamage.context((net.minecraft.world.entity.Entity)(Object)this),target,source,amount,target::hurt);var state=(ManagedProjectile)this;
         if(result && state.confluxCataclysm$mode()==2 && state.confluxCataclysm$impact()!=null)
             state.confluxCataclysm$impact().accept(new EntityHitResult(target));
         return result;

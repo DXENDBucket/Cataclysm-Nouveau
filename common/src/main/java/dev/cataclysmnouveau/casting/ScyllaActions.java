@@ -21,6 +21,8 @@ import java.util.*;
 /** Ally-directed actions: executor motion is distinct from spell ownership and payment. */
 public final class ScyllaActions {
     private static final Set<UUID> ACTORS=new HashSet<>();
+    private static final Set<UUID> LEAPING=new HashSet<>();
+    public static boolean isLeaping(Entity actor) {return LEAPING.contains(actor.getUUID());}
     public static boolean supports(Ability ability) {
         return switch(ability) {case THUNDER_COMBO,ANCHOR_SPIN,ANCHOR_LEAP,WATER_WALKING->true;default->false;};
     }
@@ -70,11 +72,10 @@ public final class ScyllaActions {
         });
     }
     private static boolean leap(ServerLevel world,CastContext cast,LivingEntity actor,SpellScylla boss,Vec3 forward) {
-        if(!actor.onGround()) return false;
-        var selection=world.clip(new ClipContext(actor.getEyePosition(),actor.getEyePosition().add(forward.scale(32)),ClipContext.Block.COLLIDER,ClipContext.Fluid.NONE,actor));
-        if(selection.getType()!=HitResult.Type.BLOCK || !world.hasChunkAt(selection.getBlockPos())
-                || actor.position().distanceToSqr(selection.getLocation())<4) return false;
+        var selection=anchorAim(world,actor,forward);
+        if(selection==null) return false;
         Vec3 target=selection.getLocation();
+        boolean hadNoGravity=actor.isNoGravity();
         var marker=new ArmorStand(world,target.x,target.y,target.z);boss.setTarget(marker);
         Goal jump=boss.nativeGoal("Scylla_Flying");
         var anchor=new Player_Ceraunus_Entity(world,actor);anchor.setBaseDamage(0);
@@ -82,12 +83,14 @@ public final class ScyllaActions {
             private int age;private boolean thrown,latched,released;
             public boolean occupiesCaster() {return actor==cast.caster();}
             public boolean start(ExecutionSession<SpellScylla> session) {
-                ACTORS.add(actor.getUUID());jump.start();boss.attackTicks=9;jump.tick();
+                ACTORS.add(actor.getUUID());LEAPING.add(actor.getUUID());actor.setNoGravity(false);jump.start();boss.attackTicks=9;jump.tick();
                 actor.setDeltaMovement(boss.getDeltaMovement());actor.setOnGround(false);actor.hurtMarked=true;return true;
             }
             public boolean tick(ExecutionSession<SpellScylla> session) {
                 if(!world.hasChunkAt(actor.blockPosition()) || actor.isPassenger()) return true;
                 age++;actor.fallDistance=0;
+                // FlyingMob.travel has no gravity even when noGravity=false. Its native travel still moves the body.
+                if(actor instanceof FlyingMob && !latched) actor.setDeltaMovement(actor.getDeltaMovement().add(0,-.08,0));
                 if(age==8) {
                     var state=(ManagedProjectile)anchor;state.confluxCataclysm$mode(2);
                     state.confluxCataclysm$impact(hit->{
@@ -96,13 +99,21 @@ public final class ScyllaActions {
                         state.confluxCataclysm$mode(1);state.confluxCataclysm$repeated(true);latched=true;
                         world.broadcastEntityEvent(anchor,(byte)73);
                     });
-                    anchor.setPos(actor.getEyePosition());Vec3 aim=target.subtract(anchor.position());
-                    anchor.shoot(aim.x,aim.y+aim.horizontalDistance()*.2,aim.z,2,0);
+                    var launch=anchorAim(world,actor,actor.getLookAngle());
+                    if(launch==null || actor.getEyePosition().distanceToSqr(launch.getLocation())<4) return true;
+                    anchor.setPos(actor.getEyePosition());Vec3 aim=launch.getLocation().subtract(anchor.position());
+                    // Re-sample after the jump. A straight hook cannot fall short and attach to incidental floor blocks.
+                    anchor.setNoGravity(true);anchor.shoot(aim.x,aim.y,aim.z,2,0);
                     thrown=world.addFreshEntity(anchor);if(!thrown) return true;
                     session.trackProjectile(anchor);
                 }
                 if(thrown && anchor.isRemoved()) return true;
+                if(thrown && !latched && actor.getDeltaMovement().y<0) {
+                    // Keep a distant hook from losing its actor to landing before it reaches the selected wall.
+                    var motion=actor.getDeltaMovement();actor.setDeltaMovement(motion.x,actor instanceof FlyingMob?0:.08,motion.z);actor.hurtMarked=true;
+                }
                 if(latched && !released) {
+                    actor.setOnGround(false); // Pull movement must resolve before evaluating the landing burst.
                     Vec3 delta=anchor.position().subtract(actor.getEyePosition());
                     if(delta.lengthSqr()<2.25) {
                         released=true;actor.setDeltaMovement(0,-.6,0);actor.hurtMarked=true;
@@ -126,12 +137,23 @@ public final class ScyllaActions {
                 return age>=155;
             }
             public void close(ExecutionSession<SpellScylla> session,ExecutionSession.EndReason reason) {
-                ACTORS.remove(actor.getUUID());jump.stop();
+                ACTORS.remove(actor.getUUID());LEAPING.remove(actor.getUUID());actor.setNoGravity(hadNoGravity);jump.stop();
                 var state=(ManagedProjectile)anchor;state.confluxCataclysm$impact(null);state.confluxCataclysm$resolving(false);
                 anchor.discard();
                 if(actor.level()==world && !actor.isRemoved()) {actor.setDeltaMovement(actor.getDeltaMovement().multiply(.2,1,.2));actor.hurtMarked=true;}
             }
         });
+    }
+    private static BlockHitResult anchorAim(ServerLevel world,LivingEntity actor,Vec3 direction) {
+        Vec3 eye=actor.getEyePosition(),unit=direction.normalize();BlockHitResult hit=null;
+        // Stop at the first surface; do not reject a nearby valid wall because distant chunks are absent.
+        for(int i=0;i<CataclysmConfig.anchorRange();i++) {
+            Vec3 from=eye.add(unit.scale(i)),to=eye.add(unit.scale(i+1));
+            if(!world.hasChunkAt(BlockPos.containing(from)) || !world.hasChunkAt(BlockPos.containing(to))) return null;
+            hit=world.clip(new ClipContext(from,to,ClipContext.Block.COLLIDER,ClipContext.Fluid.NONE,actor));
+            if(hit.getType()==HitResult.Type.BLOCK) return hit;
+        }
+        return hit;
     }
     private static boolean start(ServerLevel world,CastContext cast,Ability ability,SpellScylla boss,int ticks,ExecutionDriver<SpellScylla> driver) {
         return ExecutionSessions.start(new ExecutionSession<>(world,cast,boss,ticks,driver,hit->{},

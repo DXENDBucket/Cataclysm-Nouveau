@@ -935,7 +935,7 @@ public final class NativeAbilityTests {
     }
     @GameTest(template="empty",batch="cat_scylla_leap",timeoutTicks=180)
     public static void anchorPlungeUsesNativeJumpChainAndLandingBurst(GameTestHelper h) {
-        var a=new Arena(h);var actor=a.target(a.center,true);actor.setYRot(0);actor.setXRot(20);actor.setOnGround(true);
+        var a=new Arena(h);var actor=a.target(a.center,true);actor.setYRot(0);actor.setXRot(65);actor.setOnGround(true);
         ((Mob)actor).setNoAi(false);actor.setNoGravity(false);actor.getAttribute(Attributes.MOVEMENT_SPEED).setBaseValue(0);
         var anchors=new ArrayList<Player_Ceraunus_Entity>();var strikes=new ArrayList<com.github.L_Ender.cataclysm.entity.effect.Lightning_Storm_Entity>();
         java.util.function.Consumer<net.neoforged.neoforge.event.entity.EntityJoinLevelEvent> observer=event->{
@@ -953,6 +953,80 @@ public final class NativeAbilityTests {
             close(h,CapabilityRegistry.getMana(a.p).getCurrentMana(),10000-CataclysmConfig.cost(Ability.ANCHOR_LEAP)-CataclysmConfig.amplifyCost(),"Anchor and landing burst cost one action quote");
             h.assertTrue(strikes.stream().allMatch(e->e.getCaster()==a.p && !e.shouldBeSaved()),"Landing burst damage belongs to root caster");h.succeed();
         } finally {net.neoforged.neoforge.common.NeoForge.EVENT_BUS.unregister(observer);a.close();}});
+    }
+    @GameTest(template="empty",batch="cat_ars_growth",timeoutTicks=100)
+    public static void arsDamageAttributesEventsNativeIsolationAndCancellation(GameTestHelper h) {
+        try(var a=new Arena(h)) {
+            a.p.getAttribute(com.hollingsworth.arsnouveau.api.perk.PerkAttributes.SPELL_DAMAGE_BONUS).setBaseValue(6);
+            var victim=a.target(a.center.add(0,0,3),false);
+            var r=resolver(h,a.p,new Spell(MethodTouch.INSTANCE,GlyphCatalog.AMETHYST));
+            var frame=CastContext.of(r.spellContext,new EntityHitResult(victim),null);
+            int[] calls={0,0};boolean[] cancel={false};float[] quoted={0};
+            java.util.function.Consumer<com.hollingsworth.arsnouveau.api.event.SpellDamageEvent.Pre> pre=e->{
+                if(e.caster==a.p && e.target==victim) {calls[0]++;quoted[0]=e.damage;if(cancel[0])e.setCanceled(true);else e.damage*=1.5F;}
+            };
+            java.util.function.Consumer<com.hollingsworth.arsnouveau.api.event.SpellDamageEvent.Post> post=e->{if(e.caster==a.p && e.target==victim)calls[1]++;};
+            net.neoforged.neoforge.common.NeoForge.EVENT_BUS.addListener(pre);net.neoforged.neoforge.common.NeoForge.EVENT_BUS.addListener(post);
+            try {
+                var payload=NativePayloads.projectile(Ability.AMETHYST_CLUSTER,h.getLevel(),frame,1);((ManagedProjectile)payload).confluxCataclysm$mode(2);
+                float base=(float)com.github.L_Ender.cataclysm.config.CMCommonConfig.AmethystCrab.AmethystClusterDamage+Resources.damageBonus(1);
+                NativePayloads.hit(payload,new EntityHitResult(victim));
+                close(h,quoted[0],base+6,"Ars adds equipment attribute once, after native amplification");
+                h.assertTrue(500-victim.getHealth()>=(base+6)*1.5 && calls[0]==1 && calls[1]==1,"One Pre and one successful Post; native damage also supports external bridge scaling");
+                victim.invulnerableTime=0;victim.setHealth(500);cancel[0]=true;
+                payload=NativePayloads.projectile(Ability.AMETHYST_CLUSTER,h.getLevel(),frame,0);((ManagedProjectile)payload).confluxCataclysm$mode(2);NativePayloads.hit(payload,new EntityHitResult(victim));
+                close(h,victim.getHealth(),500,"Ars Pre cancellation prevents native damage");h.assertTrue(calls[0]==2 && calls[1]==1,"Cancelled damage has no Post");
+                cancel[0]=false;victim.invulnerableTime=0;var ordinary=new Lionfish_Spike_Entity(h.getLevel(),a.p);NativePayloads.hit(ordinary,new EntityHitResult(victim));
+                close(h,500-victim.getHealth(),4,"Ordinary original projectiles receive no Ars equipment bonus");h.assertTrue(calls[0]==2,"Ordinary native attack emits no adapter Ars event");h.succeed();
+            } finally {net.neoforged.neoforge.common.NeoForge.EVENT_BUS.unregister(pre);net.neoforged.neoforge.common.NeoForge.EVENT_BUS.unregister(post);}
+        }
+    }
+    @GameTest(template="empty",batch="cat_ars_growth_delayed",timeoutTicks=100)
+    public static void arsGrowthReachesDelayedFlareChildrenAndRealBridge(GameTestHelper h) {
+        var a=new Arena(h);var victim=a.target(a.center.add(.75,0,.75),false);
+        a.p.getAttribute(com.hollingsworth.arsnouveau.api.perk.PerkAttributes.SPELL_DAMAGE_BONUS).setBaseValue(6);
+        var spell=resolver(h,a.p,new Spell(MethodTouch.INSTANCE,GlyphCatalog.FLARE));
+        var frame=CastContext.of(spell.spellContext,block(a.center),null);
+        var payload=NativePayloads.projectile(Ability.FLARE_BOMB,h.getLevel(),frame,0);((ManagedProjectile)payload).confluxCataclysm$mode(2);payload.setPos(a.center);NativePayloads.hit(payload,block(a.center));
+        int[] hits={0};
+        java.util.function.Consumer<com.hollingsworth.arsnouveau.api.event.SpellDamageEvent.Post> post=e->{if(e.caster==a.p && e.target==victim) {hits[0]++;h.assertTrue(e.damage>=CataclysmConfig.flareJetDamage()+6,"Delayed native jets carry Ars attributes and event context");}};
+        net.neoforged.neoforge.common.NeoForge.EVENT_BUS.addListener(post);
+        h.runAfterDelay(75,()->{try {h.assertTrue(hits[0]>0,"At least one actual delayed jet reaches the event chain");h.succeed();}finally{net.neoforged.neoforge.common.NeoForge.EVENT_BUS.unregister(post);a.close();}});
+    }
+    @GameTest(template="empty",batch="cat_ars_growth_bridge",timeoutTicks=100)
+    public static void installedArsSpellsBridgeScalesNativeWaveOnce(GameTestHelper h) {
+        try(var a=new Arena(h)) {
+            var id=dev.arsconflux.api.projectile.CarrierRegistry.id("irons_spellbooks:spell_power");
+            var attribute=net.minecraft.core.registries.BuiltInRegistries.ATTRIBUTE.getHolder(id);
+            if(attribute.isEmpty()) {h.succeed();return;}
+            a.p.getAttribute(attribute.get()).setBaseValue(2);
+            var enemy=a.target(a.center.add(0,0,1),false);
+            var r=resolver(h,a.p,new Spell(MethodTouch.INSTANCE,GlyphCatalog.WAVE));
+            var frame=CastContext.of(r.spellContext,new EntityHitResult(enemy),null);
+            var wave=ArsDamage.bind(new Wave_Entity(h.getLevel(),a.p,80,9),frame);((ManagedProjectile)wave).confluxCataclysm$mode(2);wave.setPos(a.center);wave.setState(1);h.getLevel().addFreshEntity(wave);
+            wave.tick();h.assertTrue(enemy.getHealth()<500,"Real native wave contact occurs");
+            close(h,500-enemy.getHealth(),18,"Installed Ars n Spells maps 2x Iron power onto native contact exactly once");h.succeed();
+        }
+    }
+    @GameTest(template="empty",batch="cat_air_hook",timeoutTicks=180)
+    public static void hookResamplesAirborneAllyAimAndRestoresGravity(GameTestHelper h) {
+        var a=new Arena(h);LivingEntity actor;
+        if(net.neoforged.fml.ModList.get().isLoaded("irons_spellbooks")) {
+            try {
+                var type=Class.forName("io.redspace.ironsspellbooks.entity.spells.summoned_weapons.SummonedSwordEntity");
+                actor=(LivingEntity)type.getConstructor(Level.class,LivingEntity.class).newInstance(h.getLevel(),a.p);
+                actor.setPos(a.center.add(0,5,0));h.getLevel().addFreshEntity(actor);a.actors.add(actor);
+            } catch(ReflectiveOperationException error) {a.close();throw new IllegalStateException(error);}
+        } else actor=a.target(a.center.add(0,5,0),true);
+        actor.setNoGravity(true);actor.setYRot(0);actor.setXRot(20);
+        var anchors=new ArrayList<Player_Ceraunus_Entity>();
+        java.util.function.Consumer<net.neoforged.neoforge.event.entity.EntityJoinLevelEvent> observer=e->{if(e.getEntity() instanceof Player_Ceraunus_Entity hook && hook.getOwner()==actor)anchors.add(hook);};
+        net.neoforged.neoforge.common.NeoForge.EVENT_BUS.addListener(observer);
+        a.cast(GlyphCatalog.LEAP,new EntityHitResult(actor),false);
+        h.assertTrue(ScyllaActions.isLeaping(actor) && !actor.isNoGravity(),"Airborne hovering ally is accepted and temporarily follows action gravity");
+        actor.setXRot(35);Vec3 launchDirection=actor.getLookAngle();
+        h.runAfterDelay(9,()->{h.assertTrue(anchors.size()==1,"Airborne recipient throws its own native chain");var hook=anchors.get(0);h.assertTrue(hook.isNoGravity() && hook.getDeltaMovement().normalize().dot(launchDirection)>.999,"Launch uses current post-jump look, without old-point downward correction or ballistic drop");});
+        h.runAfterDelay(170,()->{try {h.assertTrue(!ScyllaActions.isLeaping(actor) && actor.isNoGravity() && anchors.get(0).isRemoved(),"Action clears the hook/AI lock and restores pre-existing floating state");h.succeed();}finally{net.neoforged.neoforge.common.NeoForge.EVENT_BUS.unregister(observer);a.close();}});
     }
     private static final class Marker extends AbstractEffect {
         int hits;

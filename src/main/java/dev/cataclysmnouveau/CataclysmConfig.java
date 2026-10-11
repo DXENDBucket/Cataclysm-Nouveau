@@ -4,6 +4,7 @@ import java.util.EnumMap;
 public final class CataclysmConfig {
     public static final ModConfigSpec SPEC;
     private static final EnumMap<Ability, ModConfigSpec.IntValue> COSTS = new EnumMap<>(Ability.class);
+    private static final ModConfigSpec.IntValue ANCHOR_RANGE;
     private static final ModConfigSpec.IntValue AMPLIFY_COST, BOLT_WARMUP;
     private static final ModConfigSpec.DoubleValue BOLT_DAMAGE;
     private static final EnumMap<Ability, ModConfigSpec.DoubleValue> GROUND_DAMAGE = new EnumMap<>(Ability.class);
@@ -67,6 +68,7 @@ public final class CataclysmConfig {
         SCYLLA_DELAY=b.comment("Initial delay for the standalone storm, before its native strike animation.").defineInRange("storm_delay_ticks",10,0,1200);
         SCYLLA_FIELD_DURATION=b.comment("Standalone electric field duration before duration augments; radius shrinks across this interval.").defineInRange("field_duration_ticks",160,20,1200);
         SCYLLA_CLOUD_WARMUP=b.comment("Cloud formation delay before native water/lightning spear rain. Default shortens the Boss windup; use 115 for native timing.").defineInRange("cloud_warmup_ticks",40,0,1200);
+        ANCHOR_RANGE=b.comment("Sight distance of the action hook, re-sampled when the anchor launches; never loads chunks.").defineInRange("anchor_range",64,4,128);
         ANCHOR_PULL_SPEED=b.comment("Blocks per tick for the collision-limited anchor plunge pull.").defineInRange("anchor_pull_speed",2.0,.1,3);
         WATER_WALKING_DURATION=b.comment("Water surface walking duration before time augments.").defineInRange("water_walking_duration_ticks",600,2,1200);b.pop();
         b.push("cooldowns");
@@ -130,6 +132,7 @@ public final class CataclysmConfig {
     public static int scyllaFieldDuration() {return SPEC.isLoaded()?SCYLLA_FIELD_DURATION.get():160;}
     public static int scyllaCloudWarmup() {return SPEC.isLoaded()?SCYLLA_CLOUD_WARMUP.get():40;}
     public static int waterWalkingDuration() {return SPEC.isLoaded()?WATER_WALKING_DURATION.get():600;}
+    public static int anchorRange() {return SPEC.isLoaded()?ANCHOR_RANGE.get():64;}
     public static double anchorPullSpeed() {return SPEC.isLoaded()?ANCHOR_PULL_SPEED.get():2;}
     private CataclysmConfig() {}
 }

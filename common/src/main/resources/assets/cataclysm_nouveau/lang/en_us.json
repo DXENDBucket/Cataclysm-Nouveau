@@ -98,7 +98,7 @@
   "cataclysm_nouveau.glyph_desc.glyph_anchor_spin": "An allied recipient performs three surrounding strikes with native shield breaking and knockback. Damage uses the Boss baseline; Amplify increases each hit.",
   "item.cataclysm_nouveau.glyph_anchor_spin": "Anchor Whirl",
   "cataclysm_nouveau.glyph_name.glyph_anchor_leap": "Anchor Plunge",
-  "cataclysm_nouveau.glyph_desc.glyph_anchor_leap": "An allied, grounded recipient jumps, throws an anchor toward a block in view, follows its chain and unleashes a native stormburst on landing. The caster supplies mana and retains damage credit.",
+  "cataclysm_nouveau.glyph_desc.glyph_anchor_leap": "Leap yourself or an ally, then throw a straight hook along the current aim and pull towards its impact. Landing triggers a native storm burst. Airborne allies can also act; an unhit hook cannot pull.",
   "item.cataclysm_nouveau.glyph_anchor_leap": "Anchor Plunge",
   "cataclysm_nouveau.glyph_name.glyph_water_walking": "Water Walking",
   "cataclysm_nouveau.glyph_desc.glyph_water_walking": "Grants an ally Water Walking for 30 seconds. The surface counts as ground, jumping is preserved, and crouching allows diving. Duration augments modify the lifetime.",

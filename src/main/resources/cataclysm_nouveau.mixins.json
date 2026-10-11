@@ -33,7 +33,10 @@
     "SpearMovementMixin",
     "SpearVisualAccess",
     "ScyllaCloudGoalMixin",
-    "SparkStateMixin"
+    "SparkStateMixin",
+    "NativeArsDamageMixin",
+    "ArsExplosionDamageMixin",
+    "LeapActorAiMixin"
   ],
   "injectors": {
     "defaultRequire": 1

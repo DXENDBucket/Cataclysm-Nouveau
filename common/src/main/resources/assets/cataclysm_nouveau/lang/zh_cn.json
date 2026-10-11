@@ -98,7 +98,7 @@
   "cataclysm_nouveau.glyph_desc.glyph_anchor_spin": "自身或友军连续进行三次周围挥击，保留原生破盾和击退。伤害使用 Boss 基准，强化提升每次伤害。",
   "item.cataclysm_nouveau.glyph_anchor_spin": "旋转挥锚",
   "cataclysm_nouveau.glyph_name.glyph_anchor_leap": "钩锚跃落",
-  "cataclysm_nouveau.glyph_desc.glyph_anchor_leap": "自身或友军起跳并向视线内的方块抛锚，沿锁链拉向锚点，落地引发雷暴。受益者需着地且能选到有效方块；伤害与耗蓝仍属于施法者。",
+  "cataclysm_nouveau.glyph_desc.glyph_anchor_leap": "自身或友军起跳，抛出时沿当前朝向投锚，沿锁链拉近，落地引发雷暴。空中友军也可使用；未命中时不会牵引。",
   "item.cataclysm_nouveau.glyph_anchor_leap": "钩锚跃落",
   "cataclysm_nouveau.glyph_name.glyph_water_walking": "水面行走",
   "cataclysm_nouveau.glyph_desc.glyph_water_walking": "自身或友军获得 30 秒水面行走。浮到表面后视为着地，保留跳跃；潜行可下潜。延长与缩短时效改变持续时间。",
