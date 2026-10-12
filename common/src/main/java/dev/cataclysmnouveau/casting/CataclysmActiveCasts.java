@@ -35,15 +35,14 @@ public final class CataclysmActiveCasts implements ActiveCastProvider {
         return Math.max(0,caster.getPersistentData().getCompound(DEADLINES).getLong(ability.id)-time);
     }
     @Override public boolean supports(Spell spell) {return !collect(List.of(spell)).isEmpty();}
-    @Override public boolean allowed(ActiveCastRequest request) {
+    @Override public boolean allowed(ActiveCastRequest request) { return rejection(request)==null; }
+    @Override public dev.arsconflux.api.casting.CastRejection rejection(ActiveCastRequest request) {
+        dev.arsconflux.api.casting.CastRejection selected=null;
         for(var ability:collect(List.of(request.spell()))) {
             long ticks=remaining(request.caster(),ability);
-            if(ticks==0) continue;
-            if(request.caster() instanceof ServerPlayer player) player.displayClientMessage(Component.translatable(
-                    "cataclysm_nouveau.cast.cooldown",Component.translatable("cataclysm_nouveau.glyph_name.glyph_"+ability.id),String.format(Locale.ROOT,"%.1f",ticks/20.0)),true);
-            return false;
+            if(ticks>0 && (selected==null || ticks>selected.remainingTicks())) selected=dev.arsconflux.api.casting.CastRejection.cooldown(Component.translatable("cataclysm_nouveau.glyph_name.glyph_"+ability.id),ticks);
         }
-        return true;
+        return selected;
     }
     @Override public void released(ActiveCastRequest request,List<Spell> recipes) {
         if(!applies(request.caster())) return;
