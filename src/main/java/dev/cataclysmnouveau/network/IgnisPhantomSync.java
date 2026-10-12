@@ -3,6 +3,7 @@ package dev.cataclysmnouveau.network;
 import com.github.L_Ender.cataclysm.entity.AnimationMonster.BossMonsters.Ignis_Entity;
 import dev.cataclysmnouveau.Ability;
 import dev.cataclysmnouveau.casting.SpellIgnis;
+import dev.cataclysmnouveau.casting.IgnisAnimations;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
@@ -13,11 +14,11 @@ import java.util.UUID;
 public final class IgnisPhantomSync {
     public static IgnisPhantomPayload snapshot(UUID token,LivingEntity actor,SpellIgnis frame,boolean closed){
         return new IgnisPhantomPayload(token,frame.level().dimension().location(),actor==null?-1:actor.getId(),actor==null?new UUID(0,0):actor.getUUID(),
-            actor==null,closed || actor==null?frame.position():actor.position(),frame.getYRot(),frame.getBossPhase(),frame.getAnimation()==Ignis_Entity.COMBO2?2:1,
+            actor==null,closed || actor==null?frame.position():actor.position(),frame.getYRot(),frame.getBossPhase(),IgnisAnimations.id(frame.getAnimation()),
             frame.getAnimationTick(),closed);
     }
     public static void send(UUID token,LivingEntity actor,SpellIgnis frame,boolean closed){
-        if(frame.ability!=Ability.IGNIS_SWORD_COMBO)return;
+        if(IgnisAnimations.id(frame.getAnimation())==0)return;
         var data=snapshot(token,actor,frame,closed);
         if(!closed && actor!=null){PacketDistributor.sendToPlayersTrackingEntityAndSelf(actor,data);return;}
         // Removed/transferred actors may have already left the tracking map. Use the last attack world/pose.

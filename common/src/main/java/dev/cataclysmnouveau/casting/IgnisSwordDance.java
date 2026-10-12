@@ -22,12 +22,14 @@ import net.minecraft.world.phys.AABB;
 final class IgnisSwordDance {
     static boolean start(ServerLevel world,CastContext cast,double amp) {
         ExecutionAnchor anchor=ExecutionAnchor.beneficial(cast,ExecutionAnchor.Basis.FEET,Vec3.ZERO);
-        if(anchor==null || !present(anchor,world,cast))return false;
+        if(anchor==null)return false;
+        var geometry=new IgnisActionGeometry(world,cast,anchor);
+        if(!geometry.present(cast,20))return false;
         LivingEntity actor=anchor.entity();
         if(actor!=null && (IgnisCasting.isActing(actor) || GuardianCasting.isPunching(actor)
                 || HarbingerActions.isCharging(actor) || ScyllaActions.isActing(actor) || ExecutionSessions.isOccupied(actor,ExecutionClaim.ENTITY_ACTION)))return false;
         var context=cast.withExecutor(actor);
-        final Vec3 initialFacing=horizontal(anchor.sample().direction(),cast.caster().getLookAngle());
+        final Vec3 initialFacing=geometry.initialFacing;
         var boss=new SpellIgnis(world,context,Ability.IGNIS_SWORD_COMBO,anchor.sample().origin(),initialFacing,amp);
         var aim=new ArmorStand(world,anchor.sample().origin().x,anchor.sample().origin().y,anchor.sample().origin().z);
         boss.setTarget(aim);boss.setAnimation(Ignis_Entity.COMBO1);
@@ -36,29 +38,15 @@ final class IgnisSwordDance {
             private Animation animation=Ignis_Entity.COMBO1;
             private net.minecraft.world.entity.ai.goal.Goal goal=boss.nativeGoal("Combo1");
             private Vec3 heading=initialFacing;
-            private LivingEntity enemy;
             private boolean started;
             public boolean occupiesCaster(){return actor!=null && actor==cast.caster();}
             public java.util.List<ExecutionClaim> claims(ExecutionSession<SpellIgnis> s){return actor==null?java.util.List.of():java.util.List.of(ExecutionClaim.action(actor));}
-            private boolean validEnemy(LivingEntity target) {
-                return target!=null && target.isAlive() && !target.isRemoved() && target.level()==world
-                        && !HarbingerCasting.allied(context,target) && world.hasChunkAt(target.blockPosition())
-                        && target.position().distanceToSqr(anchor.sample().origin())<=32*32;
-            }
-            private Vec3 desiredHeading() {
-                if(actor==null)return initialFacing;
-                if(actor instanceof Player)return horizontal(actor.getLookAngle(),heading);
-                if(actor instanceof Mob mob && validEnemy(mob.getTarget()))enemy=mob.getTarget();
-                if(!validEnemy(enemy))enemy=HarbingerCasting.target(world,actor.getEyePosition(),actor.getLookAngle(),context);
-                return horizontal(validEnemy(enemy)?enemy.position().subtract(actor.position()):actor.getLookAngle(),heading);
-            }
             private void aim() {
                 Vec3 point=anchor.sample().origin();
                 // The native Goal still drives animation, lunges and attacks. Player aim is the camera,
                 // rather than an enemy captured by a one-time raycast. The helper is never spawned.
-                aim.setPos(actor!=null && !(actor instanceof Player) && validEnemy(enemy)
-                        ?enemy.position():point.add(heading.scale(6)));
-                boss.pose(point,heading);boss.setBoundingBox(bounds(anchor));
+                aim.setPos(geometry.aimPoint(heading));
+                boss.pose(point,heading);boss.setBoundingBox(geometry.bounds());
                 boss.setOnGround(actor==null || actor.onGround());
                 boss.setDeltaMovement(actor==null?Vec3.ZERO:actor.getDeltaMovement());
                 boss.setAnimationTick(phaseAge);
@@ -66,16 +54,16 @@ final class IgnisSwordDance {
             public boolean start(ExecutionSession<SpellIgnis> s) {
                 started=true;
                 if(actor!=null){IgnisCasting.lockActor(actor);if(actor instanceof Mob mob)mob.getNavigation().stop();}
-                heading=desiredHeading();aim();goal.start();IgnisPhantomSync.send(s.id(),actor,boss,false);return true;
+                heading=geometry.desired(heading);aim();goal.start();IgnisPhantomSync.send(s.id(),actor,boss,false);return true;
             }
             public boolean tick(ExecutionSession<SpellIgnis> s) {
-                if(!present(anchor,world,cast))return true;
+                if(!geometry.present(cast,20)){s.finish(ExecutionSession.EndReason.DENIED);return false;}
                 ++age;++phaseAge;
-                if(actor!=null && canTurn(animation,phaseAge))heading=turn(heading,desiredHeading());
+                if(actor!=null && canTurn(animation,phaseAge))heading=IgnisActionGeometry.turn(heading,geometry.desired(heading));
                 aim();goal.tick();
                 // Native Goals can change yaw themselves. Damage and the visual must use the same
                 // bounded/locked heading, even when their native target prediction changes.
-                boss.pose(anchor.sample().origin(),heading);boss.setBoundingBox(bounds(anchor));
+                boss.pose(anchor.sample().origin(),heading);boss.setBoundingBox(geometry.bounds());
                 if(actor instanceof Player && animation==Ignis_Entity.COMBO2 && phaseAge<27)
                     boss.setTargetPosition(anchor.sample().origin().add(heading.scale(6)));
                 if(boss.getAnimation()!=animation) {
@@ -115,24 +103,6 @@ final class IgnisSwordDance {
     private static boolean canTurn(Animation animation,int tick) {
         return animation==Ignis_Entity.COMBO1?tick<17 || tick>44 && tick<59
                 :tick<27 || tick>43 && tick<57 || tick>61 && tick<72 || tick>77 && tick<105;
-    }
-    private static Vec3 turn(Vec3 from,Vec3 to) {
-        float current=(float)Math.toDegrees(Math.atan2(-from.x,from.z));
-        float desired=(float)Math.toDegrees(Math.atan2(-to.x,to.z));
-        double yaw=Math.toRadians(Mth.approachDegrees(current,desired,20));
-        return new Vec3(-Math.sin(yaw),0,Math.cos(yaw));
-    }
-    private static boolean present(ExecutionAnchor anchor,ServerLevel world,CastContext cast){
-        return anchor.valid(world,cast) && (anchor.entity()==null || !anchor.entity().isPassenger())
-                && MonstrosityCasting.loadedArea(world,anchor.sample().origin(),20);
-    }
-    private static AABB bounds(ExecutionAnchor anchor){
-        if(anchor.entity()!=null)return anchor.entity().getBoundingBox();
-        Vec3 p=anchor.sample().origin();return new AABB(p.x-.3,p.y,p.z-.3,p.x+.3,p.y+1.8,p.z+.3);
-    }
-    private static Vec3 horizontal(Vec3 direction,Vec3 fallback){
-        var flat=direction.multiply(1,0,1);if(flat.lengthSqr()>1e-8)return flat.normalize();
-        flat=fallback.multiply(1,0,1);return flat.lengthSqr()>1e-8?flat.normalize():new Vec3(0,0,1);
     }
     private IgnisSwordDance(){}
 }

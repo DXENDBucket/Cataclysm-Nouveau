@@ -3,6 +3,7 @@ package dev.cataclysmnouveau.client;
 import com.github.L_Ender.cataclysm.entity.AnimationMonster.BossMonsters.Ignis_Entity;
 import com.github.L_Ender.cataclysm.init.ModEntities;
 import dev.cataclysmnouveau.CataclysmClientConfig;
+import dev.cataclysmnouveau.casting.IgnisAnimations;
 import dev.cataclysmnouveau.network.IgnisPhantomPayload;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientLevel;
@@ -38,9 +39,10 @@ public final class IgnisPhantoms {
     }
     public static void accept(IgnisPhantomPayload data){
         var level=level();if(level==null || !level.dimension().location().equals(data.dimension()))return;
-        if(!CataclysmClientConfig.ignisPhantom()){ACTIVE.clear();return;}
+        if(!CataclysmClientConfig.ignisPhantom(data.animation())){ACTIVE.remove(data.token());return;}
+        var animation=IgnisAnimations.animation(data.animation());
         if(!Double.isFinite(data.position().lengthSqr()) || !Float.isFinite(data.yaw()) || data.phase()<0 || data.phase()>2
-                || data.animation()<1 || data.animation()>2 || data.age()<0 || data.age()>150)return;
+                || animation==null || data.age()<0 || data.age()>IgnisAnimations.maxProgress(data.animation()))return;
         var view=ACTIVE.get(data.token());
         if(data.closed() && view==null)return;
         if(view==null){view=new View(level);ACTIVE.put(data.token(),view);}
@@ -52,17 +54,16 @@ public final class IgnisPhantoms {
     }
     @SubscribeEvent public static void tick(ClientTickEvent.Post event){
         var level=level();if(level==null)return;
-        if(!CataclysmClientConfig.ignisPhantom()){ACTIVE.clear();return;}
-        ACTIVE.values().removeIf(v->level.getGameTime()>=v.expires);
+        ACTIVE.values().removeIf(v->level.getGameTime()>=v.expires || !CataclysmClientConfig.ignisPhantom(v.data.animation()));
     }
     @SubscribeEvent public static void render(RenderLevelStageEvent event){
         if(event.getStage()!=RenderLevelStageEvent.Stage.AFTER_ENTITIES)return;
         var level=level();var client=Minecraft.getInstance();
-        if(level==null || client.player==null || ACTIVE.isEmpty() || !CataclysmClientConfig.ignisPhantom())return;
+        if(level==null || client.player==null || ACTIVE.isEmpty())return;
         float partial=event.getPartialTick().getGameTimeDeltaPartialTick(false);
         var buffers=client.renderBuffers().bufferSource();var touched=new HashSet<RenderType>();
         for(var view:ACTIVE.values()){
-            var data=view.data;long now=level.getGameTime();if(now>=view.expires)continue;
+            var data=view.data;long now=level.getGameTime();if(now>=view.expires || !CataclysmClientConfig.ignisPhantom(data.animation()))continue;
             LivingEntity actor=null;
             if(!data.positionAnchored()) {
                 var entity=level.getEntity(data.actorId());
@@ -76,7 +77,7 @@ public final class IgnisPhantoms {
             float opacity=CataclysmClientConfig.phantomOpacity(ownFirstPerson)*fade;
             if(opacity<=0)continue;
             var proxy=view.proxy;float yaw=yaw(view,now,partial);
-            var animation=data.animation()==1?Ignis_Entity.COMBO1:Ignis_Entity.COMBO2;
+            var animation=IgnisAnimations.animation(data.animation());
             proxy.setAnimation(animation);
             proxy.setAnimationTick(Math.min(animation.getDuration()-1,data.age()+(data.closed()?0:(int)Math.min(4,now-view.received))));
             proxy.tickCount=(int)(now&0x7fffffff);proxy.setPos(point);proxy.xOld=point.x;proxy.yOld=point.y;proxy.zOld=point.z;

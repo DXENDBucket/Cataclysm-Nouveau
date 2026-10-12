@@ -14,6 +14,10 @@ public final class SpellIgnis extends Ignis_Entity {
     public final Ability ability;
     public final double amplification;
     public int spawnedFlames;
+    final java.util.Set<Entity> children=new java.util.HashSet<>();
+    boolean childrenCancelled;
+    java.util.function.Supplier<net.minecraft.world.entity.LivingEntity> projectileAim;
+    void cancelChildren(){childrenCancelled=true;java.util.List.copyOf(children).forEach(Entity::discard);children.clear();}
     public SpellIgnis(ServerLevel world,CastContext cast,Ability ability,Vec3 point,Vec3 direction,double amp) {
         super(ModEntities.IGNIS.get(),world);
         this.cast=cast;this.ability=ability;amplification=amp;

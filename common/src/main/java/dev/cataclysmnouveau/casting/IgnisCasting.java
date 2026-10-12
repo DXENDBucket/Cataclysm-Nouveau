@@ -81,7 +81,7 @@ public final class IgnisCasting {
         if(a==Ability.IGNIS_FLAME_STRIKE)return flame(world,cast,amp,duration);
         if(a==Ability.IGNIS_SWORD_COMBO)return IgnisSwordDance.start(world,cast,amp);
         if(a==Ability.IGNIS_BLADE_FIREBALLS || a==Ability.IGNIS_FIREBALL_ARRAY)return blades(a,world,cast,amp);
-        return action(a,world,cast,amp);
+        return IgnisActions.start(a,world,cast,amp);
     }
     private static LivingEntity marker(ServerLevel world,Vec3 point){return new ArmorStand(world,point.x,point.y,point.z);}
     private static Vec3 horizontal(Vec3 direction){var h=direction.multiply(1,0,1).normalize();return h.lengthSqr()<.01?new Vec3(0,0,1):h;}
@@ -138,100 +138,24 @@ public final class IgnisCasting {
             flame.setOwner(boss.cast.damageOwner());NativeDamageContexts.bind(flame,boss.cast,boss.amplification);
             boolean started=ExecutionSessions.start(new ExecutionSession<>(world,boss.cast,flame,flame.getDuration()+flame.getWaitTime()+400,new ExecutionDriver<Flame_Strike_Entity>() {
                 public boolean start(ExecutionSession<Flame_Strike_Entity> s){return original.get();}
-                public boolean tick(ExecutionSession<Flame_Strike_Entity> s){return flame.isRemoved() || !world.hasChunkAt(flame.blockPosition());}
-                public void close(ExecutionSession<Flame_Strike_Entity> s,ExecutionSession.EndReason reason){flame.discard();}
+                public boolean tick(ExecutionSession<Flame_Strike_Entity> s){return flame.isRemoved() || boss.childrenCancelled || !world.hasChunkAt(flame.blockPosition());}
+                public void close(ExecutionSession<Flame_Strike_Entity> s,ExecutionSession.EndReason reason){boss.children.remove(flame);flame.discard();}
             },hit->{},()->enabled(boss.ability),ExecutionScope.DIRECT));
-            if(started)boss.spawnedFlames++;
+            if(started){boss.spawnedFlames++;boss.children.add(flame);}
             return started;
         }
         if(!(child instanceof CMAbstractHurtingProjectile shot))return original.get();
         if(!world.hasChunkAt(child.blockPosition()))return false;
         shot.setOwner(boss.cast.damageOwner());
-        ((IgnisProjectile)shot).confluxIgnis$aim(boss.getTarget(),1);
+        ((IgnisProjectile)shot).confluxIgnis$aim(boss.projectileAim==null?boss.getTarget():boss.projectileAim.get(),1);
         var state=(ManagedProjectile)shot;state.confluxCataclysm$mode(2);state.confluxCataclysm$sourceAbility(boss.ability);
         NativeDamageContexts.bind(shot,boss.cast,boss.amplification);
-        return ExecutionSessions.start(new ExecutionSession<>(world,boss.cast,shot,400,new ExecutionDriver<CMAbstractHurtingProjectile>() {
+        boolean started=ExecutionSessions.start(new ExecutionSession<>(world,boss.cast,shot,400,new ExecutionDriver<CMAbstractHurtingProjectile>() {
             public boolean start(ExecutionSession<CMAbstractHurtingProjectile> s){return original.get();}
-            public boolean tick(ExecutionSession<CMAbstractHurtingProjectile> s){return shot.isRemoved() || !world.hasChunkAt(shot.blockPosition()) || !world.hasChunkAt(BlockPos.containing(shot.position().add(shot.getDeltaMovement())));}
-            public void close(ExecutionSession<CMAbstractHurtingProjectile> s,ExecutionSession.EndReason reason){shot.discard();}
+            public boolean tick(ExecutionSession<CMAbstractHurtingProjectile> s){return shot.isRemoved() || boss.childrenCancelled || !world.hasChunkAt(shot.blockPosition()) || !world.hasChunkAt(BlockPos.containing(shot.position().add(shot.getDeltaMovement())));}
+            public void close(ExecutionSession<CMAbstractHurtingProjectile> s,ExecutionSession.EndReason reason){boss.children.remove(shot);shot.discard();}
         },hit->{},()->enabled(boss.ability),ExecutionScope.DIRECT));
-    }
-    private static boolean action(Ability a,ServerLevel world,CastContext cast,double amp) {
-        LivingEntity actor=cast.caster(),target=null;
-        if(cast.target() instanceof EntityHitResult hit) {
-            if(!(hit.getEntity() instanceof LivingEntity selected))return false;
-            if(HarbingerCasting.allied(cast,selected))actor=selected;else target=selected;
-        }
-        final int area=a==Ability.IGNIS_ULTIMATE?40:20;
-        if(!actor.isAlive() || actor.level()!=world || actor.isPassenger() || GuardianCasting.isPunching(actor)
-                || HarbingerActions.isCharging(actor) || ScyllaActions.isActing(actor)
-                || ExecutionSessions.isCasting(actor) || !MonstrosityCasting.loadedArea(world,actor.position(),area))return false;
-        if(target==null)target=HarbingerCasting.target(world,actor.getEyePosition(),actor.getLookAngle(),cast.withExecutor(actor));
-        if(target==null)target=marker(world,cast.target() instanceof BlockHitResult block?block.getLocation():actor.position().add(horizontal(actor.getLookAngle()).scale(6)));
-        if(!valid(world,actor,target))return false;
-        final LivingEntity host=actor;
-        final boolean reinforced=a==Ability.IGNIS_REINFORCED_SMASH;
-        final boolean airborne=a==Ability.IGNIS_AIR_SMASH || reinforced,oldGravity=actor.isNoGravity();
-        final int launchTick=reinforced?84:19;
-        var frame=cast.withExecutor(actor);
-        var boss=new SpellIgnis(world,frame,a,actor.position(),target.position().subtract(actor.position()),amp);boss.setTarget(target);
-        Animation initial=switch(a){case IGNIS_AIR_SMASH->Ignis_Entity.SMASH_IN_AIR;
-            case IGNIS_REINFORCED_SMASH->boss.getBossPhase()>0?Ignis_Entity.REINFORCED_SMASH_IN_AIR_SOUL:Ignis_Entity.REINFORCED_SMASH_IN_AIR;
-            case IGNIS_EARTH_SHUDDERS->Ignis_Entity.EARTH_SHUDDERS_ATTACK;case IGNIS_ULTIMATE->Ignis_Entity.ULTIMATE_ATTACK;default->Ignis_Entity.COMBO1;};
-        boss.setAnimation(initial);
-        return ExecutionSessions.start(new ExecutionSession<>(world,frame,boss,reinforced?400:245,new ExecutionDriver<SpellIgnis>() {
-            private int age,phaseAge;
-            private Animation animation=boss.getAnimation();
-            private net.minecraft.world.entity.ai.goal.Goal goal=a==Ability.IGNIS_ULTIMATE?boss.activeNativeGoal():boss.nativeGoal(
-                reinforced?"Reinforced_Air_Smash":airborne?"Air_Smash":a==Ability.IGNIS_EARTH_SHUDDERS?"Earth_Shudders":"Combo1");
-            private Vec3 heading=horizontal(host.getLookAngle());
-            public boolean occupiesCaster(){return host==cast.caster();}
-            public java.util.List<ExecutionClaim> claims(ExecutionSession<SpellIgnis> s){return java.util.List.of(ExecutionClaim.action(host));}
-            public boolean start(ExecutionSession<SpellIgnis> s){ACTORS.add(host.getUUID());if(host instanceof Mob mob)mob.getNavigation().stop();if(airborne)host.setNoGravity(false);goal.start();dev.cataclysmnouveau.network.IgnisPhantomSync.send(s.id(),host,boss,false);return true;}
-            public boolean tick(ExecutionSession<SpellIgnis> s) {
-                if(!host.isAlive() || host.level()!=world || host.isPassenger() || !MonstrosityCasting.loadedArea(world,host.position(),area))return true;
-                boolean landing=airborne && (animation==Ignis_Entity.SMASH || animation==Ignis_Entity.REINFORCED_SMASH || animation==Ignis_Entity.REINFORCED_SMASH_SOUL);
-                if(!landing && !valid(world,host,boss.getTarget()))return true;
-                ++age;++phaseAge;
-                boolean follow=switch(a){case IGNIS_EARTH_SHUDDERS->phaseAge<31 || phaseAge>45 && phaseAge<73 || phaseAge>89 && phaseAge<117;
-                    case IGNIS_ULTIMATE->phaseAge<72;default->airborne || phaseAge<20 || phaseAge>44;};
-                if(!landing && follow)heading=horizontal(boss.getTarget().position().subtract(host.position()));
-                boss.pose(host.position(),heading);boss.setBoundingBox(host.getBoundingBox());boss.setOnGround(host.onGround());
-                boss.setDeltaMovement(host.getDeltaMovement());boss.setAnimationTick(phaseAge);
-                if(!landing)goal.tick();
-                if(boss.getAnimation()!=animation) {
-                    Animation next=boss.getAnimation();
-                    boolean expected=airborne?(reinforced?next==Ignis_Entity.REINFORCED_SMASH || next==Ignis_Entity.REINFORCED_SMASH_SOUL:next==Ignis_Entity.SMASH)
-                        :a==Ability.IGNIS_SWORD_COMBO && next==Ignis_Entity.COMBO2;
-                    if(!expected)return true;
-                    goal.stop();boss.setAnimation(next);animation=next;phaseAge=0;
-                    if(!airborne){goal=boss.nativeGoal("Combo2");goal.start();}
-                    dev.cataclysmnouveau.network.IgnisPhantomSync.send(s.id(),host,boss,false);
-                    return false;
-                }
-                boss.yBodyRot=boss.getYRot();boss.yHeadRot=boss.getYRot();boss.aiStep();
-                if(!landing) {
-                    Vec3 motion=boss.getDeltaMovement();
-                    if(!world.hasChunkAt(BlockPos.containing(host.position().add(motion))))return true;
-                    host.setDeltaMovement(motion);host.hurtMarked=true;
-                    if(airborne && phaseAge==launchTick)host.setOnGround(false);
-                }
-                if(airborne) {
-                    host.fallDistance=0;
-                    if(!landing && phaseAge>launchTick && (host instanceof FlyingMob || host instanceof Player p && p.getAbilities().flying)) {host.setDeltaMovement(host.getDeltaMovement().add(0,-.08,0));host.hurtMarked=true;}
-                }
-                boolean strike=landing?(reinforced?phaseAge==5 || phaseAge==46:Set.of(5,8,11,14).contains(phaseAge))
-                    :a==Ability.IGNIS_EARTH_SHUDDERS?Set.of(32,73,117).contains(phaseAge)
-                    :a==Ability.IGNIS_ULTIMATE?phaseAge==74
-                    :reinforced?Set.of(23,53).contains(phaseAge)
-                    :animation==Ignis_Entity.COMBO1?Set.of(19,38,61,76).contains(phaseAge)
-                    :animation==Ignis_Entity.COMBO2 && Set.of(32,59,74,108,110,112,114,116).contains(phaseAge);
-                if(strike){host.swing(InteractionHand.MAIN_HAND);MonstrosityCasting.impactVisual(world,host.position().add(heading.scale(2)),true,true);world.sendParticles(boss.getBossPhase()>0?ParticleTypes.SOUL_FIRE_FLAME:ParticleTypes.FLAME,host.getX(),host.getEyeY(),host.getZ(),20,.8,.4,.8,.03);}
-                if(age%4==0)dev.cataclysmnouveau.network.IgnisPhantomSync.send(s.id(),host,boss,false);
-                return airborne && !landing?age>=(reinforced?280:200):phaseAge>=animation.getDuration();
-            }
-            public void close(ExecutionSession<SpellIgnis> s,ExecutionSession.EndReason reason){dev.cataclysmnouveau.network.IgnisPhantomSync.send(s.id(),host,boss,true);ACTORS.remove(host.getUUID());goal.stop();boss.discard();if(!host.isRemoved())host.setNoGravity(oldGravity);if(host.level()==world && !host.isRemoved()){host.setDeltaMovement(host.getDeltaMovement().multiply(.2,1,.2));host.hurtMarked=true;}}
-        },hit->{},()->enabled(a),ExecutionScope.DIRECT));
+        if(started)boss.children.add(shot);return started;
     }
     private IgnisCasting() {}
 }

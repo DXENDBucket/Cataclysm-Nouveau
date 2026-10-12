@@ -1887,4 +1887,132 @@ public final class NativeAbilityTests {
             a.p.discard();ExecutionSessions.tick();h.assertTrue(cloud.isRemoved(),"Root removal ends independent smoke");h.succeed();
         }
     }
+
+    private static List<dev.cataclysmnouveau.glyph.CataclysmEffectGlyph> migratedIgnisActions(){
+        return List.of(GlyphCatalog.IGNIS_AIR_SMASH,GlyphCatalog.IGNIS_REINFORCED_SMASH,GlyphCatalog.IGNIS_EARTH_SHUDDERS,GlyphCatalog.IGNIS_ULTIMATE);
+    }
+    private static void loadIgnisUltimateArea(Arena a){
+        for(int x=(a.base.getX()-40)>>4;x<=(a.base.getX()+40)>>4;x++)for(int z=(a.base.getZ()-40)>>4;z<=(a.base.getZ()+40)>>4;z++)
+            if(!a.h.getLevel().getForcedChunks().contains(net.minecraft.world.level.ChunkPos.asLong(x,z))){a.h.getLevel().setChunkForced(x,z,true);a.forced.add(new net.minecraft.world.level.ChunkPos(x,z));}
+    }
+    @GameTest(template="empty",batch="cat_ignis_all_action_permissions",timeoutTicks=100)
+    public static void ignisActionsRejectHostileAndMissTargetsWithoutChangingStateOrCharging(GameTestHelper h){
+        for(var glyph:migratedIgnisActions())try(var a=new Arena(h)){
+            loadIgnisUltimateArea(a);
+            var enemy=a.target(a.center,false);var cast=CastContext.detached(a.p,new EntityHitResult(enemy),null).withDamageOwner(enemy);
+            h.assertTrue(!IgnisCasting.effect(glyph.ability,h.getLevel(),cast,0),"Damage ownership cannot authorize "+glyph.ability);
+            var miss=BlockHitResult.miss(a.center,Direction.UP,BlockPos.containing(a.center));
+            h.assertTrue(!IgnisCasting.effect(glyph.ability,h.getLevel(),cast.withTarget(miss),0),"MISS cannot become a fixed action");
+            double mana=CapabilityRegistry.getMana(a.p).getCurrentMana();a.cast(glyph,new EntityHitResult(enemy),false);a.cast(glyph,miss,false);
+            close(h,CapabilityRegistry.getMana(a.p).getCurrentMana(),mana,"Invalid actions refund their full fee");
+            h.assertTrue(!IgnisCasting.isActing(a.p) && !IgnisCasting.isActing(enemy),"Denied action changes no actor state");
+        }
+        h.succeed();
+    }
+    @GameTest(template="empty",batch="cat_ignis_all_action_positions",timeoutTicks=100)
+    public static void ignisFixedActionsRetainNativeDamageStagesPoseFeeAndRootMotion(GameTestHelper h){
+        for(var glyph:migratedIgnisActions()){
+            var frames=new ArrayList<dev.cataclysmnouveau.network.IgnisPhantomPayload>();
+            try(var a=new Arena(h,packet->{if(packet instanceof net.minecraft.network.protocol.common.ClientboundCustomPayloadPacket p
+                    && p.payload() instanceof dev.cataclysmnouveau.network.IgnisPhantomPayload data)frames.add(data);})){
+                loadIgnisUltimateArea(a);
+                var point=a.center.add(.125,0,.125);var enemy=a.target(point.add(0,0,2),false);var friend=a.target(enemy.position(),true);
+                Vec3 position=a.p.position(),motion=new Vec3(.2,.1,.3);a.p.setDeltaMovement(motion);a.p.setYRot(0);
+                double before=CapabilityRegistry.getMana(a.p).getCurrentMana();a.cast(glyph,block(point),false);
+                h.assertTrue(!frames.isEmpty() && frames.getFirst().positionAnchored(),"Fixed "+glyph.ability+" starts a native visual");
+                h.assertTrue(!ExecutionSessions.isCasting(a.p),"Fixed output does not claim payer action or channel");
+                a.p.setYRot(180);
+                for(int t=0;t<250;t++){enemy.invulnerableTime=0;ExecutionSessions.tick();}
+                h.assertTrue(frames.getLast().closed(),"Native fixed action completes "+glyph.ability);
+                h.assertTrue(frames.stream().allMatch(f->f.positionAnchored() && f.actorId()==-1 && f.position().equals(point) && Math.abs(f.yaw())<.001),"Fixed pose does not drift with native jump or player's camera");
+                h.assertTrue(a.p.position().equals(position) && a.p.getDeltaMovement().equals(motion) && a.p.isNoGravity(),"Fixed action and cleanup leave payer motion and gravity untouched");
+                h.assertTrue(enemy.getHealth()<500 && enemy.getLastDamageSource().getEntity()==a.p,"Fixed native action damages at anchor with root credit "+glyph.ability);
+                close(h,friend.getHealth(),500,"Fixed native action protects allies");
+                close(h,before-CapabilityRegistry.getMana(a.p).getCurrentMana(),CataclysmConfig.cost(glyph.ability),"Complete action pays once");
+                if(glyph.ability==Ability.IGNIS_REINFORCED_SMASH){
+                    h.assertTrue(ignisShots(a).size()==6,"Fixed reinforced action includes all three preparation and three landing projectiles");
+                    h.assertTrue(frames.stream().anyMatch(f->f.animation()==7),"Fixed action includes native landing animation");
+                }
+                if(glyph.ability==Ability.IGNIS_AIR_SMASH)h.assertTrue(frames.stream().anyMatch(f->f.animation()==4),"Fixed output transitions to native impact");
+                h.assertTrue(h.getLevel().getEntitiesOfClass(com.github.L_Ender.cataclysm.entity.AnimationMonster.BossMonsters.Ignis_Entity.class,new AABB(a.center,a.center).inflate(40)).isEmpty(),"Visual and native invocation frames never spawn a Boss");
+                var buffer=new net.minecraft.network.RegistryFriendlyByteBuf(io.netty.buffer.Unpooled.buffer(),h.getLevel().registryAccess());
+                try{for(var f:frames){dev.cataclysmnouveau.network.IgnisPhantomPayload.CODEC.encode(buffer,f);h.assertTrue(f.equals(dev.cataclysmnouveau.network.IgnisPhantomPayload.CODEC.decode(buffer)),"Every attack-stage snapshot roundtrips");}}finally{buffer.release();}
+            }
+        }
+        h.succeed();
+    }
+    @GameTest(template="empty",batch="cat_ignis_earth_camera",timeoutTicks=100)
+    public static void ignisEarthPlayerTurnsDuringPreparationAndLocksDamageAndVisualTogether(GameTestHelper h){
+        var frames=new ArrayList<dev.cataclysmnouveau.network.IgnisPhantomPayload>();
+        try(var a=new Arena(h,packet->{if(packet instanceof net.minecraft.network.protocol.common.ClientboundCustomPayloadPacket p
+                && p.payload() instanceof dev.cataclysmnouveau.network.IgnisPhantomPayload data)frames.add(data);})){
+            a.p.setPos(a.center);a.p.setYRot(0);a.p.setXRot(0);
+            var east=a.target(a.center.add(1.5,0,0),false);var west=a.target(a.center.add(-1.5,0,0),false);
+            a.cast(GlyphCatalog.IGNIS_EARTH_SHUDDERS,new EntityHitResult(a.p),false);
+            a.p.setYRot(-90);
+            for(int t=1;t<=30;t++)ExecutionSessions.tick();
+            close(h,frames.getLast().yaw(),-90,"Preparation follows the player's camera at bounded speed");
+            a.p.setYRot(90);
+            ExecutionSessions.tick();ExecutionSessions.tick();
+            close(h,frames.getLast().yaw(),-90,"Strike is locked instead of following camera changes");
+            h.assertTrue(east.getHealth()<west.getHealth(),"Forward hit adds damage over the native ground shockwave on both sides: east="+east.getHealth()+", west="+west.getHealth()+", yaw="+frames.getLast().yaw()+", pose="+frames.getLast().position());
+            for(int t=33;t<=45;t++)ExecutionSessions.tick();
+            close(h,frames.getLast().yaw(),-90,"Recovery keeps previous heading");
+            for(int t=46;t<=48;t++)ExecutionSessions.tick();
+            h.assertTrue(Math.abs(frames.getLast().yaw()+90)>10,"Next preparation can turn again");
+            a.p.discard();ExecutionSessions.tick();h.assertTrue(frames.getLast().closed(),"Owner loss closes actual-player phantom");h.succeed();
+        }
+    }
+    @GameTest(template="empty",batch="cat_ignis_all_action_cancel",timeoutTicks=100)
+    public static void ignisActionsRevokeAuthorityReleaseOwnClaimAndCancelOnlyOwnChildren(GameTestHelper h){
+        for(var glyph:migratedIgnisActions()){
+            var frames=new ArrayList<dev.cataclysmnouveau.network.IgnisPhantomPayload>();
+            try(var a=new Arena(h,packet->{if(packet instanceof net.minecraft.network.protocol.common.ClientboundCustomPayloadPacket p
+                    && p.payload() instanceof dev.cataclysmnouveau.network.IgnisPhantomPayload data)frames.add(data);});var observer=new NearbyObserver(h,a.p)){
+                loadIgnisUltimateArea(a);var host=a.target(a.center,true);host.setOnGround(true);host.setYRot(0);
+                var enemy=a.target(a.center.add(0,0,2),false);
+                var channel=new dev.arsconflux.api.execution.ExecutionSession<>(h.getLevel(),CastContext.detached(a.p,null,null).withExecutor(host),0,400,new dev.arsconflux.api.execution.ExecutionDriver<Integer>(){
+                    public List<dev.arsconflux.api.execution.ExecutionClaim> claims(dev.arsconflux.api.execution.ExecutionSession<Integer> s){return List.of(dev.arsconflux.api.execution.ExecutionClaim.channel(host));}
+                    public boolean start(dev.arsconflux.api.execution.ExecutionSession<Integer> s){return true;}
+                    public boolean tick(dev.arsconflux.api.execution.ExecutionSession<Integer> s){return false;}
+                    public void close(dev.arsconflux.api.execution.ExecutionSession<Integer> s,dev.arsconflux.api.execution.ExecutionSession.EndReason reason){}
+                },hit->{},()->true,dev.arsconflux.api.execution.ExecutionScope.DIRECT);
+                h.assertTrue(ExecutionSessions.start(channel),"Independent channel starts");
+                a.cast(glyph,new EntityHitResult(host),false);
+                h.assertTrue(IgnisCasting.isActing(host) && ExecutionSessions.isOccupied(host,dev.arsconflux.api.execution.ExecutionClaim.ENTITY_ACTION) && channel.active(),"Native action can coexist with actual actor's channel");
+                double mana=CapabilityRegistry.getMana(a.p).getCurrentMana();Vec3 motion=host.getDeltaMovement();boolean gravity=host.isNoGravity();
+                a.cast(GlyphCatalog.IGNIS_SWORD_COMBO,new EntityHitResult(host),false);
+                close(h,CapabilityRegistry.getMana(a.p).getCurrentMana(),mana,"Conflicting sword dance is refunded");
+                h.assertTrue(IgnisCasting.isActing(host) && host.getDeltaMovement().equals(motion) && host.isNoGravity()==gravity,"Rejected action cannot alter the running action");
+                if(glyph.ability==Ability.IGNIS_REINFORCED_SMASH)for(int t=0;t<84;t++)ExecutionSessions.tick();
+                var ownShots=List.copyOf(ignisShots(a));var ownFlames=List.copyOf(ignisFlames(a));
+                if(glyph.ability==Ability.IGNIS_REINFORCED_SMASH)h.assertTrue(ownShots.size()==3,"Actual action has active child projectiles before cancellation");
+                if(glyph.ability==Ability.IGNIS_ULTIMATE)h.assertTrue(ownFlames.size()==1,"Ultimate has its preparation field before cancellation");
+                // A separately created field from the same caster must survive this action's cancellation.
+                h.assertTrue(IgnisCasting.effect(Ability.IGNIS_FLAME_STRIKE,h.getLevel(),CastContext.detached(a.p,block(a.center.add(6,0,0)),null),0),"Unrelated field starts");
+                var unrelated=ignisFlames(a).stream().filter(f->!ownFlames.contains(f)).findFirst().orElseThrow(()->new AssertionError("No independent field for "+glyph.ability+", fields="+ignisFlames(a).size()+", own="+ownFlames.size()));
+                h.getLevel().getScoreboard().removePlayerFromTeam(host.getScoreboardName());ExecutionSessions.tick();
+                h.assertTrue(!IgnisCasting.isActing(host) && !ExecutionSessions.isOccupied(host,dev.arsconflux.api.execution.ExecutionClaim.ENTITY_ACTION) && channel.active(),"Authority revocation only releases the action's claim");
+                h.assertTrue(host.isNoGravity() && !frames.isEmpty() && frames.getLast().closed(),"Cancellation restores gravity and closes visual for "+glyph.ability+", frames="+frames.size());
+                h.assertTrue(ownShots.stream().allMatch(Entity::isRemoved) && ownFlames.stream().allMatch(Entity::isRemoved) && !unrelated.isRemoved(),"Only cancelled action's children are cleaned");
+                channel.finish(dev.arsconflux.api.execution.ExecutionSession.EndReason.COMPLETED);
+            }
+        }
+        h.succeed();
+    }
+
+
+    /** Real nearby broadcasts consult the server player list, not only ServerLevel's entity list. */
+    private static final class NearbyObserver implements AutoCloseable {
+        private final List<ServerPlayer> players;
+        private final ServerPlayer player;
+        @SuppressWarnings("unchecked") NearbyObserver(GameTestHelper h,ServerPlayer player){
+            this.player=player;
+            try {
+                var field=net.minecraft.server.players.PlayerList.class.getDeclaredField("players");field.setAccessible(true);
+                players=(List<ServerPlayer>)field.get(h.getLevel().getServer().getPlayerList());players.add(player);
+            }catch(ReflectiveOperationException e){throw new AssertionError("Cannot register test-only nearby packet observer",e);}
+        }
+        public void close(){players.remove(player);}
+    }
 }

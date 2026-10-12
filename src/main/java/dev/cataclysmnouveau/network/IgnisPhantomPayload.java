@@ -22,7 +22,7 @@ public record IgnisPhantomPayload(UUID token,ResourceLocation dimension,int acto
         b.readBoolean(),new Vec3(b.readDouble(),b.readDouble(),b.readDouble()),b.readFloat(),b.readVarInt(),b.readVarInt(),b.readVarInt(),b.readBoolean()));
     @Override public Type<IgnisPhantomPayload> type(){return TYPE;}
     public static void register(RegisterPayloadHandlersEvent event){
-        event.registrar("2").playToClient(TYPE,CODEC,(p,c)->{
+        event.registrar("3").playToClient(TYPE,CODEC,(p,c)->{
             if(FMLEnvironment.dist==Dist.CLIENT)c.enqueueWork(()->dev.cataclysmnouveau.client.IgnisPhantoms.accept(p));
         });
     }

@@ -1,3 +1,11 @@
+## 0.1.0-dev.35
+
+- Migrate Leaping Smash, Reinforced Leaping Smash, Earth Shudders and Ultimate Flame Slash to Conflux entity/position execution anchors. Reject hostile entity and MISS selections instead of implicitly executing on the caster.
+- Retain native goals, damage, phases, fees and actual actor landing. Fixed points run stationary preparation and attack stages without moving or claiming the payer.
+- Follow player camera or mob attack target during native preparation windows; lock damage and visual heading together during strikes.
+- Expand native Ignis phantoms to all migrated actions, including ordinary/soul airborne and landing stages. Add a separate client visual switch; payload protocol is 3.
+- Recheck authority continuously, release only owned action state, and clean action-owned children on cancellation without removing unrelated casts.
+
 # Changelog
 
 ## 0.1.0-dev.34
