@@ -42,8 +42,12 @@ public final class GlyphCatalog {
     public static final CataclysmProjectileGlyph HOMING=new CataclysmProjectileGlyph(Ability.HOMING_MISSILE);
     public static final CataclysmProjectileGlyph HOWITZER=new CataclysmProjectileGlyph(Ability.WITHER_HOWITZER);
     public static final CataclysmEffectGlyph DEATH_LASER=new CataclysmEffectGlyph(Ability.DEATH_LASER);
+    public static final CataclysmEffectGlyph HARBINGER_CHARGE=new CataclysmEffectGlyph(Ability.HARBINGER_CHARGE);
+    public static final CataclysmEffectGlyph HOWITZER_VOLLEY=new CataclysmEffectGlyph(Ability.HOWITZER_VOLLEY);
+    public static final CataclysmEffectGlyph MISSILE_SALVO=new CataclysmEffectGlyph(Ability.MISSILE_SALVO);
+    public static final CataclysmEffectGlyph SMOKE=new CataclysmEffectGlyph(Ability.WITHER_SMOKE);
     public static final List<CataclysmProjectileGlyph> PROJECTILES=List.of(AMETHYST,SPIKE,ANCHOR,WAVE,FLARE,LAVA,WATER_SPEAR,LIGHTNING_SPEAR,SPARK,LASER_BOLT,MISSILE,HOMING,HOWITZER);
-    public static final List<AbstractSpellPart> ALL=List.<AbstractSpellPart>of(BOLT,RUNE,JET,QUAKE,FISSURE,RINGS,CHARGE,ABSORB,MONSTROUS,FRACTURE,LAVA_WALKING,SERPENT,STORM,FIELD,BURST,AMETHYST,SPIKE,ANCHOR,WAVE,FLARE,LAVA,WATER_SPEAR,LIGHTNING_SPEAR,SPARK,CLOUD,ROW,COMBO,SPIN,LEAP,WATER_WALKING,LASER_BOLT,MISSILE,HOMING,HOWITZER,DEATH_LASER)
+    public static final List<AbstractSpellPart> ALL=List.<AbstractSpellPart>of(BOLT,RUNE,JET,QUAKE,FISSURE,RINGS,CHARGE,ABSORB,MONSTROUS,FRACTURE,LAVA_WALKING,SERPENT,STORM,FIELD,BURST,AMETHYST,SPIKE,ANCHOR,WAVE,FLARE,LAVA,WATER_SPEAR,LIGHTNING_SPEAR,SPARK,CLOUD,ROW,COMBO,SPIN,LEAP,WATER_WALKING,LASER_BOLT,MISSILE,HOMING,HOWITZER,DEATH_LASER,HARBINGER_CHARGE,HOWITZER_VOLLEY,MISSILE_SALVO,SMOKE)
             .stream().sorted(Comparator.comparing(GlyphCatalog::displayOrderKey)).toList();
     /** Core retains Ars categories; within each category, group native series before registry names. */
     public static String displayOrderKey(AbstractSpellPart part) {

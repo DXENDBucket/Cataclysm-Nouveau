@@ -11,11 +11,11 @@ import net.minecraft.world.phys.*;
 /** A detached invocation frame. Never spawned, ticked as a mob, saved or sent to clients. */
 public final class SpellMonstrosity extends Netherite_Monstrosity_Entity {
     public final CastContext cast;
-    public final float damageBonus;
+    public final float amplification;
     public int absorbed;
     public SpellMonstrosity(ServerLevel world,CastContext cast,Vec3 point,Vec3 direction,double amplification) {
         super(ModEntities.NETHERITE_MONSTROSITY.get(),world);
-        this.cast=cast;damageBonus=Resources.damageBonus(amplification);
+        this.cast=cast;this.amplification=Resources.amplification(amplification);NativeDamageContexts.bind(this,cast,amplification);
         setNoAi(true);setNoGravity(true);setPos(point);
         setBoundingBox(new AABB(point,point).inflate(.3));
         setYRot((float)Math.toDegrees(Math.atan2(-direction.x,direction.z)));yBodyRot=getYRot();

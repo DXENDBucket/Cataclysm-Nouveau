@@ -11,6 +11,6 @@ public abstract class SparkChildMixin {
     @ModifyArg(method={"onHitBlock","spawnArea"},at=@At(value="INVOKE",target="Lnet/minecraft/world/level/Level;addFreshEntity(Lnet/minecraft/world/entity/Entity;)Z"),index=0,require=1)
     private Entity confluxScylla$inherit(Entity child) {
         var cast=((ScyllaPayload)this).confluxScylla$cast();
-        return cast!=null && child instanceof ScyllaPayload?ScyllaCasting.manage(child,cast):child;
+        return cast!=null && child instanceof ScyllaPayload?ScyllaCasting.manage(child,cast,NativeDamageContexts.amplification((Entity)(Object)this)):child;
     }
 }

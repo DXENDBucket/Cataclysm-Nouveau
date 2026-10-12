@@ -6,8 +6,8 @@
   "cataclysm_nouveau.glyph_desc.glyph_lionfish_spike": "Replaces a projectile with a native lionfish spike. Successful hits retain native Poison I for 3 seconds. Amplify changes direct damage as for Harm.",
   "item.cataclysm_nouveau.glyph_bolt_strike": "Bolt Strike",
   "cataclysm_nouveau.glyph_desc.glyph_bolt_strike": "Summons a native lightning column at the selected location after a short delay. Amplify changes damage as for Harm.",
-  "cataclysm_nouveau.augment.increase_damage": "Increases damage by the configured Harm amplification amount.",
-  "cataclysm_nouveau.augment.decrease_damage": "Decreases damage by the configured Harm amplification amount.",
+  "cataclysm_nouveau.augment.increase_damage": "Increase each hit from its unaugmented base by a bounded percentage.",
+  "cataclysm_nouveau.augment.decrease_damage": "Decrease each hit from its unaugmented base by a bounded percentage.",
   "cataclysm_nouveau.glyph_name.glyph_amethyst_cluster": "Amethyst Cluster",
   "cataclysm_nouveau.glyph_name.glyph_lionfish_spike": "Lionfish Spike",
   "cataclysm_nouveau.glyph_name.glyph_bolt_strike": "Bolt Strike",
@@ -113,5 +113,13 @@
   "cataclysm_nouveau.glyph_name.glyph_wither_howitzer": "Wither Howitzer",
   "cataclysm_nouveau.glyph_desc.glyph_wither_howitzer": "Replace a projectile with an explosive shell that leaves a shrinking wither smoke cloud.",
   "cataclysm_nouveau.glyph_name.glyph_death_laser": "Death Laser",
-  "cataclysm_nouveau.glyph_desc.glyph_death_laser": "Channel the Harbinger’s native piercing beam for 3 seconds after a brief windup. Consumes mana each active second. Below or at half health, the caster adds the native ignition effect. Amplify increases damage; duration augments change channel duration."
+  "cataclysm_nouveau.glyph_desc.glyph_death_laser": "Channel the Harbinger’s native piercing beam for 3 seconds after a brief windup. Consumes mana each active second. Below or at half health, the caster adds the native ignition effect. Amplify increases damage; duration augments change channel duration.",
+  "cataclysm_nouveau.glyph_name.glyph_harbinger_charge": "Harbinger Charge",
+  "cataclysm_nouveau.glyph_desc.glyph_harbinger_charge": "The caster or an ally charges along their aim, colliding with enemies. Retains native impact damage and knockback; at half health, the native chance of consecutive charges applies.",
+  "cataclysm_nouveau.glyph_name.glyph_howitzer_volley": "Howitzer Volley",
+  "cataclysm_nouveau.glyph_desc.glyph_howitzer_volley": "Fire two native arcing howitzer volleys, five shells each; seven each at half health. Shells retain their explosions and wither smoke.",
+  "cataclysm_nouveau.glyph_name.glyph_missile_salvo": "Missile Salvo",
+  "cataclysm_nouveau.glyph_desc.glyph_missile_salvo": "Lock a visible enemy and fire six native homing missiles. At half health, the launchers fire together in a faster sequence.",
+  "cataclysm_nouveau.glyph_name.glyph_wither_smoke": "Wither Smoke",
+  "cataclysm_nouveau.glyph_desc.glyph_wither_smoke": "Create a shrinking cloud of native wither smoke at the trigger position. Duration augments change its lifetime."
 }

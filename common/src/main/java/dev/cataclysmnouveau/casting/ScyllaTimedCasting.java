@@ -18,7 +18,7 @@ public final class ScyllaTimedCasting {
         if(point==null || !MonstrosityCasting.loadedArea(world,point,16)) return false;
         if(ability==Ability.THUNDER_CLOUD && !world.isInWorldBounds(net.minecraft.core.BlockPos.containing(point.add(0,10,0)))) return false;
         Vec3 forward=MonstrosityCasting.direction(cast);
-        var boss=new SpellScylla(world,cast,point,Resources.damageBonus(amp));
+        var boss=new SpellScylla(world,cast,point,Resources.amplification(amp));
         LivingEntity target=cast.target() instanceof EntityHitResult hit && hit.getEntity() instanceof LivingEntity living
                 && !dev.arsconflux.api.targeting.Allies.areAllies(cast.damageOwner(),living)?living:null;
         if(target==null) {

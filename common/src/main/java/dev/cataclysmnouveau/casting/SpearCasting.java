@@ -15,17 +15,17 @@ import java.util.*;
 /** Accelerating native spears share the existing Core carrier/session contract. */
 public final class SpearCasting {
     public static Elemental_Spear_Entity create(Ability ability,ServerLevel world,CastContext cast,Vec3 direction,double amp,double acceleration) {
-        float damage=Math.max(0,CataclysmConfig.scyllaSpearDamage()+Resources.damageBonus(amp));
+        float damage=Math.max(0,CataclysmConfig.scyllaSpearDamage());
         Elemental_Spear_Entity spear;
         if(ability==Ability.WATER_SPEAR) {
             var water=new Water_Spear_Entity(cast.damageOwner(),direction,world,damage,2*Math.max(.1,1+acceleration/.75));
             water.setTotalBounces(8);spear=water;
         } else if(ability==Ability.LIGHTNING_SPEAR) {
             var lightning=new Lightning_Spear_Entity(cast.damageOwner(),direction,world,damage,2*Math.max(.1,1+acceleration/.75));
-            lightning.setAreaDamage(Math.max(0,CataclysmConfig.scyllaFieldDamage()+Resources.damageBonus(amp)));
+            lightning.setAreaDamage(Math.max(0,CataclysmConfig.scyllaFieldDamage()));
             lightning.setAreaRadius(2);lightning.setHpDamage(CataclysmConfig.scyllaHpDamage());spear=lightning;
         } else throw new IllegalArgumentException("Not a Scylla spear: "+ability);
-        ((ScyllaPayload)spear).confluxScylla$cast(cast);
+        NativeDamageContexts.bind(spear,cast,amp);((ScyllaPayload)spear).confluxScylla$cast(cast);
         return spear;
     }
     public static boolean replace(Ability ability,EntityProjectileSpell carrier,CarrierProfile profile) {

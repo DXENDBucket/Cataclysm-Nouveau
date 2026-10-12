@@ -23,17 +23,9 @@ public abstract class ScyllaAdapterMixin {
     private LivingEntity confluxScylla$owner(LivingEntity original) {
         return (Object)this instanceof SpellScylla frame?frame.cast.damageOwner():original;
     }
-    @ModifyArg(method="aiStep",at=@At(value="INVOKE",target="Lnet/minecraft/world/entity/LivingEntity;hurt(Lnet/minecraft/world/damagesource/DamageSource;F)Z"),index=1)
-    private float confluxScylla$damage(float original) {
-        return (Object)this instanceof SpellScylla frame?Math.max(0,original+frame.bonus):original;
-    }
     @ModifyArg(method={"AreaAttack","SpinDamage"},at=@At(value="INVOKE",target="Lnet/minecraft/world/damagesource/DamageSources;mobAttack(Lnet/minecraft/world/entity/LivingEntity;)Lnet/minecraft/world/damagesource/DamageSource;"),index=0)
     private LivingEntity confluxScylla$meleeOwner(LivingEntity original) {
         return (Object)this instanceof SpellScylla frame?frame.cast.damageOwner():original;
-    }
-    @ModifyArg(method={"AreaAttack","SpinDamage"},at=@At(value="INVOKE",target="Lnet/minecraft/world/entity/LivingEntity;hurt(Lnet/minecraft/world/damagesource/DamageSource;F)Z"),index=1)
-    private float confluxScylla$meleeDamage(float original) {
-        return (Object)this instanceof SpellScylla frame?Math.max(0,original+frame.bonus):original;
     }
     @ModifyExpressionValue(method="Stormknockback",at=@At(value="INVOKE",target="Lcom/github/L_Ender/cataclysm/entity/InternalAnimationMonster/IABossMonsters/Scylla/Scylla_Entity;getEntitiesNearby(Ljava/lang/Class;DDDD)Ljava/util/List;"))
     private List<Entity> confluxScylla$pushAllies(List<Entity> original) {

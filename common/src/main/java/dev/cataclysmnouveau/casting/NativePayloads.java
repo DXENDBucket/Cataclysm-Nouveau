@@ -15,22 +15,22 @@ import net.minecraft.world.phys.*;
 public final class NativePayloads {
     public static ThrowableProjectile projectile(Ability ability,ServerLevel world,CastContext frame,double amplify) {
         ThrowableProjectile result=switch(ability) {
-            case AMETHYST_CLUSTER -> new Amethyst_Cluster_Projectile_Entity(ModEntities.AMETHYST_CLUSTER_PROJECTILE.get(),world,frame.caster(),Math.max(0,(float)CMCommonConfig.AmethystCrab.AmethystClusterDamage+Resources.damageBonus(amplify)));
+            case AMETHYST_CLUSTER -> new Amethyst_Cluster_Projectile_Entity(ModEntities.AMETHYST_CLUSTER_PROJECTILE.get(),world,frame.caster(),Math.max(0,(float)CMCommonConfig.AmethystCrab.AmethystClusterDamage));
             case LIONFISH_SPIKE -> new Lionfish_Spike_Entity(world,frame.caster());
             case LAVA_BOMB -> new Lava_Bomb_Entity(ModEntities.LAVA_BOMB.get(),world,frame.caster());
             case FLARE_BOMB -> new Flare_Bomb_Entity(ModEntities.FLARE_BOMB.get(),world,frame.caster());
             case SPARK -> {
                 var spark=new Spark_Entity(world,frame.damageOwner());
-                spark.setDamage(Math.max(0,CataclysmConfig.scyllaStormDamage()+Resources.damageBonus(amplify)));
-                spark.setAreaDamage(Math.max(0,CataclysmConfig.scyllaFieldDamage()+Resources.damageBonus(amplify)));
+                spark.setDamage(Math.max(0,CataclysmConfig.scyllaStormDamage()));
+                spark.setAreaDamage(Math.max(0,CataclysmConfig.scyllaFieldDamage()));
                 spark.setAreaRadius(2);spark.setHpDamage(CataclysmConfig.scyllaHpDamage());
-                yield ScyllaCasting.manage(spark,frame);
+                yield ScyllaCasting.manage(spark,frame,amplify);
             }
             default -> throw new IllegalArgumentException("Not a projectile: "+ability);
         };
         result.setOwner(frame.damageOwner());
-        ((ManagedProjectile)result).confluxCataclysm$bonus(Resources.damageBonus(amplify));
-        return NativeSpellDamage.bind(result,frame);
+        ((ManagedProjectile)result).confluxCataclysm$amplification(Resources.amplification(amplify));
+        return NativeDamageContexts.bind(result,frame,amplify);
     }
     public static void hit(ThrowableProjectile projectile,HitResult hit) {
         if (projectile instanceof Lava_Bomb_Entity lava && ((ManagedProjectile)lava).confluxCataclysm$mode() > 0
@@ -41,9 +41,9 @@ public final class NativePayloads {
     public static boolean bolt(ServerLevel world,CastContext frame,double amplify) {
         if (frame.target()==null || frame.target().getType()==HitResult.Type.MISS) return false;
         Vec3 point=frame.target() instanceof EntityHitResult entity?entity.getEntity().position():frame.origin();
-        var bolt=new Bolt_strike_Entity(world,point.x,point.y,point.z,0,CataclysmConfig.boltWarmup(),Math.max(0,CataclysmConfig.boltDamage()+Resources.damageBonus(amplify)),frame.damageOwner());
+        var bolt=new Bolt_strike_Entity(world,point.x,point.y,point.z,0,CataclysmConfig.boltWarmup(),Math.max(0,CataclysmConfig.boltDamage()),frame.damageOwner());
         bolt.setR(80);bolt.setG(170);bolt.setB(255);
-        return world.addFreshEntity(NativeSpellDamage.bind(bolt,frame));
+        return world.addFreshEntity(NativeDamageContexts.bind(bolt,frame,amplify));
     }
 
     public static boolean effect(Ability ability, ServerLevel world, CastContext frame, double amplify) {
@@ -51,7 +51,7 @@ public final class NativePayloads {
         Vec3 point = groundPoint(world, frame);
         if (point == null) return false;
         float yaw = frame.damageOwner() == null ? 0 : (float)Math.toRadians(frame.damageOwner().getYRot());
-        float damage = Math.max(0, CataclysmConfig.groundDamage(ability) + Resources.damageBonus(amplify));
+        float damage = Math.max(0, CataclysmConfig.groundDamage(ability));
         var entity = switch (ability) {
             case VOID_RUNE -> new Void_Rune_Entity(world, point.x, point.y, point.z, yaw,
                     CataclysmConfig.groundWarmup(ability), damage, frame.damageOwner());
@@ -59,7 +59,7 @@ public final class NativePayloads {
                     CataclysmConfig.groundWarmup(ability), damage, frame.damageOwner());
             default -> throw new IllegalArgumentException("Not a ground effect: " + ability);
         };
-        return world.addFreshEntity(NativeSpellDamage.bind(entity,frame));
+        return world.addFreshEntity(NativeDamageContexts.bind(entity,frame,amplify));
     }
 
     /** Local ground projection only: never scan a cave column or cause chunk loading. */

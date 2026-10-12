@@ -40,11 +40,6 @@ public final class HarbingerCasting {
         var c=NativeSpellDamage.context(source);if(c==null)return false;
         return allied(c,target) || source instanceof Death_Laser_Beam_Entity beam && beam.tickCount>20+beam.getDuration();
     }
-    public static float damageAmount(Entity source,float amount) {
-        if(source instanceof Wither_Howitzer_Entity && NativeSpellDamage.context(source)!=null)return Math.max(0,amount+((ManagedProjectile)source).confluxCataclysm$bonus());
-        if(source instanceof HarbingerSmoke smoke && NativeSpellDamage.context(source)!=null)return Math.max(0,amount+smoke.confluxHarbinger$bonus());
-        return amount;
-    }
     public static LivingEntity target(ServerLevel world,Vec3 origin,Vec3 facing,CastContext c) {
         Vec3 end=origin;
         for(int i=1;i<=CataclysmConfig.harbingerRange();i++) {
@@ -60,15 +55,15 @@ public final class HarbingerCasting {
         return best;
     }
     public static Projectile create(Ability a,ServerLevel world,CastContext c,Vec3 direction,LivingEntity target,double amplify) {
-        var owner=c.damageOwner()==null?c.caster():c.damageOwner();float bonus=Resources.damageBonus(amplify);
+        var owner=c.damageOwner()==null?c.caster():c.damageOwner();float bonus=Resources.amplification(amplify);
         Projectile p=switch(a) {
-            case LASER_BOLT->new Laser_Beam_Entity(owner,direction,world,Math.max(0,(float)CMCommonConfig.Harbinger.Laserdamage+bonus));
-            case WITHER_MISSILE->new Wither_Missile_Entity(owner,direction,world,Math.max(0,(float)CMCommonConfig.Harbinger.WitherMissiledamage+bonus));
-            case HOMING_MISSILE->new Wither_Homing_Missile_Entity(owner,direction,world,Math.max(0,(float)CMCommonConfig.Harbinger.WitherMissiledamage+bonus),target);
+            case LASER_BOLT->new Laser_Beam_Entity(owner,direction,world,Math.max(0,(float)CMCommonConfig.Harbinger.Laserdamage));
+            case WITHER_MISSILE->new Wither_Missile_Entity(owner,direction,world,Math.max(0,(float)CMCommonConfig.Harbinger.WitherMissiledamage));
+            case HOMING_MISSILE->new Wither_Homing_Missile_Entity(owner,direction,world,Math.max(0,(float)CMCommonConfig.Harbinger.WitherMissiledamage),target);
             case WITHER_HOWITZER->{var shell=new Wither_Howitzer_Entity(ModEntities.WITHER_HOWITZER.get(),world,owner);shell.setRadius(3);yield shell;}
             default->throw new IllegalArgumentException("Not a Harbinger payload: "+a);
         };
-        ((ManagedProjectile)p).confluxCataclysm$bonus(bonus);return NativeSpellDamage.bind(p,c);
+        ((ManagedProjectile)p).confluxCataclysm$sourceAbility(a);((ManagedProjectile)p).confluxCataclysm$amplification(bonus);return NativeDamageContexts.bind(p,c,amplify);
     }
     public static boolean replace(Ability a,EntityProjectileSpell carrier,CarrierProfile profile) {
         if(!(carrier.level() instanceof ServerLevel world))return false;
@@ -112,22 +107,27 @@ public final class HarbingerCasting {
         public void close(ExecutionSession<Projectile> s,ExecutionSession.EndReason reason){var state=(ManagedProjectile)payload;state.confluxCataclysm$impact(null);state.confluxCataclysm$carrier(null);state.confluxCataclysm$resolving(false);if(trajectory!=null)trajectory.close();else{payload.discard();carrier.discard();}}
     }
     public static Explosion explosion(Entity source,Level level,double x,double y,double z,float radius) {
-        var frame=NativeSpellDamage.context(source);float bonus=((ManagedProjectile)source).confluxCataclysm$bonus();
+        var frame=NativeSpellDamage.context(source);float bonus=((ManagedProjectile)source).confluxCataclysm$amplification();
         return NativeSpellDamage.during(frame,()->level.explode(source,null,new ExplosionDamageCalculator(){
             public boolean shouldDamageEntity(Explosion boom,Entity target){return !allied(frame,target);}
             public float getKnockbackMultiplier(Entity target){return allied(frame,target)?0:super.getKnockbackMultiplier(target);}
-            public float getEntityDamageAmount(Explosion boom,Entity target){return Math.max(0,super.getEntityDamageAmount(boom,target)+bonus);}
+            public float getEntityDamageAmount(Explosion boom,Entity target){return Resources.augmentedDamage(super.getEntityDamageAmount(boom,target),NativeDamageContexts.amplification(source));}
         },x,y,z,radius,false,Level.ExplosionInteraction.NONE));
     }
     public static boolean smoke(ServerLevel world,Entity child,Entity parent,Supplier<Boolean> original) {
         var frame=NativeSpellDamage.context(parent);if(frame==null || !(child instanceof Wither_Smoke_Effect_Entity cloud))return original.get();
+        var state=(ManagedProjectile)parent;var source=state.confluxCataclysm$sourceAbility();
+        return cloud(world,cloud,frame,state.confluxCataclysm$amplification(),source==null?Ability.WITHER_HOWITZER:source,original);
+    }
+    public static boolean cloud(ServerLevel world,Wither_Smoke_Effect_Entity cloud,CastContext frame,float bonus,Ability source,Supplier<Boolean> spawn) {
         ((HarbingerSmoke)cloud).confluxHarbinger$managedSmoke(true);
-        ((HarbingerSmoke)cloud).confluxHarbinger$bonus(((ManagedProjectile)parent).confluxCataclysm$bonus());NativeSpellDamage.bind(cloud,frame);
+        ((HarbingerSmoke)cloud).confluxHarbinger$amplification(bonus);NativeDamageContexts.bind(cloud,frame,bonus);
         return ExecutionSessions.start(new ExecutionSession<>(world,frame,cloud,cloud.getDuration()+30,new ExecutionDriver<Wither_Smoke_Effect_Entity>(){
-            public boolean start(ExecutionSession<Wither_Smoke_Effect_Entity> s){return original.get();}
+            public boolean start(ExecutionSession<Wither_Smoke_Effect_Entity> s){return spawn.get();}
             public boolean tick(ExecutionSession<Wither_Smoke_Effect_Entity> s){return cloud.isRemoved() || !s.world().hasChunkAt(cloud.blockPosition());}
             public void close(ExecutionSession<Wither_Smoke_Effect_Entity> s,ExecutionSession.EndReason reason){cloud.discard();}
-        },h->{},()->GlyphCatalog.HOWITZER.isEnabled(),ExecutionScope.DIRECT));
+        },h->{},()->GlyphCatalog.ALL.stream().anyMatch(g->g instanceof dev.cataclysmnouveau.glyph.CataclysmEffectGlyph e && e.ability==source && e.isEnabled()
+                || g instanceof dev.cataclysmnouveau.glyph.CataclysmProjectileGlyph p && p.ability==source && p.isEnabled()),ExecutionScope.DIRECT));
     }
     private HarbingerCasting() {}
 }

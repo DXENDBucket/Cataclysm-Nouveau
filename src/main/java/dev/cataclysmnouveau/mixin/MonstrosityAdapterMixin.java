@@ -19,22 +19,13 @@ public abstract class MonstrosityAdapterMixin {
     private LivingEntity confluxCataclysm$owner(LivingEntity original) {
         return (Object)this instanceof SpellMonstrosity frame?frame.cast.damageOwner():original;
     }
-    @ModifyArg(method={"EarthQuake","spawnBlocks","aiStep"},at=@At(value="INVOKE",
-            target="Lnet/minecraft/world/entity/LivingEntity;hurt(Lnet/minecraft/world/damagesource/DamageSource;F)Z"),index=1)
-    private float confluxCataclysm$damage(float original) {
-        return (Object)this instanceof SpellMonstrosity frame?Math.max(0,original+frame.damageBonus):original;
-    }
     @ModifyArg(method="spawnJet",at=@At(value="INVOKE",target="Lcom/github/L_Ender/cataclysm/entity/projectile/Flame_Jet_Entity;<init>(Lnet/minecraft/world/level/Level;DDDFIFLnet/minecraft/world/entity/LivingEntity;)V"),index=7)
     private LivingEntity confluxCataclysm$jetOwner(LivingEntity original) {
         return (Object)this instanceof SpellMonstrosity frame?frame.cast.damageOwner():original;
     }
-    @ModifyArg(method="spawnJet",at=@At(value="INVOKE",target="Lcom/github/L_Ender/cataclysm/entity/projectile/Flame_Jet_Entity;<init>(Lnet/minecraft/world/level/Level;DDDFIFLnet/minecraft/world/entity/LivingEntity;)V"),index=6)
-    private float confluxCataclysm$jetDamage(float original) {
-        return (Object)this instanceof SpellMonstrosity frame?Math.max(0,original+frame.damageBonus):original;
-    }
     @ModifyArg(method="spawnJet",at=@At(value="INVOKE",target="Lnet/minecraft/world/level/Level;addFreshEntity(Lnet/minecraft/world/entity/Entity;)Z"),index=0)
     private net.minecraft.world.entity.Entity confluxCataclysm$jetContext(net.minecraft.world.entity.Entity child) {
-        return (Object)this instanceof SpellMonstrosity frame?dev.arsconflux.api.damage.NativeSpellDamage.bind(child,frame.cast):child;
+        return (Object)this instanceof SpellMonstrosity frame?dev.cataclysmnouveau.casting.NativeDamageContexts.bind(child,frame.cast,frame.amplification):child;
     }
     @WrapOperation(method="aiStep",at=@At(value="INVOKE",target="Lcom/github/L_Ender/cataclysm/entity/InternalAnimationMonster/IABossMonsters/IABoss_monster;aiStep()V"))
     private void confluxCataclysm$noMobTick(Netherite_Monstrosity_Entity boss,Operation<Void> original) {

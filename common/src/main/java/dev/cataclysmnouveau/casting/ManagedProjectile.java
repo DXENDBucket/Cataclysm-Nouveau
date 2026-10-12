@@ -5,11 +5,13 @@ import net.minecraft.world.phys.HitResult;
 import java.util.function.Consumer;
 /** Transient state; mode 0 leaves original Cataclysm projectiles untouched. */
 public interface ManagedProjectile extends CarrierProxy {
+    dev.cataclysmnouveau.Ability confluxCataclysm$sourceAbility();
+    void confluxCataclysm$sourceAbility(dev.cataclysmnouveau.Ability value);
     int confluxCataclysm$mode();
     void confluxCataclysm$mode(int mode);
     void confluxCataclysm$carrier(EntityProjectileSpell carrier);
-    float confluxCataclysm$bonus();
-    void confluxCataclysm$bonus(float bonus);
+    float confluxCataclysm$amplification();
+    void confluxCataclysm$amplification(float bonus);
     boolean confluxCataclysm$resolving();
     void confluxCataclysm$resolving(boolean value);
     boolean confluxCataclysm$repeated();

@@ -85,7 +85,7 @@ public final class MonstrosityCasting {
                     private void absorb(int phase) {
                         int radius=4<<phase;boss.absorbed=0;
                         nativeAccess.confluxCataclysm$absorb(radius,1<<phase,radius);
-                        if(boss.absorbed>0) cast.caster().heal(Math.max(0,CataclysmConfig.absorptionHeal()+boss.damageBonus));
+                        if(boss.absorbed>0) cast.caster().heal(Math.max(0,CataclysmConfig.absorptionHeal()+Resources.healingBonus(boss.amplification)));
                         world.playSound(null,point.x,point.y,point.z,SoundEvents.BUCKET_FILL_LAVA,SoundSource.PLAYERS,1.5F,.5F);
                         impactVisual(world,point,true,false);
                     }

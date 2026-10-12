@@ -16,7 +16,9 @@ public final class ScyllaCasting {
         if(ScyllaActions.supports(ability)) return true;
         return switch(ability) {case STORM_SERPENT,LIGHTNING_STORM,LIGHTNING_FIELD,STORM_BURST,THUNDER_CLOUD,LIGHTNING_ROW->true;default->false;};
     }
-    public static <T extends Entity> T manage(T entity,CastContext cast) {
+    public static <T extends Entity> T manage(T entity,CastContext cast){return manage(entity,cast,0);}
+    public static <T extends Entity> T manage(T entity,CastContext cast,double amplify) {
+        NativeDamageContexts.bind(entity,cast,amplify);
         ((ScyllaPayload)entity).confluxScylla$cast(cast);
         if(entity instanceof Lightning_Storm_Entity storm) storm.setCaster(cast.damageOwner());
         if(entity instanceof Lightning_Area_Effect_Entity field) field.setOwner(cast.damageOwner());
@@ -26,22 +28,22 @@ public final class ScyllaCasting {
     }
     public static Entity bossChild(Entity entity,SpellScylla boss) {
         if(entity instanceof Lightning_Storm_Entity storm) {
-            storm.setDamage(Math.max(0,CataclysmConfig.scyllaStormDamage()+boss.bonus));
+            storm.setDamage(Math.max(0,CataclysmConfig.scyllaStormDamage()));
             storm.setHpDamage(CataclysmConfig.scyllaHpDamage());
         } else if(entity instanceof Spark_Entity spark) {
-            spark.setDamage(Math.max(0,CataclysmConfig.scyllaStormDamage()+boss.bonus));
-            spark.setAreaDamage(Math.max(0,CataclysmConfig.scyllaFieldDamage()+boss.bonus));
+            spark.setDamage(Math.max(0,CataclysmConfig.scyllaStormDamage()));
+            spark.setAreaDamage(Math.max(0,CataclysmConfig.scyllaFieldDamage()));
             spark.setHpDamage(CataclysmConfig.scyllaHpDamage());
         } else if(entity instanceof Elemental_Spear_Entity spear) {
-            spear.setDamage(Math.max(0,spear.getDamage()+boss.bonus));
+            spear.setDamage(Math.max(0,spear.getDamage()));
             spear.setOwner(boss.cast.damageOwner());
             ((ManagedProjectile)spear).confluxCataclysm$mode(2);
             if(spear instanceof Lightning_Spear_Entity lightning) {
-                lightning.setAreaDamage(Math.max(0,CataclysmConfig.scyllaFieldDamage()+boss.bonus));
+                lightning.setAreaDamage(Math.max(0,CataclysmConfig.scyllaFieldDamage()));
                 lightning.setHpDamage(CataclysmConfig.scyllaHpDamage());
             }
         }
-        return entity instanceof ScyllaPayload?manage(entity,boss.cast):entity;
+        return entity instanceof ScyllaPayload?manage(entity,boss.cast,boss.amplification):entity;
     }
     public static boolean effect(Ability ability,ServerLevel world,CastContext cast,double amp,double duration) {
         if(ScyllaActions.supports(ability)) return ScyllaActions.effect(ability,world,cast,amp,duration);
@@ -49,13 +51,13 @@ public final class ScyllaCasting {
             return ScyllaTimedCasting.effect(ability,world,cast,amp,duration);
         Vec3 point=NativePayloads.groundPoint(world,cast);
         if(point==null) return false;
-        float bonus=Resources.damageBonus(amp);
+        float bonus=Resources.amplification(amp);
         if(ability==Ability.LIGHTNING_STORM) return world.addFreshEntity(manage(new Lightning_Storm_Entity(
                 world,point.x,point.y,point.z,0,CataclysmConfig.scyllaStormDelay(),
-                Math.max(0,CataclysmConfig.scyllaStormDamage()+bonus),CataclysmConfig.scyllaHpDamage(),cast.damageOwner(),2),cast));
+                Math.max(0,CataclysmConfig.scyllaStormDamage()),CataclysmConfig.scyllaHpDamage(),cast.damageOwner(),2),cast,amp));
         if(ability==Ability.LIGHTNING_FIELD) {
-            var field=manage(new Lightning_Area_Effect_Entity(world,point.x,point.y,point.z),cast);
-            field.setRadius(3);field.setDamage(Math.max(0,CataclysmConfig.scyllaFieldDamage()+bonus));
+            var field=manage(new Lightning_Area_Effect_Entity(world,point.x,point.y,point.z),cast,amp);
+            field.setRadius(3);field.setDamage(Math.max(0,CataclysmConfig.scyllaFieldDamage()));
             field.setWaitTime(12);int ticks=MonstrosityCasting.scaledTicks(CataclysmConfig.scyllaFieldDuration(),duration);
             field.setDuration(ticks);field.setRadiusPerTick(-2.5F/ticks);
             return world.addFreshEntity(field);
@@ -75,8 +77,8 @@ public final class ScyllaCasting {
                 Vec3 heading=self?forward:point.subtract(origin).multiply(1,0,1).normalize();
                 float yaw=(float)Math.atan2(heading.z,heading.x);
                 var snake=new Storm_Serpent_Entity(world,origin.x,origin.y,origin.z,yaw,i*8,cast.damageOwner(),
-                        Math.max(0,CataclysmConfig.scyllaSnakeDamage()+bonus),target,i==0);
-                spawned|=world.addFreshEntity(manage(snake,cast));
+                        Math.max(0,CataclysmConfig.scyllaSnakeDamage()),target,i==0);
+                spawned|=world.addFreshEntity(manage(snake,cast,amp));
             }
             return spawned;
         }

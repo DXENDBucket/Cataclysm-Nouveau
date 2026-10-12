@@ -25,9 +25,9 @@ public final class HarbingerLaser implements ExecutionDriver<Death_Laser_Beam_En
         var driver=new HarbingerLaser(host,frame.origin(),facing,charge);
         var origin=driver.origin();if(!world.hasChunkAt(BlockPos.containing(origin)) || charge.affordableCount(1)==0)return false;
         int ticks=(int)Math.max(20,Math.min(1200,Math.round(60*Math.max(.1,1+.5*duration))));
-        var beam=new Death_Laser_Beam_Entity(ModEntities.DEATH_LASER_BEAM.get(),world,frame.damageOwner()==null?frame.caster():frame.damageOwner(),origin.x,origin.y,origin.z,0,0,ticks,Math.max(0,(float)CMCommonConfig.Harbinger.DeathLaserdamage+Resources.damageBonus(amp)),(float)CMCommonConfig.Harbinger.DeathLaserHpdamage);
+        var beam=new Death_Laser_Beam_Entity(ModEntities.DEATH_LASER_BEAM.get(),world,frame.damageOwner()==null?frame.caster():frame.damageOwner(),origin.x,origin.y,origin.z,0,0,ticks,Math.max(0,(float)CMCommonConfig.Harbinger.DeathLaserdamage),(float)CMCommonConfig.Harbinger.DeathLaserHpdamage);
         beam.setFire(frame.caster().getHealth()<=frame.caster().getMaxHealth()/2);((ManagedDeathLaser)beam).confluxHarbinger$managed(true);
-        var execution=frame.withExecutor(host==null?frame.caster():host).withAccount(charge.account());NativeSpellDamage.bind(beam,execution);
+        var execution=frame.withExecutor(host==null?frame.caster():host).withAccount(charge.account());NativeDamageContexts.bind(beam,execution,amp);
         driver.pose(beam);
         return ExecutionSessions.start(new ExecutionSession<>(world,execution,beam,ticks+27,driver,h->{},()->GlyphCatalog.DEATH_LASER.isEnabled(),ExecutionScope.DIRECT));
     }

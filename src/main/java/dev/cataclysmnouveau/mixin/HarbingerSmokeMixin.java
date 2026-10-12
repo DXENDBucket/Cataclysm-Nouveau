@@ -11,7 +11,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 @Mixin(value=Wither_Smoke_Effect_Entity.class,remap=false)
 public abstract class HarbingerSmokeMixin extends Entity implements HarbingerSmoke {
     @Unique private static final EntityDataAccessor<Boolean> harbinger$MANAGED_SMOKE=SynchedEntityData.defineId(Wither_Smoke_Effect_Entity.class,EntityDataSerializers.BOOLEAN);
-    @Unique private float harbinger$bonus;
+    @Unique private float harbinger$amplification;
     @Inject(method="defineSynchedData",at=@At("TAIL"))
     private void harbinger$define(SynchedEntityData.Builder builder,CallbackInfo ci){builder.define(harbinger$MANAGED_SMOKE,false);}
     public boolean confluxHarbinger$managedSmoke(){return entityData.get(harbinger$MANAGED_SMOKE);}
@@ -22,8 +22,8 @@ public abstract class HarbingerSmokeMixin extends Entity implements HarbingerSmo
         if(harbinger$MANAGED_SMOKE.equals(key))noCulling=confluxHarbinger$managedSmoke();
     }
     protected HarbingerSmokeMixin(EntityType<?> type,Level level){super(type,level);}
-    public float confluxHarbinger$bonus(){return harbinger$bonus;}
-    public void confluxHarbinger$bonus(float v){harbinger$bonus=v;}
+    public float confluxHarbinger$amplification(){return harbinger$amplification;}
+    public void confluxHarbinger$amplification(float v){harbinger$amplification=v;}
     @Override public boolean shouldBeSaved(){return !confluxHarbinger$managedSmoke() && NativeSpellDamage.context(this)==null && super.shouldBeSaved();}
     @Inject(method="tick",at=@At("HEAD"),cancellable=true)
     private void harbinger$alive(CallbackInfo ci){var c=NativeSpellDamage.context(this);if(c!=null && (c.caster()==null || !c.caster().isAlive() || c.caster().level()!=level())){discard();ci.cancel();}}

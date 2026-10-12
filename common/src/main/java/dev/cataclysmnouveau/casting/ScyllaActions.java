@@ -33,7 +33,7 @@ public final class ScyllaActions {
                 MonstrosityCasting.scaledTicks(CataclysmConfig.waterWalkingDuration(),duration),0,false,true),cast.caster());
         if(actor.isPassenger() || ACTORS.contains(actor.getUUID()) || ExecutionSessions.isCasting(actor)) return false;
         var frame=cast.withExecutor(actor);
-        var boss=new SpellScylla(world,frame,actor.position(),Resources.damageBonus(amp));
+        var boss=new SpellScylla(world,frame,actor.position(),Resources.amplification(amp));
         Vec3 forward=actor.getLookAngle();heading(boss,forward);
         if(ability==Ability.ANCHOR_LEAP) return leap(world,frame,actor,boss,forward);
         var aim=world.clip(new ClipContext(actor.getEyePosition(),actor.getEyePosition().add(forward.scale(32)),ClipContext.Block.COLLIDER,ClipContext.Fluid.NONE,actor));

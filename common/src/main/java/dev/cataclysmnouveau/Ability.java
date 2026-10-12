@@ -34,7 +34,11 @@ public enum Ability {
     WITHER_MISSILE("wither_missile", "Wither Missile", 90),
     HOMING_MISSILE("homing_missile", "Homing Missile", 120),
     WITHER_HOWITZER("wither_howitzer", "Wither Howitzer", 200),
-    DEATH_LASER("death_laser", "Death Laser", 60);
+    DEATH_LASER("death_laser", "Death Laser", 60),
+    HARBINGER_CHARGE("harbinger_charge", "Harbinger Charge", 180),
+    HOWITZER_VOLLEY("howitzer_volley", "Howitzer Volley", 400),
+    MISSILE_SALVO("missile_salvo", "Missile Salvo", 240),
+    WITHER_SMOKE("wither_smoke", "Wither Smoke", 40);
     public final String id, name;
     public final int mana;
     Ability(String id, String name, int mana) { this.id=id; this.name=name; this.mana=mana; }
@@ -42,7 +46,7 @@ public enum Ability {
     /** Acquisition/source families, shared by all presentation surfaces. */
     public Series series() {
         return switch(this) {
-            case LASER_BOLT,WITHER_MISSILE,HOMING_MISSILE,WITHER_HOWITZER,DEATH_LASER -> Series.HARBINGER;
+            case LASER_BOLT,WITHER_MISSILE,HOMING_MISSILE,WITHER_HOWITZER,DEATH_LASER,HARBINGER_CHARGE,HOWITZER_VOLLEY,MISSILE_SALVO,WITHER_SMOKE -> Series.HARBINGER;
             case AMETHYST_CLUSTER -> Series.AMETHYST_CRAB;
             case LIONFISH_SPIKE -> Series.LIONFISH;
             case VOID_RUNE -> Series.ENDER_GOLEM;

@@ -76,13 +76,13 @@ public final class NativeAbilityTests {
                 var state=(ManagedProjectile)nativeEntity;state.confluxCataclysm$mode(2);
                 h.getLevel().addFreshEntity(nativeEntity);NativePayloads.hit(nativeEntity,new EntityHitResult(target));
                 double base=ability==Ability.AMETHYST_CLUSTER?com.github.L_Ender.cataclysm.config.CMCommonConfig.AmethystCrab.AmethystClusterDamage:ability==Ability.FLARE_BOMB?7:4;
-                close(h,500-target.getHealth(),base+Resources.damageBonus(1),"Native damage plus configured Harm amplification");
+                close(h,500-target.getHealth(),Resources.augmentedDamage(base,1),"Native damage plus configured Harm amplification");
                 h.assertTrue(nativeEntity.getOwner()==p && nativeEntity.isRemoved(),"Native owner and on-hit removal retained");
                 if (ability==Ability.LIONFISH_SPIKE) h.assertTrue(target.hasEffect(MobEffects.POISON) && target.getEffect(MobEffects.POISON).getDuration()==60,"Native three-second poison retained");
                 target.discard();
             }
             var target=cow(h,scene(h).add(0,1,3));var ordinary=new Lionfish_Spike_Entity(h.getLevel(),p);
-            ((ManagedProjectile)ordinary).confluxCataclysm$bonus(100);
+            ((ManagedProjectile)ordinary).confluxCataclysm$amplification(100);
             NativePayloads.hit(ordinary,new EntityHitResult(target));
             close(h,500-target.getHealth(),4,"Unmanaged original projectile stays unchanged");
             h.succeed();
@@ -177,19 +177,19 @@ public final class NativeAbilityTests {
         var rune=runes.get(0);var jet=jets.get(0);
         h.assertTrue(rune.getCaster()==p && jet.getCaster()==p,"Native damage attribution follows caster");
         h.assertTrue(marker.hits==1,"Later Ars effects resolve immediately, independent of native warmup");
-        close(h,rune.getDamage(),CataclysmConfig.groundDamage(Ability.VOID_RUNE)+Resources.damageBonus(1),"Rune amplification");
-        close(h,jet.getDamage(),CataclysmConfig.groundDamage(Ability.FLAME_JET)+Resources.damageBonus(1),"Jet amplification");
+        close(h,rune.getDamage(),CataclysmConfig.groundDamage(Ability.VOID_RUNE),"Rune amplification");
+        close(h,jet.getDamage(),CataclysmConfig.groundDamage(Ability.FLAME_JET),"Jet amplification");
         close(h,mana.getCurrentMana(),10000-CataclysmConfig.cost(Ability.VOID_RUNE)-CataclysmConfig.cost(Ability.FLAME_JET)-2*CataclysmConfig.amplifyCost(),"Each actual spawn pays its own quote once");
         close(h,runeTarget.getHealth(),500,"Rune has no immediate damage");
         close(h,jetTarget.getHealth(),500,"Jet has no immediate damage");
         h.runAfterDelay(CataclysmConfig.groundWarmup(Ability.FLAME_JET)+9,()->{
-            close(h,500-jetTarget.getHealth(),jet.getDamage(),"Native jet attacks after its animation delay");
+            close(h,500-jetTarget.getHealth(),Resources.augmentedDamage(jet.getDamage(),1),"Native jet attacks after its animation delay");
             h.assertTrue(jetTarget.isOnFire(),"Native five-second ignition retained");
             close(h,ally.getHealth(),500,"Native alliance filtering retained");
             h.assertTrue(!ally.isOnFire(),"Allies are not ignited");
         });
         h.runAfterDelay(CataclysmConfig.groundWarmup(Ability.VOID_RUNE)+17,()->{
-            close(h,500-runeTarget.getHealth(),rune.getDamage(),"Native rune attack window and amplified damage retained");
+            close(h,500-runeTarget.getHealth(),Resources.augmentedDamage(rune.getDamage(),1),"Native rune attack window and amplified damage retained");
         });
         h.runAfterDelay(Math.max(CataclysmConfig.groundWarmup(Ability.VOID_RUNE)+36,CataclysmConfig.groundWarmup(Ability.FLAME_JET)+24),()->{
             try {
@@ -245,7 +245,7 @@ public final class NativeAbilityTests {
         int quote=Resources.quote(cast.spellContext,Ability.CERAUNUS,List.of(AugmentAmplify.INSTANCE)).amount();
         close(h,mana.getCurrentMana(),10000-quote,"Only launch pays");
         ((ProjectileHitAccess)anchor).confluxCataclysm$nativeHit(new EntityHitResult(target));
-        close(h,500-target.getHealth(),CataclysmConfig.anchorDamage()+Resources.damageBonus(1),"Anchor base ignores caster melee and follows Harm amplification");
+        close(h,500-target.getHealth(),Resources.augmentedDamage(CataclysmConfig.anchorDamage(),1),"Anchor base ignores caster melee and follows Harm amplification");
         h.assertTrue(anchor.getReturn() && !anchor.isRemoved(),"Native return survives impact");
         h.assertTrue(marker.hits==1 && anchor.getOwner()==p,"Native ownership and exactly one continuation");
         state.confluxCataclysm$impact().accept(new EntityHitResult(target));
@@ -379,7 +379,7 @@ public final class NativeAbilityTests {
             h.getLevel().setBlockAndUpdate(base.offset(x,0,z),Blocks.STONE.defaultBlockState());
         // Native Boss projectiles are opt-out, even if an addon bonus field happens to be set.
         var ordinary=new Flare_Bomb_Entity(com.github.L_Ender.cataclysm.init.ModEntities.FLARE_BOMB.get(),h.getLevel(),p);
-        ordinary.setPos(impact);((ManagedProjectile)ordinary).confluxCataclysm$bonus(100);
+        ordinary.setPos(impact);((ManagedProjectile)ordinary).confluxCataclysm$amplification(100);
         NativePayloads.hit(ordinary,block(impact));
         var originalJets=h.getLevel().getEntitiesOfClass(Flame_Jet_Entity.class,area);
         h.assertTrue(originalJets.size()==40,"Native four-arm pattern creates 40 jets on flat ground");
@@ -397,7 +397,7 @@ public final class NativeAbilityTests {
         h.assertTrue(jets.size()==40 && payload.isRemoved() && marker.hits==1,"Native impact expands once and continues Ars once");
         for(var jet:jets) {
             h.assertTrue(jet.getCaster()==p,"Generated jets inherit the actual damage owner");
-            close(h,jet.getDamage(),CataclysmConfig.flareJetDamage()+Resources.damageBonus(1),"Amplification reaches secondary attacks");
+            close(h,jet.getDamage(),CataclysmConfig.flareJetDamage(),"Amplification reaches secondary attacks");
         }
         var outer=jets.stream().max(Comparator.comparingDouble(jet->jet.position().distanceToSqr(impact))).orElseThrow();
         var target=cow(h,outer.position());var ally=cow(h,outer.position());
@@ -460,7 +460,7 @@ public final class NativeAbilityTests {
             var mana=CapabilityRegistry.getMana(a.p);double before=mana.getCurrentMana();
             a.p.setHealth(5);a.cast(GlyphCatalog.QUAKE,block(a.center),true);
             double attack=25*com.github.L_Ender.cataclysm.config.CMCommonConfig.NetheriteMonstrosity.attackMultiplier;
-            double expected=attack+Math.min(attack,500*com.github.L_Ender.cataclysm.config.CMCommonConfig.NetheriteMonstrosity.SmashHpdamage)+Resources.damageBonus(1);
+            double expected=Resources.augmentedDamage(attack+Math.min(attack,500*com.github.L_Ender.cataclysm.config.CMCommonConfig.NetheriteMonstrosity.SmashHpdamage),1);
             close(h,500-victim.getHealth(),expected,"Quake uses Boss base and capped target-health damage, plus flat amplification");
             h.assertTrue(victim.getLastDamageSource().getEntity()==a.p && victim.getDeltaMovement().y>0 && victim.isOnFire(),"Owner, native launch and berserk ignition preserved");
             close(h,ally.getHealth(),500,"Allied targets excluded");close(h,before-mana.getCurrentMana(),CataclysmConfig.cost(Ability.EARTHQUAKE)+10,"One actual attack pays once");
@@ -473,7 +473,7 @@ public final class NativeAbilityTests {
         var a=new Arena(h);a.cast(GlyphCatalog.RINGS,block(a.center),true);
         var jets=h.getLevel().getEntitiesOfClass(Flame_Jet_Entity.class,new AABB(a.center,a.center).inflate(20));
         h.assertTrue(jets.size()==56,"Healthy Boss pattern is two sets of seven spokes with four rings");
-        for(var jet:jets) {h.assertTrue(jet.getCaster()==a.p,"Native jet owner is the caster, never a dummy Boss");close(h,jet.getDamage(),CataclysmConfig.groundDamage(Ability.FLAME_JET)+Resources.damageBonus(1),"Ring amplification reaches each native jet");}
+        for(var jet:jets) {h.assertTrue(jet.getCaster()==a.p,"Native jet owner is the caster, never a dummy Boss");close(h,jet.getDamage(),CataclysmConfig.groundDamage(Ability.FLAME_JET),"Ring amplification reaches each native jet");}
         a.p.setHealth(5);a.cast(GlyphCatalog.RINGS,block(a.center),false);
         var all=h.getLevel().getEntitiesOfClass(Flame_Jet_Entity.class,new AABB(a.center,a.center).inflate(20));
         h.assertTrue(all.size()==56+224,"Berserk Boss produces two sets of fourteen spokes and eight rings");
@@ -501,7 +501,7 @@ public final class NativeAbilityTests {
             a.p.setPos(a.center);a.p.setYRot(0);var victim=a.target(a.center.add(0,0,1),false);var ally=a.target(a.center.add(0,0,1),true);
             a.cast(GlyphCatalog.CHARGE,new EntityHitResult(a.p),true);ExecutionSessions.tick();
             h.assertTrue(victim.hasEffect(ModEffect.EFFECTBONE_FRACTURE) && victim.getLastDamageSource().getEntity()==a.p,"Native shoulder impact inflicts fracture with actual attribution");
-            close(h,500-victim.getHealth(),25*.4*com.github.L_Ender.cataclysm.config.CMCommonConfig.NetheriteMonstrosity.attackMultiplier+Resources.damageBonus(1),"Native shoulder damage plus Harm amplification");
+            close(h,500-victim.getHealth(),Resources.augmentedDamage(25*.4*com.github.L_Ender.cataclysm.config.CMCommonConfig.NetheriteMonstrosity.attackMultiplier,1),"Native shoulder damage plus Harm amplification");
             close(h,ally.getHealth(),500,"Shoulder protects allies");h.assertTrue(a.p.getDeltaMovement().z>0 && dev.arsconflux.api.execution.ExecutionSessions.isCasting(a.p),"Caster receives a forward dash during the session");
             a.p.horizontalCollision=true;ExecutionSessions.tick();h.assertTrue(!ExecutionSessions.isCasting(a.p),"Obstacle stops the dash session");a.p.horizontalCollision=false;
             a.cast(GlyphCatalog.CHARGE,new EntityHitResult(ally),false);ExecutionSessions.tick();h.assertTrue(ally.getDeltaMovement().z>0,"An allied target can execute the dash");
@@ -517,7 +517,7 @@ public final class NativeAbilityTests {
         h.assertTrue(h.getLevel().getBlockState(positions.getFirst()).isAir() && h.getLevel().getBlockState(positions.getLast()).is(Blocks.LAVA),"First native absorption wave is local");
         h.runAfterDelay(7,()->{try {
             h.assertTrue(positions.stream().allMatch(p->h.getLevel().getBlockState(p).isAir()),"All three native lava absorption radii execute");
-            close(h,a.p.getHealth(),50+3*(CataclysmConfig.absorptionHeal()+Resources.damageBonus(1)),"Only successful waves heal with amplification");
+            close(h,a.p.getHealth(),50+3*(CataclysmConfig.absorptionHeal()+Resources.healingBonus(1)),"Only successful waves heal with amplification");
             double before=CapabilityRegistry.getMana(a.p).getCurrentMana();a.cast(GlyphCatalog.ABSORB,block(a.center),false);
             close(h,CapabilityRegistry.getMana(a.p).getCurrentMana(),before,"Empty area produces no healing and refunds mana");h.succeed();
         }finally{a.close();}});
@@ -695,7 +695,7 @@ public final class NativeAbilityTests {
             var water=(Water_Spear_Entity)SpearCasting.create(Ability.WATER_SPEAR,h.getLevel(),frame,new Vec3(1,0,0),1,0);
             ((ManagedProjectile)water).confluxCataclysm$mode(2);
             ((ProjectileHitAccess)water).confluxCataclysm$nativeHit(new EntityHitResult(victim));
-            close(h,500-victim.getHealth(),CataclysmConfig.scyllaSpearDamage()+Resources.damageBonus(1),"Native spear damage and amplification");
+            close(h,500-victim.getHealth(),Resources.augmentedDamage(CataclysmConfig.scyllaSpearDamage(),1),"Native spear damage and amplification");
             h.assertTrue(victim.hasEffect(ModEffect.EFFECTWETNESS) && victim.getEffect(ModEffect.EFFECTWETNESS).getDuration()==200,"Native Wetness retained");
             ((ProjectileHitAccess)water).confluxCataclysm$nativeHit(new BlockHitResult(a.center,Direction.WEST,BlockPos.containing(a.center),false));
             h.assertTrue(water.getTotalBounces()==7 && water.getDeltaMovement().x<0,"Native water reflection and bounce budget retained");
@@ -707,7 +707,7 @@ public final class NativeAbilityTests {
             var fields=h.getLevel().getEntitiesOfClass(com.github.L_Ender.cataclysm.entity.effect.Lightning_Area_Effect_Entity.class,box);
             h.assertTrue(lightning.isRemoved() && storms.size()==1 && fields.size()==1,"Lightning block impact creates both native subeffects");
             h.assertTrue(storms.getFirst().getCaster()==a.p && fields.getFirst().getOwner()==a.p,"Child damage ownership stays with the caster");
-            close(h,storms.getFirst().getDamage(),CataclysmConfig.scyllaFieldDamage()+Resources.damageBonus(1),"Native spear landing damage uses its area damage parameter");
+            close(h,storms.getFirst().getDamage(),CataclysmConfig.scyllaFieldDamage(),"Native spear landing damage uses its area damage parameter");
             h.assertTrue(!storms.getFirst().shouldBeSaved() && !fields.getFirst().shouldBeSaved(),"Transient child context is not saved");
             var ordinary=new Water_Spear_Entity(a.p,new Vec3(0,0,1),h.getLevel(),3,2);
             h.assertTrue(((ManagedProjectile)ordinary).confluxCataclysm$mode()==0 && ordinary.shouldBeSaved(),"Ordinary Boss spears remain unmanaged");
@@ -769,7 +769,7 @@ public final class NativeAbilityTests {
         h.assertTrue(storms.size()==36 && sparks.size()==2,"Native burst produces 35 delayed strikes and two sparks, besides standalone storm");
         h.assertTrue(storms.stream().allMatch(e->e.getCaster()==a.p) && sparks.stream().allMatch(e->e.getOwner()==a.p),"No detached Boss retains damage ownership");
         h.assertTrue(h.getLevel().getEntitiesOfClass(com.github.L_Ender.cataclysm.entity.InternalAnimationMonster.IABossMonsters.Scylla.Scylla_Entity.class,box).isEmpty(),"Invocation frame is never spawned");
-        close(h,fields.getFirst().getDamage(),CataclysmConfig.scyllaFieldDamage()+Resources.damageBonus(1),"Field amplification");
+        close(h,fields.getFirst().getDamage(),CataclysmConfig.scyllaFieldDamage(),"Field amplification");
         h.runAfterDelay(32,()->{
             h.assertTrue(victim.getHealth()<500 && victim.getLastDamageSource().getEntity()==a.p,"Native storm/field damage reaches the target with caster credit");
             close(h,ally.getHealth(),500,"Storm and field skip allies");
@@ -808,7 +808,7 @@ public final class NativeAbilityTests {
             var storms=h.getLevel().getEntitiesOfClass(com.github.L_Ender.cataclysm.entity.effect.Lightning_Storm_Entity.class,box);
             var fields=h.getLevel().getEntitiesOfClass(com.github.L_Ender.cataclysm.entity.effect.Lightning_Area_Effect_Entity.class,box);
             h.assertTrue(spark.isRemoved() && storms.size()==1 && fields.size()==1,"Native spark landing generates both complete subeffects");
-            close(h,storms.getFirst().getDamage(),CataclysmConfig.scyllaStormDamage()+Resources.damageBonus(1),"Spark strike amplification");
+            close(h,storms.getFirst().getDamage(),CataclysmConfig.scyllaStormDamage(),"Spark strike amplification");
             h.assertTrue(storms.getFirst().getCaster()==a.p && fields.getFirst().getOwner()==a.p,"Spark subeffects retain real ownership");
             var mana=CapabilityRegistry.getMana(a.p);mana.setMana(10000);var marker=new Marker();
             var cast=resolver(h,a.p,new Spell(MethodProjectile.INSTANCE,GlyphCatalog.SPARK,marker));cast.spellContext.nextPart();
@@ -843,7 +843,7 @@ public final class NativeAbilityTests {
             for(var spear:spears) {
                 h.assertTrue(spear.getOwner()==a.p && !spear.shouldBeSaved(),"Cloud spear belongs to caster and is transient");
                 double base=spear instanceof Water_Spear_Entity?com.github.L_Ender.cataclysm.config.CMCommonConfig.Scylla.SpearDamage:com.github.L_Ender.cataclysm.config.CMCommonConfig.Scylla.SnakeDamage;
-                close(h,spear.getDamage(),base+Resources.damageBonus(1),"Cloud preserves its native per-type damage plus amplification");
+                close(h,spear.getDamage(),base,"Cloud preserves its native per-type damage plus amplification");
             }
             close(h,CapabilityRegistry.getMana(a.p).getCurrentMana(),before-CataclysmConfig.cost(Ability.THUNDER_CLOUD)-CataclysmConfig.amplifyCost(),"No per-spear hidden extra fee");
             int completed=spears.size();a.cast(GlyphCatalog.CLOUD,new EntityHitResult(victim),false);
@@ -865,7 +865,7 @@ public final class NativeAbilityTests {
         h.runAfterDelay(80,()->{try {
             h.assertTrue(strikes.size()==18 && strikes.stream().allMatch(Entity::isRemoved),"Both nine-strike native waves complete and expire");
             for(var storm:strikes) {
-                close(h,storm.getDamage(),CataclysmConfig.scyllaStormDamage()+Resources.damageBonus(1),"Row strike amplification");
+                close(h,storm.getDamage(),CataclysmConfig.scyllaStormDamage(),"Row strike amplification");
                 h.assertTrue(storm.getCaster()==a.p && !storm.shouldBeSaved(),"Rows retain true damage ownership without a Boss");
             }
             h.succeed();
@@ -970,7 +970,7 @@ public final class NativeAbilityTests {
             net.neoforged.neoforge.common.NeoForge.EVENT_BUS.addListener(pre);net.neoforged.neoforge.common.NeoForge.EVENT_BUS.addListener(post);
             try {
                 var payload=NativePayloads.projectile(Ability.AMETHYST_CLUSTER,h.getLevel(),frame,1);((ManagedProjectile)payload).confluxCataclysm$mode(2);
-                float base=(float)com.github.L_Ender.cataclysm.config.CMCommonConfig.AmethystCrab.AmethystClusterDamage+Resources.damageBonus(1);
+                float base=Resources.augmentedDamage(com.github.L_Ender.cataclysm.config.CMCommonConfig.AmethystCrab.AmethystClusterDamage,1);
                 NativePayloads.hit(payload,new EntityHitResult(victim));
                 close(h,quoted[0],base+6,"Ars adds equipment attribute once, after native amplification");
                 h.assertTrue(500-victim.getHealth()>=(base+6)*1.5 && calls[0]==1 && calls[1]==1,"One Pre and one successful Post; native damage also supports external bridge scaling");
@@ -1083,7 +1083,7 @@ public final class NativeAbilityTests {
                 var payload=HarbingerCasting.create(ability,h.getLevel(),ctx,new Vec3(0,0,1),enemy,1);payload.setPos(enemy.position());((ManagedProjectile)payload).confluxCataclysm$mode(2);
                 ((ProjectileHitAccess)payload).confluxCataclysm$nativeHit(new EntityHitResult(enemy));
                 double base=ability==Ability.LASER_BOLT?com.github.L_Ender.cataclysm.config.CMCommonConfig.Harbinger.Laserdamage:ability==Ability.WITHER_HOWITZER?11:com.github.L_Ender.cataclysm.config.CMCommonConfig.Harbinger.WitherMissiledamage;
-                h.assertTrue(500-enemy.getHealth()>=base+Resources.damageBonus(1),"Native hit plus Harm amplification");close(h,ally.getHealth(),500,"Explosion spares allies");
+                h.assertTrue(500-enemy.getHealth()>=Resources.augmentedDamage(base,1),"Native hit plus Harm amplification");close(h,ally.getHealth(),500,"Explosion spares allies");
                 if(ability==Ability.LASER_BOLT)h.assertTrue(enemy.isOnFire(),"Laser ignition retained");
                 if(ability==Ability.WITHER_HOWITZER)h.assertTrue(enemy.hasEffect(MobEffects.WITHER),"Shell withering retained");
                 enemy.discard();ally.discard();
@@ -1136,8 +1136,90 @@ public final class NativeAbilityTests {
             replica.getEntityData().assignValues(packet.packedItems());
             h.assertTrue(replica.noCulling && ((HarbingerSmoke)replica).confluxHarbinger$managedSmoke(),"Spawn metadata installs the particle-tick protection on the receiving entity");
             enemy.setHealth(500);enemy.invulnerableTime=0;for(int tick=0;tick<12;tick++){++cloud.tickCount;cloud.tick();}
-            close(h,500-enemy.getHealth(),3+Resources.damageBonus(1),"Smoke inherits Harm amplification");close(h,ally.getHealth(),500,"Smoke spares allies");
+            close(h,500-enemy.getHealth(),Resources.augmentedDamage(3,1),"Smoke inherits Harm amplification");close(h,ally.getHealth(),500,"Smoke spares allies");
             h.assertTrue(enemy.hasEffect(MobEffects.WITHER),"Native smoke debuff retained");a.p.setHealth(0);cloud.tick();h.assertTrue(cloud.isRemoved(),"Root death cleans up cloud");h.succeed();
+        }
+    }
+
+    @GameTest(template="empty",batch="cat_bounded_augments",timeoutTicks=100)
+    public static void boundedDamageAugmentsUseNativeBaseAndPrecedeGear(GameTestHelper h) {
+        close(h,Resources.augmentedDamage(5,1),7,"Low damage has a two-point floor");
+        close(h,Resources.augmentedDamage(20,1),24,"Midrange hit scales by twenty percent");
+        close(h,Resources.augmentedDamage(100,1),110,"High damage has a ten-point ceiling");
+        close(h,Resources.augmentedDamage(20,3),32,"Multiple augments use the same original base");
+        close(h,Resources.augmentedDamage(20,-2),12,"Dampen uses the same bounded step");
+        close(h,Resources.augmentedDamage(5,-100),0,"Dampen cannot create negative hurt");
+        try(var a=new Arena(h)) {
+            a.p.getAttribute(com.hollingsworth.arsnouveau.api.perk.PerkAttributes.SPELL_DAMAGE_BONUS).setBaseValue(6);
+            var victim=a.target(a.center.add(0,0,1),false);var r=resolver(h,a.p,new Spell(MethodTouch.INSTANCE,GlyphCatalog.WAVE));
+            var ctx=CastContext.of(r.spellContext,new EntityHitResult(victim),null);
+            var wave=NativeDamageContexts.bind(new Wave_Entity(h.getLevel(),a.p,80,100),ctx,2);((ManagedProjectile)wave).confluxCataclysm$mode(2);
+            wave.setPos(a.center);wave.setState(1);h.getLevel().addFreshEntity(wave);wave.tick();
+            close(h,500-victim.getHealth(),126,"Two bounded augments then a six-point Ars attribute, exactly once");
+            victim.invulnerableTime=0;victim.setHealth(500);wave.discard();
+            var weak=NativeDamageContexts.bind(new Wave_Entity(h.getLevel(),a.p,80,100),ctx,-2);((ManagedProjectile)weak).confluxCataclysm$mode(2);
+            weak.setPos(a.center);weak.setState(1);h.getLevel().addFreshEntity(weak);weak.tick();
+            close(h,500-victim.getHealth(),86,"Dampen reduces before external attributes");h.succeed();
+        }
+    }
+    @GameTest(template="empty",batch="cat_harbinger_howvol",timeoutTicks=100)
+    public static void howitzerVolleysRetainTwoWavesHalfHealthAndChildOwnership(GameTestHelper h) {
+        var a=new Arena(h);a.p.setPos(a.center);a.p.setNoGravity(true);
+        var target=a.target(a.center.add(0,0,16),false);var spawned=new ArrayList<Wither_Howitzer_Entity>();var times=new ArrayList<Long>();var emitterYs=new ArrayList<Double>();
+        java.util.function.Consumer<net.neoforged.neoforge.event.entity.EntityJoinLevelEvent> listener=e->{if(e.getEntity() instanceof Wither_Howitzer_Entity shell && shell.getOwner()==a.p){spawned.add(shell);times.add(h.getLevel().getGameTime());emitterYs.add(shell.getY());}};
+        net.neoforged.neoforge.common.NeoForge.EVENT_BUS.addListener(listener);a.cast(GlyphCatalog.HOWITZER_VOLLEY,new EntityHitResult(target),true);
+        close(h,CapabilityRegistry.getMana(a.p).getCurrentMana(),10000-CataclysmConfig.cost(Ability.HOWITZER_VOLLEY)-CataclysmConfig.amplifyCost(),"One prepaid action, not per-child payload charges");
+        h.runAfterDelay(25,()->{try {
+            h.assertTrue(spawned.size()==10 && times.get(5)-times.get(0)==6,"Two native waves of five, six ticks apart");
+            h.assertTrue(spawned.stream().allMatch(e->!e.shouldBeSaved() && NativeDamageContexts.amplification(e)==1 && NativeSpellDamage.context(e).caster()==a.p),"Native shells retain amplification, root ownership and independent lifetimes");
+            close(h,emitterYs.getFirst(),a.p.getEyeY(),"Detached Boss barrel is placed at the caster eye height");
+            spawned.forEach(Entity::discard);spawned.clear();times.clear();emitterYs.clear();a.p.setHealth(a.p.getMaxHealth()/2);
+            a.cast(GlyphCatalog.HOWITZER_VOLLEY,new EntityHitResult(target),false);
+        }catch(RuntimeException|Error error){net.neoforged.neoforge.common.NeoForge.EVENT_BUS.unregister(listener);a.close();throw error;}});
+        h.runAfterDelay(51,()->{try{h.assertTrue(spawned.size()==14,"Half-health native waves each contain seven shells");h.succeed();}finally{net.neoforged.neoforge.common.NeoForge.EVENT_BUS.unregister(listener);a.close();}});
+    }
+    @GameTest(template="empty",batch="cat_harbinger_missalvo",timeoutTicks=230)
+    public static void missileSalvosRetainNativeTimingsAndHalfHealthPairs(GameTestHelper h) {
+        var a=new Arena(h);a.p.setPos(a.center);a.p.setNoGravity(true);var target=a.target(a.center.add(0,0,16),false);
+        var missiles=new ArrayList<Wither_Homing_Missile_Entity>();var times=new ArrayList<Long>();
+        java.util.function.Consumer<net.neoforged.neoforge.event.entity.EntityJoinLevelEvent> listener=e->{if(e.getEntity() instanceof Wither_Homing_Missile_Entity m && m.getOwner()==a.p){missiles.add(m);times.add(h.getLevel().getGameTime());}};
+        net.neoforged.neoforge.common.NeoForge.EVENT_BUS.addListener(listener);a.cast(GlyphCatalog.MISSILE_SALVO,new EntityHitResult(target),true);
+        close(h,CapabilityRegistry.getMana(a.p).getCurrentMana(),10000-CataclysmConfig.cost(Ability.MISSILE_SALVO)-CataclysmConfig.amplifyCost(),"Salvo pays once before its native launch sequence");
+        h.runAfterDelay(113,()->{try {
+            h.assertTrue(missiles.size()==6 && times.get(1)-times.get(0)==4 && times.get(3)-times.get(0)==18,"Normal native side launch groups");
+            h.assertTrue(missiles.stream().allMatch(e->!e.shouldBeSaved() && NativeSpellDamage.context(e).caster()==a.p && NativeDamageContexts.amplification(e)==1),"Salvo retains native payloads and augmented context");
+            missiles.forEach(Entity::discard);missiles.clear();times.clear();a.p.setHealth(a.p.getMaxHealth()/2);
+            var ally=a.target(a.center,true);ally.setYRot(0);ally.setXRot(0);a.cast(GlyphCatalog.MISSILE_SALVO,new EntityHitResult(ally),false);
+        }catch(RuntimeException|Error error){net.neoforged.neoforge.common.NeoForge.EVENT_BUS.unregister(listener);a.close();throw error;}});
+        h.runAfterDelay(199,()->{try{h.assertTrue(missiles.size()==6 && times.get(0).equals(times.get(1)) && times.get(2)-times.get(0)==4 && times.get(4)-times.get(0)==8,"Half-health root selects the compact three paired launches from an allied emitter");h.succeed();}finally{net.neoforged.neoforge.common.NeoForge.EVENT_BUS.unregister(listener);a.close();}});
+    }
+    @GameTest(template="empty",batch="cat_harbinger_charge",timeoutTicks=100)
+    public static void harbingerChargeMovesAllyHitsEnemyAndLeavesTerrain(GameTestHelper h) {
+        var a=new Arena(h);var actor=a.target(a.center,true);actor.setYRot(0);actor.setXRot(0);actor.setOnGround(true);actor.setNoGravity(false);((Mob)actor).setNoAi(false);actor.getAttribute(Attributes.MOVEMENT_SPEED).setBaseValue(0);
+        var victim=a.target(a.center.add(0,0,1.5),false);var original=actor.position();var stone=BlockPos.containing(a.center.add(1,0,0));h.getLevel().setBlockAndUpdate(stone,Blocks.STONE.defaultBlockState());
+        int[] hits={0};java.util.function.Consumer<com.hollingsworth.arsnouveau.api.event.SpellDamageEvent.Post> post=e->{if(e.caster==a.p && e.target==victim)hits[0]++;};
+        net.neoforged.neoforge.common.NeoForge.EVENT_BUS.addListener(post);a.cast(GlyphCatalog.HARBINGER_CHARGE,new EntityHitResult(actor),true);
+        h.assertTrue(HarbingerActions.isCharging(actor),"Allied actor reserves its movement independently");
+        h.runAfterDelay(58,()->{try{
+            h.assertTrue(actor.position().distanceToSqr(original)>4,"Actual actor moves with native charge impulse");h.assertTrue(hits[0]>0 && victim.getHealth()<500,"Native collision damage belongs to root caster and reaches Ars events");
+            close(h,actor.getHealth(),500,"Native collision ignores executor ally");h.assertTrue(h.getLevel().getBlockState(stone).is(Blocks.STONE),"Charge invocation never runs native terrain griefing");
+            h.assertTrue(!HarbingerActions.isCharging(actor),"Native action ending releases actor movement");
+            a.p.setHealth(a.p.getMaxHealth()/2);var r=resolver(h,a.p,new Spell(MethodSelf.INSTANCE,GlyphCatalog.HARBINGER_CHARGE));var ctx=CastContext.of(r.spellContext,new EntityHitResult(actor),null).withExecutor(actor);
+            var frame=new SpellHarbinger(h.getLevel(),ctx,Ability.HARBINGER_CHARGE,actor.position(),0,0);frame.setTarget(victim);frame.setOverload(1);frame.acceptingRepeat=true;
+            long seed=0;while(net.minecraft.util.RandomSource.create(seed).nextInt(2)!=0)seed++;frame.getRandom().setSeed(seed);
+            frame.nativeGoal("ChargeGoal").stop();h.assertTrue(frame.isPowered() && frame.repeatRequested,"Native half-health repeat chance uses root health and is captured without broadcasting a detached Boss");h.succeed();
+        }finally{net.neoforged.neoforge.common.NeoForge.EVENT_BUS.unregister(post);a.close();}});
+    }
+    @GameTest(template="empty",batch="cat_harbinger_standalone_smoke",timeoutTicks=100)
+    public static void standaloneSmokeDurationDamageFeeAndRootCleanup(GameTestHelper h) {
+        try(var a=new Arena(h)) {
+            var r=resolver(h,a.p,new Spell(MethodTouch.INSTANCE,GlyphCatalog.SMOKE,AugmentAmplify.INSTANCE,com.hollingsworth.arsnouveau.common.spell.augment.AugmentExtendTime.INSTANCE));r.spellContext.nextPart();
+            r.onResolveEffect(h.getLevel(),block(a.center));var clouds=h.getLevel().getEntitiesOfClass(com.github.L_Ender.cataclysm.entity.effect.Wither_Smoke_Effect_Entity.class,new AABB(a.center,a.center).inflate(4));
+            h.assertTrue(clouds.size()==1,"One native independent smoke cloud");var cloud=clouds.getFirst();
+            h.assertTrue(cloud.noCulling && cloud.getDuration()==450 && !cloud.shouldBeSaved(),"Native visual ticks, time augment and transient storage");
+            close(h,NativeDamageContexts.amplification(cloud),1,"Smoke has its own augmentation snapshot");close(h,CapabilityRegistry.getMana(a.p).getCurrentMana(),10000-CataclysmConfig.cost(Ability.WITHER_SMOKE)-CataclysmConfig.amplifyCost(),"Standalone smoke charges once");
+            var victim=a.target(a.center,false);for(int t=0;t<12;t++){++cloud.tickCount;cloud.tick();}close(h,500-victim.getHealth(),5,"Smoke damage gets the minimum bounded increase");
+            a.p.discard();ExecutionSessions.tick();h.assertTrue(cloud.isRemoved(),"Root removal ends independent smoke");h.succeed();
         }
     }
 }

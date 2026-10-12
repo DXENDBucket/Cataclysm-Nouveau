@@ -12,9 +12,9 @@ import net.minecraft.world.phys.Vec3;
 /** Detached invocation frame, never spawned or saved as a Boss. */
 public final class SpellScylla extends Scylla_Entity {
     public final CastContext cast;
-    public final float bonus;
-    public SpellScylla(ServerLevel world,CastContext cast,Vec3 point,float bonus) {
-        super(ModEntities.SCYLLA.get(),world);this.cast=cast;this.bonus=bonus;
+    public final float amplification;
+    public SpellScylla(ServerLevel world,CastContext cast,Vec3 point,float amplification) {
+        super(ModEntities.SCYLLA.get(),world);this.cast=cast;this.amplification=amplification;NativeDamageContexts.bind(this,cast,amplification);
         setPos(point);setNoAi(true);setNoGravity(true);setPhase(0);
     }
     @Override public boolean isAlliedTo(Entity other) {

@@ -6,8 +6,8 @@
   "cataclysm_nouveau.glyph_desc.glyph_lionfish_spike": "将弹射物替换为灾变的狮子鱼刺，命中时保留本体的3秒中毒I。增强对直接伤害的提升与伤害魔符一致。",
   "item.cataclysm_nouveau.glyph_bolt_strike": "雷击柱",
   "cataclysm_nouveau.glyph_desc.glyph_bolt_strike": "在选定位置召出灾变的雷击柱，短暂延迟后攻击。增强对伤害的提升与伤害魔符一致。",
-  "cataclysm_nouveau.augment.increase_damage": "按照伤害魔符的增强数值提高伤害。",
-  "cataclysm_nouveau.augment.decrease_damage": "按照伤害魔符的增强数值降低伤害。",
+  "cataclysm_nouveau.augment.increase_damage": "按每段基础伤害的一定比例增强，单次增幅受下限与上限约束。",
+  "cataclysm_nouveau.augment.decrease_damage": "按每段基础伤害的一定比例削弱，单次减幅受下限与上限约束。",
   "cataclysm_nouveau.glyph_name.glyph_amethyst_cluster": "紫水晶簇",
   "cataclysm_nouveau.glyph_name.glyph_lionfish_spike": "狮子鱼刺",
   "cataclysm_nouveau.glyph_name.glyph_bolt_strike": "雷击柱",
@@ -113,5 +113,13 @@
   "cataclysm_nouveau.glyph_name.glyph_wither_howitzer": "凋灵榴弹",
   "cataclysm_nouveau.glyph_desc.glyph_wither_howitzer": "将弹射物替换为凋灵榴弹，爆炸后留下逐渐收缩、伤害敌人的凋灵烟雾。",
   "cataclysm_nouveau.glyph_name.glyph_death_laser": "死亡激光",
-  "cataclysm_nouveau.glyph_desc.glyph_death_laser": "短暂预备后释放先驱者的穿透光束，默认持续3秒，每个输出秒消耗魔力。施法时生命不高于一半，会附带原生点燃效果。增幅提升伤害，时效增强改变持续时间。"
+  "cataclysm_nouveau.glyph_desc.glyph_death_laser": "短暂预备后释放先驱者的穿透光束，默认持续3秒，每个输出秒消耗魔力。施法时生命不高于一半，会附带原生点燃效果。增幅提升伤害，时效增强改变持续时间。",
+  "cataclysm_nouveau.glyph_name.glyph_harbinger_charge": "冲锋撞击",
+  "cataclysm_nouveau.glyph_desc.glyph_harbinger_charge": "自身或友军朝瞄准方向冲锋，保留原生碰撞伤害与击退。施法时生命不高于一半，会按原生概率连续冲锋。",
+  "cataclysm_nouveau.glyph_name.glyph_howitzer_volley": "榴弹齐射",
+  "cataclysm_nouveau.glyph_desc.glyph_howitzer_volley": "发射两轮原生高抛榴弹，每轮5枚，施法时半血则每轮7枚。保留爆炸与凋灵烟云。",
+  "cataclysm_nouveau.glyph_name.glyph_missile_salvo": "追踪导弹连射",
+  "cataclysm_nouveau.glyph_desc.glyph_missile_salvo": "锁定可见敌人，分批发射6枚原生追踪导弹。施法时半血则采用更紧凑的双侧同步连射。",
+  "cataclysm_nouveau.glyph_name.glyph_wither_smoke": "凋灵烟云",
+  "cataclysm_nouveau.glyph_desc.glyph_wither_smoke": "在触发位置生成逐渐收缩的原生凋灵烟云。时效增强改变持续时间。"
 }

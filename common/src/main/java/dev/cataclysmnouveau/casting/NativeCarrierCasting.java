@@ -31,13 +31,13 @@ public final class NativeCarrierCasting {
         Entity payload;
         if (ability==Ability.CERAUNUS) {
             var anchor=new Player_Ceraunus_Entity(world,frame.damageOwner());
-            anchor.setBaseDamage(Math.max(0,CataclysmConfig.anchorDamage()+Resources.damageBonus(stats.getAmpMultiplier())));
+            anchor.setBaseDamage(Math.max(0,CataclysmConfig.anchorDamage()));
             payload=anchor;
         } else {
-            var wave=new Wave_Entity(world,frame.damageOwner(),duration,Math.max(0,CataclysmConfig.waveDamage()+Resources.damageBonus(stats.getAmpMultiplier())));
+            var wave=new Wave_Entity(world,frame.damageOwner(),duration,Math.max(0,CataclysmConfig.waveDamage()));
             wave.setState(1);payload=wave;
         }
-        NativeSpellDamage.bind(payload,frame);
+        NativeDamageContexts.bind(payload,frame,stats.getAmpMultiplier());
         var driver=new Flight(payload,carrier,profile.arsDriven(),profile.repeated(),stats.getAccMultiplier());
         var continuation=resolver.clone();
         var session=new ExecutionSession<>(world,frame.withAccount(quote.account()),payload,duration+2,driver,
