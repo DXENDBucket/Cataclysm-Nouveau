@@ -29,7 +29,12 @@ public enum Ability {
     THUNDER_COMBO("thunder_combo", "Thunderstrike Combo", 700),
     ANCHOR_SPIN("anchor_spin", "Anchor Whirl", 300),
     ANCHOR_LEAP("anchor_leap", "Anchor Plunge", 600),
-    WATER_WALKING("water_walking", "Water Walking", 60);
+    WATER_WALKING("water_walking", "Water Walking", 60),
+    LASER_BOLT("laser_bolt", "Laser Bolt", 40),
+    WITHER_MISSILE("wither_missile", "Wither Missile", 90),
+    HOMING_MISSILE("homing_missile", "Homing Missile", 120),
+    WITHER_HOWITZER("wither_howitzer", "Wither Howitzer", 200),
+    DEATH_LASER("death_laser", "Death Laser", 120);
     public final String id, name;
     public final int mana;
     Ability(String id, String name, int mana) { this.id=id; this.name=name; this.mana=mana; }
@@ -37,6 +42,7 @@ public enum Ability {
     /** Acquisition/source families, shared by all presentation surfaces. */
     public Series series() {
         return switch(this) {
+            case LASER_BOLT,WITHER_MISSILE,HOMING_MISSILE,WITHER_HOWITZER,DEATH_LASER -> Series.HARBINGER;
             case AMETHYST_CLUSTER -> Series.AMETHYST_CRAB;
             case LIONFISH_SPIKE -> Series.LIONFISH;
             case VOID_RUNE -> Series.ENDER_GOLEM;
@@ -46,5 +52,5 @@ public enum Ability {
                     STORM_SERPENT,LIGHTNING_STORM,LIGHTNING_FIELD,STORM_BURST,SPARK,THUNDER_CLOUD,LIGHTNING_ROW,THUNDER_COMBO,ANCHOR_SPIN,ANCHOR_LEAP,WATER_WALKING -> Series.SCYLLA;
         };
     }
-    public enum Series { AMETHYST_CRAB, LIONFISH, ENDER_GOLEM, MONSTROSITY, SCYLLA }
+    public enum Series { AMETHYST_CRAB, LIONFISH, ENDER_GOLEM, MONSTROSITY, SCYLLA, HARBINGER }
 }

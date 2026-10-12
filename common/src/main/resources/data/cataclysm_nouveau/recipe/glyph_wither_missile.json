@@ -1,0 +1,16 @@
+{
+  "type": "ars_nouveau:glyph",
+  "exp": 27,
+  "output": {
+    "id": "cataclysm_nouveau:glyph_wither_missile",
+    "count": 1
+  },
+  "inputs": [
+    {
+      "item": "cataclysm:witherite_ingot"
+    },
+    {
+      "item": "ars_nouveau:source_gem"
+    }
+  ]
+}

@@ -103,5 +103,15 @@
   "cataclysm_nouveau.glyph_name.glyph_water_walking": "Water Walking",
   "cataclysm_nouveau.glyph_desc.glyph_water_walking": "Grants an ally Water Walking for 30 seconds. The surface counts as ground, jumping is preserved, and crouching allows diving. Duration augments modify the lifetime.",
   "item.cataclysm_nouveau.glyph_water_walking": "Water Walking",
-  "effect.cataclysm_nouveau.water_walking": "Water Walking"
+  "effect.cataclysm_nouveau.water_walking": "Water Walking",
+  "cataclysm_nouveau.glyph_name.glyph_laser_bolt": "Laser Bolt",
+  "cataclysm_nouveau.glyph_desc.glyph_laser_bolt": "Replace a projectile with the Harbinger’s native laser bolt. Ignites hit enemies; acceleration changes launch speed.",
+  "cataclysm_nouveau.glyph_name.glyph_wither_missile": "Wither Missile",
+  "cataclysm_nouveau.glyph_desc.glyph_wither_missile": "Replace a projectile with an explosive wither missile. Retains native withering and healing on a lethal direct hit.",
+  "cataclysm_nouveau.glyph_name.glyph_homing_missile": "Homing Missile",
+  "cataclysm_nouveau.glyph_desc.glyph_homing_missile": "Replace a projectile with a native homing missile. Ordinary shots acquire a visible enemy ahead; Ars trajectory forms retain their own movement.",
+  "cataclysm_nouveau.glyph_name.glyph_wither_howitzer": "Wither Howitzer",
+  "cataclysm_nouveau.glyph_desc.glyph_wither_howitzer": "Replace a projectile with an explosive shell that leaves a shrinking wither smoke cloud.",
+  "cataclysm_nouveau.glyph_name.glyph_death_laser": "Death Laser",
+  "cataclysm_nouveau.glyph_desc.glyph_death_laser": "Channel the Harbinger’s native piercing beam for 3 seconds after a brief windup. Consumes mana each active second. Below or at half health, the caster adds the native ignition effect. Amplify increases damage; duration augments change channel duration."
 }

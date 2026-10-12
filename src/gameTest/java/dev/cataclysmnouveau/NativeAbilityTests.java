@@ -1041,4 +1041,97 @@ public final class NativeAbilityTests {
         protected Set<AbstractAugment> getCompatibleAugments() { return Set.of(); }
         public String getBookDescription() { return "Test continuation"; }
     }
+
+    private static List<net.minecraft.world.entity.projectile.Projectile> harbingerPayloads(GameTestHelper h) {
+        return h.getLevel().getEntitiesOfClass(net.minecraft.world.entity.projectile.Projectile.class,new AABB(scene(h),scene(h)).inflate(24),e->HarbingerCasting.nativePayload(e) && ((ManagedProjectile)e).confluxCataclysm$mode()>0);
+    }
+    @GameTest(template="empty",batch="cat_harbinger_flight",timeoutTicks=100)
+    public static void harbingerFlightFeesContinuationAndArsMotion(GameTestHelper h) {
+        try(var a=new Arena(h)) {
+            var mana=CapabilityRegistry.getMana(a.p);
+            for(var glyph:List.of(GlyphCatalog.LASER_BOLT,GlyphCatalog.MISSILE,GlyphCatalog.HOMING,GlyphCatalog.HOWITZER)) {
+                mana.setMana(10000);var marker=new Marker();var enemy=a.target(a.center.add(0,1,8),false);
+                var r=resolver(h,a.p,new Spell(MethodProjectile.INSTANCE,glyph,marker));r.spellContext.nextPart();
+                var carrier=new EntityProjectileSpell(h.getLevel(),r);carrier.setPos(a.center.add(0,1,0));carrier.setDeltaMovement(new Vec3(0,0,.75));
+                h.assertTrue(ProjectileDispatch.convert(carrier),"Harbinger payload dispatch");var nativeEntity=harbingerPayloads(h).getFirst();
+                close(h,nativeEntity.getDeltaMovement().length(),glyph==GlyphCatalog.HOWITZER?.6:.1,"Native launch speed");
+                h.assertTrue(nativeEntity.getOwner()==a.p && !nativeEntity.shouldBeSaved(),"Root ownership and transient lifecycle");
+                int fee=Resources.quote(r.spellContext,glyph.ability,List.of()).amount();close(h,mana.getCurrentMana(),10000-fee,"Single launch payment");
+                ((ProjectileHitAccess)nativeEntity).confluxCataclysm$nativeHit(block(a.center.add(0,1,3)));
+                h.assertTrue(marker.hits==1 && nativeEntity.isRemoved(),"Single native hit and continuation");
+                close(h,mana.getCurrentMana(),10000-fee,"No double impact charge");ExecutionSessions.tick();enemy.discard();
+                var orbitResolver=resolver(h,a.p,new Spell(MethodProjectile.INSTANCE,glyph,marker));orbitResolver.spellContext.nextPart();
+                var orbit=new EntityOrbitProjectile(h.getLevel(),orbitResolver,a.p);orbit.setPos(a.center.add(0,2,0));
+                h.assertTrue(ProjectileDispatch.convert(orbit),"Ars orbit dispatch");var orbitVisual=harbingerPayloads(h).getFirst();var pos=orbitVisual.position();var velocity=orbitVisual.getDeltaMovement();
+                for(int tick=0;tick<90;tick++) {++orbitVisual.tickCount;orbitVisual.tick();}
+                h.assertTrue(!orbitVisual.isRemoved(),"Native homing fuse or missing target cannot kill an Ars-driven carrier");
+                close(h,orbitVisual.position().distanceTo(pos),0,"Decorative server tick adds no displacement");close(h,orbitVisual.getDeltaMovement().distanceTo(velocity),0,"Decorative server tick adds no acceleration");
+                int before=(int)mana.getCurrentMana();ArsSpellAccess.resolver(orbit).onResolveEffect(h.getLevel(),block(a.center.add(0,1,3)));
+                close(h,mana.getCurrentMana(),before-fee,"Repeated impact pays once");h.assertTrue(!orbitVisual.isRemoved(),"Repeated native body retains carrier");
+                mana.setMana(0);ArsSpellAccess.resolver(orbit).onResolveEffect(h.getLevel(),block(a.center.add(0,1,3)));
+                h.assertTrue(orbitVisual.isRemoved() && orbit.isRemoved(),"Empty mana ends repeated payload");ExecutionSessions.tick();
+            }
+            h.succeed();
+        }
+    }
+    @GameTest(template="empty",batch="cat_harbinger_native",timeoutTicks=100)
+    public static void harbingerNativeDamageKillHealingAndIsolation(GameTestHelper h) {
+        try(var a=new Arena(h)) {
+            for(var ability:List.of(Ability.LASER_BOLT,Ability.WITHER_MISSILE,Ability.HOMING_MISSILE,Ability.WITHER_HOWITZER)) {
+                var enemy=a.target(a.center.add(0,1,2),false);var ally=a.target(a.center.add(0,1,2),true);
+                var r=resolver(h,a.p,new Spell(MethodTouch.INSTANCE,GlyphCatalog.DEATH_LASER));var ctx=CastContext.of(r.spellContext,new EntityHitResult(enemy),null);
+                var payload=HarbingerCasting.create(ability,h.getLevel(),ctx,new Vec3(0,0,1),enemy,1);payload.setPos(enemy.position());((ManagedProjectile)payload).confluxCataclysm$mode(2);
+                ((ProjectileHitAccess)payload).confluxCataclysm$nativeHit(new EntityHitResult(enemy));
+                double base=ability==Ability.LASER_BOLT?com.github.L_Ender.cataclysm.config.CMCommonConfig.Harbinger.Laserdamage:ability==Ability.WITHER_HOWITZER?11:com.github.L_Ender.cataclysm.config.CMCommonConfig.Harbinger.WitherMissiledamage;
+                h.assertTrue(500-enemy.getHealth()>=base+Resources.damageBonus(1),"Native hit plus Harm amplification");close(h,ally.getHealth(),500,"Explosion spares allies");
+                if(ability==Ability.LASER_BOLT)h.assertTrue(enemy.isOnFire(),"Laser ignition retained");
+                if(ability==Ability.WITHER_HOWITZER)h.assertTrue(enemy.hasEffect(MobEffects.WITHER),"Shell withering retained");
+                enemy.discard();ally.discard();
+            }
+            var weak=a.target(a.center.add(0,1,6),false);weak.setHealth(1);a.p.setHealth(2);
+            var r=resolver(h,a.p,new Spell(MethodTouch.INSTANCE,GlyphCatalog.DEATH_LASER));var ctx=CastContext.of(r.spellContext,new EntityHitResult(weak),null);
+            var missile=HarbingerCasting.create(Ability.WITHER_MISSILE,h.getLevel(),ctx,new Vec3(0,0,1),weak,0);missile.setPos(weak.position());((ManagedProjectile)missile).confluxCataclysm$mode(2);
+            ((ProjectileHitAccess)missile).confluxCataclysm$nativeHit(new EntityHitResult(weak));close(h,a.p.getHealth(),12,"Native missile lethal direct hit heals ordinary owner twice");
+            var ordinary=new Laser_Beam_Entity(a.p,new Vec3(0,0,1),h.getLevel(),5);var enemy=a.target(a.center.add(0,1,10),false);
+            a.p.getAttribute(com.hollingsworth.arsnouveau.api.perk.PerkAttributes.SPELL_DAMAGE_BONUS).setBaseValue(100);
+            ((ProjectileHitAccess)ordinary).confluxCataclysm$nativeHit(new EntityHitResult(enemy));close(h,500-enemy.getHealth(),5,"Unmanaged native laser ignores Ars bonus");h.succeed();
+        }
+    }
+    @GameTest(template="empty",batch="cat_harbinger_beam",timeoutTicks=100)
+    public static void deathLaserHalfHealthHpCapAndPerSecondPayment(GameTestHelper h) {
+        try(var a=new Arena(h)) {
+            var enemy=a.target(a.center.add(0,1,5),false);enemy.getAttribute(Attributes.MAX_HEALTH).setBaseValue(1000);enemy.setHealth(1000);
+            var ally=a.target(a.center.add(0,1,5),true);var mana=CapabilityRegistry.getMana(a.p);a.p.setYRot(0);a.p.setXRot(0);a.p.setHealth(a.p.getMaxHealth()/2);
+            var r=resolver(h,a.p,new Spell(MethodTouch.INSTANCE,GlyphCatalog.DEATH_LASER));var ctx=CastContext.of(r.spellContext,block(a.center.add(0,1,0)),null);
+            var charge=Resources.quote(r.spellContext,Ability.DEATH_LASER,List.of());h.assertTrue(HarbingerLaser.start(h.getLevel(),ctx,0,0,charge),"Beam starts");
+            var beams=h.getLevel().getEntitiesOfClass(Death_Laser_Beam_Entity.class,new AABB(a.center,a.center).inflate(24));h.assertTrue(beams.size()==1,"Native registered beam");var beam=beams.getFirst();
+            h.assertTrue(beam.getFire() && beam.caster==a.p && !beam.shouldBeSaved(),"Native half-health branch uses root caster, transient beam");
+            close(h,beam.getHpDamage(),com.github.L_Ender.cataclysm.config.CMCommonConfig.Harbinger.DeathLaserHpdamage,"Native hp coefficient retained");beam.setHpDamage(100);
+            for(int tick=0;tick<20;tick++)ExecutionSessions.tick();close(h,mana.getCurrentMana(),10000,"Windup does not spend active-second mana");
+            ExecutionSessions.tick();close(h,mana.getCurrentMana(),10000-charge.amount(),"First output second pays before damage");
+            close(h,1000-enemy.getHealth(),10,"Percentage damage capped at another base hit: 10 total");close(h,ally.getHealth(),500,"Beam excludes allies");h.assertTrue(enemy.isOnFire(),"Powered beam ignites victim");
+            float health=enemy.getHealth();mana.setMana(0);for(int tick=0;tick<20;tick++)ExecutionSessions.tick();
+            h.assertTrue(beam.isRemoved(),"No mana removes beam before unpaid second");close(h,enemy.getHealth(),health,"No unpaid or fade-tail damage");
+            a.p.setGameMode(GameType.CREATIVE);var free=Resources.quote(r.spellContext,Ability.DEATH_LASER,List.of());
+            var host=a.target(a.center.add(3,1,0),true);host.setYRot(90);host.setXRot(-20);
+            h.assertTrue(HarbingerLaser.start(h.getLevel(),ctx.withTarget(new EntityHitResult(host)),0,0,free),"Creative beams bypass empty mana");
+            var follow=h.getLevel().getEntitiesOfClass(Death_Laser_Beam_Entity.class,new AABB(a.center,a.center).inflate(24)).getFirst();
+            ExecutionSessions.tick();close(h,follow.position().distanceTo(host.getEyePosition()),0,"Selected executor supplies beam origin");close(h,follow.renderYaw,follow.getYaw(),"Native renderer and server share managed yaw");
+            for(int tick=0;tick<90;tick++)ExecutionSessions.tick();h.assertTrue(follow.isRemoved(),"Native duration and fade finish creative beam");close(h,mana.getCurrentMana(),0,"Creative active seconds remain free");h.succeed();
+        }
+    }
+    @GameTest(template="empty",batch="cat_harbinger_smoke",timeoutTicks=100)
+    public static void howitzerSmokeContextDamageAndCasterCleanup(GameTestHelper h) {
+        try(var a=new Arena(h)) {
+            var enemy=a.target(a.center.add(0,0,2),false);var ally=a.target(enemy.position(),true);
+            var r=resolver(h,a.p,new Spell(MethodTouch.INSTANCE,GlyphCatalog.HOWITZER));var ctx=CastContext.of(r.spellContext,block(enemy.position()),null);
+            var shell=HarbingerCasting.create(Ability.WITHER_HOWITZER,h.getLevel(),ctx,new Vec3(0,0,1),enemy,1);shell.setPos(enemy.position());((ManagedProjectile)shell).confluxCataclysm$mode(2);
+            ((ProjectileHitAccess)shell).confluxCataclysm$nativeHit(block(enemy.position()));
+            var clouds=h.getLevel().getEntitiesOfClass(com.github.L_Ender.cataclysm.entity.effect.Wither_Smoke_Effect_Entity.class,new AABB(a.center,a.center).inflate(10));
+            h.assertTrue(clouds.size()==1,"One native smoke child");var cloud=clouds.getFirst();h.assertTrue(NativeSpellDamage.context(cloud).caster()==a.p && !cloud.shouldBeSaved(),"Child inherits caster context and transient lifecycle");
+            enemy.setHealth(500);enemy.invulnerableTime=0;for(int tick=0;tick<12;tick++){++cloud.tickCount;cloud.tick();}
+            close(h,500-enemy.getHealth(),3+Resources.damageBonus(1),"Smoke inherits Harm amplification");close(h,ally.getHealth(),500,"Smoke spares allies");
+            h.assertTrue(enemy.hasEffect(MobEffects.WITHER),"Native smoke debuff retained");a.p.setHealth(0);cloud.tick();h.assertTrue(cloud.isRemoved(),"Root death cleans up cloud");h.succeed();
+        }
+    }
 }

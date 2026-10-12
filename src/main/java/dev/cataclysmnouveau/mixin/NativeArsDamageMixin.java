@@ -14,14 +14,18 @@ import org.spongepowered.asm.mixin.injection.At;
 @Mixin(value={Amethyst_Cluster_Projectile_Entity.class,Lionfish_Spike_Entity.class,Player_Ceraunus_Entity.class,Wave_Entity.class,Flare_Bomb_Entity.class,
         Bolt_strike_Entity.class,Void_Rune_Entity.class,Flame_Jet_Entity.class,Elemental_Spear_Entity.class,
         Lightning_Storm_Entity.class,Lightning_Area_Effect_Entity.class,Storm_Serpent_Entity.class,
-        Scylla_Entity.class,Netherite_Monstrosity_Entity.class},remap=false)
+        Scylla_Entity.class,Netherite_Monstrosity_Entity.class,Laser_Beam_Entity.class,Wither_Missile_Entity.class,Wither_Homing_Missile_Entity.class,Wither_Howitzer_Entity.class,Death_Laser_Beam_Entity.class,Wither_Smoke_Effect_Entity.class},remap=false)
 public abstract class NativeArsDamageMixin {
     @WrapOperation(method="*",at=@At(value="INVOKE",target="Lnet/minecraft/world/entity/Entity;hurt(Lnet/minecraft/world/damagesource/DamageSource;F)Z",remap=true),require=0)
     private boolean nativeArs$entity(Entity target,DamageSource source,float amount,Operation<Boolean> original) {
+        if(dev.cataclysmnouveau.casting.HarbingerCasting.rejectDamage((Entity)(Object)this,target)) return false;
+        amount=dev.cataclysmnouveau.casting.HarbingerCasting.damageAmount((Entity)(Object)this,amount);
         return NativeSpellDamage.hurt(NativeDamageContexts.context((Entity)(Object)this),target,source,amount,(s,a)->original.call(target,s,a));
     }
     @WrapOperation(method="*",at=@At(value="INVOKE",target="Lnet/minecraft/world/entity/LivingEntity;hurt(Lnet/minecraft/world/damagesource/DamageSource;F)Z",remap=true),require=0)
     private boolean nativeArs$living(LivingEntity target,DamageSource source,float amount,Operation<Boolean> original) {
+        if(dev.cataclysmnouveau.casting.HarbingerCasting.rejectDamage((Entity)(Object)this,target)) return false;
+        amount=dev.cataclysmnouveau.casting.HarbingerCasting.damageAmount((Entity)(Object)this,amount);
         return NativeSpellDamage.hurt(NativeDamageContexts.context((Entity)(Object)this),target,source,amount,(s,a)->original.call(target,s,a));
     }
 }

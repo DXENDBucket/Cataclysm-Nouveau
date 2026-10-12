@@ -103,5 +103,15 @@
   "cataclysm_nouveau.glyph_name.glyph_water_walking": "水面行走",
   "cataclysm_nouveau.glyph_desc.glyph_water_walking": "自身或友军获得 30 秒水面行走。浮到表面后视为着地，保留跳跃；潜行可下潜。延长与缩短时效改变持续时间。",
   "item.cataclysm_nouveau.glyph_water_walking": "水面行走",
-  "effect.cataclysm_nouveau.water_walking": "水面行走"
+  "effect.cataclysm_nouveau.water_walking": "水面行走",
+  "cataclysm_nouveau.glyph_name.glyph_laser_bolt": "激光弹",
+  "cataclysm_nouveau.glyph_desc.glyph_laser_bolt": "将弹射物替换为先驱者的激光弹，命中后点燃敌人。加速改变发射速度。",
+  "cataclysm_nouveau.glyph_name.glyph_wither_missile": "凋灵导弹",
+  "cataclysm_nouveau.glyph_desc.glyph_wither_missile": "将弹射物替换为会爆炸的凋灵导弹，保留原生凋零效果及直接击杀时的恢复能力。",
+  "cataclysm_nouveau.glyph_name.glyph_homing_missile": "追踪导弹",
+  "cataclysm_nouveau.glyph_desc.glyph_homing_missile": "将弹射物替换为追踪导弹。普通发射锁定前方可见敌人；特殊弹射物形态保留自身运动方式。",
+  "cataclysm_nouveau.glyph_name.glyph_wither_howitzer": "凋灵榴弹",
+  "cataclysm_nouveau.glyph_desc.glyph_wither_howitzer": "将弹射物替换为凋灵榴弹，爆炸后留下逐渐收缩、伤害敌人的凋灵烟雾。",
+  "cataclysm_nouveau.glyph_name.glyph_death_laser": "死亡激光",
+  "cataclysm_nouveau.glyph_desc.glyph_death_laser": "短暂预备后释放先驱者的穿透光束，默认持续3秒，每个输出秒消耗魔力。施法时生命不高于一半，会附带原生点燃效果。增幅提升伤害，时效增强改变持续时间。"
 }

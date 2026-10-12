@@ -35,7 +35,16 @@
     "ScyllaCloudGoalMixin",
     "SparkStateMixin",
     "NativeArsDamageMixin",
-    "LeapActorAiMixin"
+    "LeapActorAiMixin",
+    "LaserBoltStateMixin",
+    "MissileStateMixin",
+    "HomingMissileStateMixin",
+    "HowitzerStateMixin",
+    "HarbingerNativeMixin",
+    "HarbingerDecorationMixin",
+    "HarbingerSmokeMixin",
+    "DeathLaserMixin",
+    "HarbingerFriendlyHitMixin"
   ],
   "injectors": {
     "defaultRequire": 1

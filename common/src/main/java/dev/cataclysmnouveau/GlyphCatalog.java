@@ -37,8 +37,13 @@ public final class GlyphCatalog {
     public static final CataclysmEffectGlyph SPIN=new CataclysmEffectGlyph(Ability.ANCHOR_SPIN);
     public static final CataclysmEffectGlyph LEAP=new CataclysmEffectGlyph(Ability.ANCHOR_LEAP);
     public static final CataclysmEffectGlyph WATER_WALKING=new CataclysmEffectGlyph(Ability.WATER_WALKING);
-    public static final List<CataclysmProjectileGlyph> PROJECTILES=List.of(AMETHYST,SPIKE,ANCHOR,WAVE,FLARE,LAVA,WATER_SPEAR,LIGHTNING_SPEAR,SPARK);
-    public static final List<AbstractSpellPart> ALL=List.<AbstractSpellPart>of(BOLT,RUNE,JET,QUAKE,FISSURE,RINGS,CHARGE,ABSORB,MONSTROUS,FRACTURE,LAVA_WALKING,SERPENT,STORM,FIELD,BURST,AMETHYST,SPIKE,ANCHOR,WAVE,FLARE,LAVA,WATER_SPEAR,LIGHTNING_SPEAR,SPARK,CLOUD,ROW,COMBO,SPIN,LEAP,WATER_WALKING)
+    public static final CataclysmProjectileGlyph LASER_BOLT=new CataclysmProjectileGlyph(Ability.LASER_BOLT);
+    public static final CataclysmProjectileGlyph MISSILE=new CataclysmProjectileGlyph(Ability.WITHER_MISSILE);
+    public static final CataclysmProjectileGlyph HOMING=new CataclysmProjectileGlyph(Ability.HOMING_MISSILE);
+    public static final CataclysmProjectileGlyph HOWITZER=new CataclysmProjectileGlyph(Ability.WITHER_HOWITZER);
+    public static final CataclysmEffectGlyph DEATH_LASER=new CataclysmEffectGlyph(Ability.DEATH_LASER);
+    public static final List<CataclysmProjectileGlyph> PROJECTILES=List.of(AMETHYST,SPIKE,ANCHOR,WAVE,FLARE,LAVA,WATER_SPEAR,LIGHTNING_SPEAR,SPARK,LASER_BOLT,MISSILE,HOMING,HOWITZER);
+    public static final List<AbstractSpellPart> ALL=List.<AbstractSpellPart>of(BOLT,RUNE,JET,QUAKE,FISSURE,RINGS,CHARGE,ABSORB,MONSTROUS,FRACTURE,LAVA_WALKING,SERPENT,STORM,FIELD,BURST,AMETHYST,SPIKE,ANCHOR,WAVE,FLARE,LAVA,WATER_SPEAR,LIGHTNING_SPEAR,SPARK,CLOUD,ROW,COMBO,SPIN,LEAP,WATER_WALKING,LASER_BOLT,MISSILE,HOMING,HOWITZER,DEATH_LASER)
             .stream().sorted(Comparator.comparing(GlyphCatalog::displayOrderKey)).toList();
     /** Core retains Ars categories; within each category, group native series before registry names. */
     public static String displayOrderKey(AbstractSpellPart part) {

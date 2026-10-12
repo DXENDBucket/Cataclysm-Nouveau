@@ -5,6 +5,8 @@ public final class CataclysmConfig {
     public static final ModConfigSpec SPEC;
     private static final EnumMap<Ability, ModConfigSpec.IntValue> COSTS = new EnumMap<>(Ability.class);
     private static final ModConfigSpec.IntValue ANCHOR_RANGE;
+    private static final ModConfigSpec.BooleanValue HARBINGER_FIRE;
+    private static final ModConfigSpec.IntValue HARBINGER_RANGE;
     private static final ModConfigSpec.IntValue AMPLIFY_COST, BOLT_WARMUP;
     private static final ModConfigSpec.DoubleValue BOLT_DAMAGE;
     private static final EnumMap<Ability, ModConfigSpec.DoubleValue> GROUND_DAMAGE = new EnumMap<>(Ability.class);
@@ -71,6 +73,9 @@ public final class CataclysmConfig {
         ANCHOR_RANGE=b.comment("Sight distance of the action hook, re-sampled when the anchor launches; never loads chunks.").defineInRange("anchor_range",64,4,128);
         ANCHOR_PULL_SPEED=b.comment("Blocks per tick for the collision-limited anchor plunge pull.").defineInRange("anchor_pull_speed",2.0,.1,3);
         WATER_WALKING_DURATION=b.comment("Water surface walking duration before time augments.").defineInRange("water_walking_duration_ticks",600,2,1200);b.pop();
+        b.push("harbinger");
+        HARBINGER_FIRE=b.comment("Allow managed laser impacts to place fire; entity ignition still follows native behavior. No glass destruction or EMP reset.").define("terrain_fire",false);
+        HARBINGER_RANGE=b.comment("Loaded, visible target ray for native homing launches.").defineInRange("homing_range",48,4,128);b.pop();
         b.push("cooldowns");
         COOLDOWNS=b.comment("Gate new active uses through Conflux; existing trajectories keep running.").define("enabled",true);
         CREATIVE_COOLDOWN=b.define("creative_cooldown",false);
@@ -107,7 +112,7 @@ public final class CataclysmConfig {
     public static float flareDirectDamage() {return SPEC.isLoaded()?FLARE_DIRECT_DAMAGE.get().floatValue():7;}
     public static float flareJetDamage() {return SPEC.isLoaded()?FLARE_JET_DAMAGE.get().floatValue():7;}
     private static int defaultCooldown(Ability ability) {
-        return switch(ability) {case CERAUNUS->40;case WAVE->100;case FLARE_BOMB->160;case LAVA_BOMB->100;case EARTHQUAKE->160;case FISSURE->200;case FLAME_RING->200;case SHOULDER_CHECK->80;case LAVA_ABSORPTION->400;case MONSTROUS->350;case WATER_SPEAR->40;case LIGHTNING_SPEAR->60;case STORM_SERPENT->120;case LIGHTNING_STORM->80;case LIGHTNING_FIELD->100;case STORM_BURST->240;case SPARK->60;case THUNDER_CLOUD->400;case LIGHTNING_ROW->200;case THUNDER_COMBO->360;case ANCHOR_SPIN->240;case ANCHOR_LEAP->300;default->0;};
+        return switch(ability) {case LASER_BOLT->20;case WITHER_MISSILE->60;case HOMING_MISSILE->80;case WITHER_HOWITZER->160;case DEATH_LASER->200;case CERAUNUS->40;case WAVE->100;case FLARE_BOMB->160;case LAVA_BOMB->100;case EARTHQUAKE->160;case FISSURE->200;case FLAME_RING->200;case SHOULDER_CHECK->80;case LAVA_ABSORPTION->400;case MONSTROUS->350;case WATER_SPEAR->40;case LIGHTNING_SPEAR->60;case STORM_SERPENT->120;case LIGHTNING_STORM->80;case LIGHTNING_FIELD->100;case STORM_BURST->240;case SPARK->60;case THUNDER_CLOUD->400;case LIGHTNING_ROW->200;case THUNDER_COMBO->360;case ANCHOR_SPIN->240;case ANCHOR_LEAP->300;default->0;};
     }
     public static int cooldownTicks(Ability ability) {
         return SPEC.isLoaded()?COOLDOWN_TICKS.get(ability).get():defaultCooldown(ability);
@@ -134,5 +139,7 @@ public final class CataclysmConfig {
     public static int waterWalkingDuration() {return SPEC.isLoaded()?WATER_WALKING_DURATION.get():600;}
     public static int anchorRange() {return SPEC.isLoaded()?ANCHOR_RANGE.get():64;}
     public static double anchorPullSpeed() {return SPEC.isLoaded()?ANCHOR_PULL_SPEED.get():2;}
+    public static boolean harbingerTerrainFire() {return SPEC.isLoaded() && HARBINGER_FIRE.get();}
+    public static int harbingerRange() {return SPEC.isLoaded()?HARBINGER_RANGE.get():48;}
     private CataclysmConfig() {}
 }
