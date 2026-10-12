@@ -23,3 +23,7 @@ SHA-256：`1605eaab81b2742b2eb0b5dd955513e054f573013798799e50529685a8c53d07`
 `cataclysm-nouveau-0.1.0-dev.43-sources.jar`
 
 SHA-256：`56a647c472c78e288c37b9aaf9f405b7cd85cbcc5b19b17e3cde3cd9cb0b55d4`
+
+## 本地部署与版本控制
+
+修复提交 `8cee6caf9b79c99622cf42e6fa17641c349a32ef`，本地主分支及标签 `v0.1.0-dev.43`。已仅替换“万法归一”的 Cataclysm-Nouveau JAR，复制后 SHA-256 一致。旧包备份 `conflux-backups/20261013-074711-scylla-visuals/`。Core 和用户配置未修改。没有推送或公开发布。
