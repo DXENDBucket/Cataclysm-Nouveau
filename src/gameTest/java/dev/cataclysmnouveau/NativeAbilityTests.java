@@ -1163,7 +1163,7 @@ public final class NativeAbilityTests {
                 for(int tick=1;tick<=6;tick++){cloud.tickCount=tick;cloud.tick();}
                 h.assertTrue(packets.size()==1,"Native server tick sends one visual batch after the waiting period");
                 var first=packets.getFirst();h.assertTrue(first.getCount()==20 && !first.isOverrideLimiter(),"Bounded batch uses vanilla smoke and respects client particle settings");
-                close(h,first.getY(),cloud.getY()+.2,"Particle origin clears the impact plane without moving the damage cloud");
+                close(h,first.getY(),cloud.getY(),"Particle origin stays at the native cloud height");
                 close(h,first.getXDist(),cloud.getRadius()*.45,"Visual spread follows the native radius");
                 cloud.tickCount=7;cloud.tick();h.assertTrue(packets.size()==1,"No duplicate packet on intervening ticks");
                 cloud.tickCount=8;cloud.tick();h.assertTrue(packets.size()==2 && packets.getLast().getXDist()<first.getXDist(),"Subsequent particle batches shrink with the cloud");

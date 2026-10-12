@@ -10,10 +10,9 @@ public final class HarbingerSmokeParticles {
         if (!(cloud.level() instanceof ServerLevel world)
                 || !((HarbingerSmoke) cloud).confluxHarbinger$managedSmoke()
                 || cloud.isRemoved() || cloud.isWaiting() || (cloud.tickCount & 1) != 0) return;
-        // One batch per two ticks. Keep particles above the collision plane rather than
-        // embedding their quads in the block hit by the shell. No forced particle setting.
+        // One batch per two ticks at the native cloud origin. No forced particle setting.
         double spread = cloud.getRadius() * .45;
-        world.sendParticles(ParticleTypes.SMOKE, cloud.getX(), cloud.getY() + .2, cloud.getZ(),
+        world.sendParticles(ParticleTypes.SMOKE, cloud.getX(), cloud.getY(), cloud.getZ(),
                 20, spread, 0, spread, .025);
     }
 

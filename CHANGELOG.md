@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.1.0-dev.22
+
+- Remove the 0.2-block visual height offset from Wither Smoke. Keep the server particle transport confirmed visible by the player in dev.21.
+- Wall impacts were also invisible before dev.21, so impact-plane occlusion was not the demonstrated cause.
+
 ## 0.1.0-dev.21
 
 - Send managed Wither Smoke visuals through vanilla server particle packets, covering both Howitzer impacts and the standalone glyph. Lift particle origins slightly above the impact plane; keep native cloud damage, shrinking and expiry.
