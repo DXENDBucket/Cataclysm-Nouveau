@@ -19,7 +19,7 @@ import java.util.*;
 
 public final class GuardianCasting {
     private static final Set<UUID> PUNCHING=new HashSet<>();
-    public static boolean isPunching(Entity actor){return PUNCHING.contains(actor.getUUID()) || GuardianActions.isActing(actor);}
+    public static boolean isPunching(Entity actor){return PUNCHING.contains(actor.getUUID()) || GuardianActions.isActing(actor) || IgnisCasting.isActing(actor);}
     public static boolean rejectDamage(Entity source,Entity target) {
         if(!(source instanceof SpellGuardian || source instanceof GuardianBullet || source instanceof GuardianChild child && child.confluxGuardian$managed()))return false;
         var cast=NativeDamageContexts.context(source);return cast!=null && HarbingerCasting.allied(cast,target);

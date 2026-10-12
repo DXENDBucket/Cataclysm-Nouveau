@@ -25,8 +25,8 @@ import java.util.function.Supplier;
 /** Native payloads own visuals/hit bodies; a single trajectory owns motion and collision. */
 public final class HarbingerCasting {
     private static final ThreadLocal<Entity> DECORATING=new ThreadLocal<>();
-    public static boolean supports(Ability a) {return switch(a){case LASER_BOLT,WITHER_MISSILE,HOMING_MISSILE,WITHER_HOWITZER,GUARDIAN_BULLET->true;default->false;};}
-    public static boolean nativePayload(Entity e) {return e instanceof Laser_Beam_Entity || e instanceof Wither_Missile_Entity || e instanceof Wither_Homing_Missile_Entity || e instanceof Wither_Howitzer_Entity || e instanceof Ender_Guardian_Bullet_Entity;}
+    public static boolean supports(Ability a) {return switch(a){case IGNIS_FIREBALL,IGNIS_ABYSS_FIREBALL,LASER_BOLT,WITHER_MISSILE,HOMING_MISSILE,WITHER_HOWITZER,GUARDIAN_BULLET->true;default->false;};}
+    public static boolean nativePayload(Entity e) {return e instanceof Ignis_Fireball_Entity || e instanceof Ignis_Abyss_Fireball_Entity || e instanceof Laser_Beam_Entity || e instanceof Wither_Missile_Entity || e instanceof Wither_Homing_Missile_Entity || e instanceof Wither_Howitzer_Entity || e instanceof Ender_Guardian_Bullet_Entity;}
     public static boolean decorating(Entity e) {return DECORATING.get()==e && e instanceof ManagedProjectile s && s.confluxCataclysm$mode()==1;}
     public static void decorate(Entity e,Runnable tick) {
         var old=DECORATING.get();DECORATING.set(e);
@@ -55,6 +55,7 @@ public final class HarbingerCasting {
         return best;
     }
     public static Projectile create(Ability a,ServerLevel world,CastContext c,Vec3 direction,LivingEntity target,double amplify) {
+        if(IgnisCasting.projectile(a))return IgnisCasting.create(a,world,c,direction,target,amplify);
         var owner=c.damageOwner()==null?c.caster():c.damageOwner();float bonus=Resources.amplification(amplify);
         Projectile p=switch(a) {
             case GUARDIAN_BULLET->new Ender_Guardian_Bullet_Entity(world,owner,direction);
@@ -71,7 +72,7 @@ public final class HarbingerCasting {
         var resolver=ArsSpellAccess.resolver(carrier);var frame=CastContext.of(resolver.spellContext,null,null);
         if(frame.caster()==null || !frame.caster().isAlive())return true;
         Vec3 direction=TriggerGeometry.direction(carrier);
-        var selected=a==Ability.HOMING_MISSILE?target(world,carrier.position(),direction,frame):null;
+        var selected=(a==Ability.HOMING_MISSILE || IgnisCasting.projectile(a))?target(world,carrier.position(),direction,frame):null;
         if(a==Ability.HOMING_MISSILE && !profile.arsDriven() && selected==null)return true;
         var stats=resolver.getCastStats();var quote=Resources.quote(resolver.spellContext,a,stats.getAugments());
         var payload=create(a,world,frame,direction,selected,stats.getAmpMultiplier());
@@ -94,6 +95,7 @@ public final class HarbingerCasting {
                 Vec3 staging=carrier.position().add(direction.scale(3));
                 bullet.setUp(CataclysmConfig.guardianBulletDelay(),direction.x*acceleration,direction.y*acceleration,direction.z*acceleration,staging.x,staging.y,staging.z);
             }
+            if(payload instanceof CMAbstractHurtingProjectile fire)IgnisCasting.accelerate(fire,acceleration,target(s.world(),carrier.position(),direction,s.context()));
             if(trajectory!=null)return trajectory.start(s.world(),()->{},h->impact(s,h));
             payload.setPos(carrier.position());
             if(payload instanceof Wither_Howitzer_Entity shell)shell.shoot(direction.x,direction.y,direction.z,(float)(.6*acceleration),0);
@@ -104,6 +106,7 @@ public final class HarbingerCasting {
         void impact(ExecutionSession<Projectile> s,HitResult hit) {
             var state=(ManagedProjectile)payload;if(state.confluxCataclysm$resolving() || hit.getType()==HitResult.Type.MISS)return;
             if(payload instanceof GuardianBullet bullet && !bullet.confluxGuardian$fired())return;
+            if(payload instanceof IgnisProjectile fire && !fire.confluxIgnis$ready())return;
             if(hit instanceof EntityHitResult e && allied(s.context(),e.getEntity()))return;
             direction=trajectory==null?payload.getDeltaMovement().normalize():trajectory.incomingDirection();state.confluxCataclysm$resolving(true);
             try{if(!s.activate(()->{payload.setPos(hit.getLocation());((ProjectileHitAccess)payload).confluxCataclysm$nativeHit(hit);s.impact(hit);return true;}))s.finish(ExecutionSession.EndReason.DENIED);}

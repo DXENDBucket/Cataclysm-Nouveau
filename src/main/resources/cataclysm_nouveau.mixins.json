@@ -53,7 +53,14 @@
     "GuardianAttackAccess",
     "GuardianAdapterMixin",
     "GuardianRuneStateMixin",
-    "GuardianVortexMixin"
+    "GuardianVortexMixin",
+    "IgnisFireballModeMixin",
+    "IgnisAbyssModeMixin",
+    "IgnisNativeTickMixin",
+    "IgnisMotionMixin",
+    "IgnisExplosionMixin",
+    "IgnisAttackAccess",
+    "IgnisAdapterMixin"
   ],
   "client": [
     "client.GuardianVortexRenderProbeMixin"

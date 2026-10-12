@@ -46,7 +46,12 @@ public enum Ability {
     GUARDIAN_UPPERCUT("guardian_uppercut", "Guardian Uppercut Combo", 420),
     GUARDIAN_BLINK("guardian_blink", "Guardian Blink Strike", 180),
     GUARDIAN_AIR_STRIKE("guardian_air_strike", "Guardian Aerial Slam", 450),
-    GUARDIAN_ROCKET_PUNCH("guardian_rocket_punch", "Guardian Rocket Punch", 160);
+    GUARDIAN_ROCKET_PUNCH("guardian_rocket_punch", "Guardian Rocket Punch", 160),
+    IGNIS_FIREBALL("ignis_fireball", "Ignis Fireball", 120),
+    IGNIS_ABYSS_FIREBALL("ignis_abyss_fireball", "Ignis Abyss Fireball", 200),
+    IGNIS_BLADE_FIREBALLS("ignis_blade_fireballs", "Ignis Blade Fireballs", 320),
+    IGNIS_AIR_SMASH("ignis_air_smash", "Ignis Leaping Smash", 300),
+    IGNIS_SWORD_COMBO("ignis_sword_combo", "Ignis Sword Dance", 650);
     public final String id, name;
     public final int mana;
     Ability(String id, String name, int mana) { this.id=id; this.name=name; this.mana=mana; }
@@ -54,6 +59,7 @@ public enum Ability {
     /** Acquisition/source families, shared by all presentation surfaces. */
     public Series series() {
         return switch(this) {
+            case IGNIS_FIREBALL,IGNIS_ABYSS_FIREBALL,IGNIS_BLADE_FIREBALLS,IGNIS_AIR_SMASH,IGNIS_SWORD_COMBO -> Series.IGNIS;
             case GUARDIAN_BULLET,VOID_VORTEX,GUARDIAN_STOMP,GRAVITY_PUNCH,GUARDIAN_UPPERCUT,GUARDIAN_BLINK,GUARDIAN_AIR_STRIKE,GUARDIAN_ROCKET_PUNCH -> Series.ENDER_GUARDIAN;
             case LASER_BOLT,WITHER_MISSILE,HOMING_MISSILE,WITHER_HOWITZER,DEATH_LASER,HARBINGER_CHARGE,HOWITZER_VOLLEY,MISSILE_SALVO,WITHER_SMOKE -> Series.HARBINGER;
             case AMETHYST_CLUSTER -> Series.AMETHYST_CRAB;
@@ -65,5 +71,5 @@ public enum Ability {
                     STORM_SERPENT,LIGHTNING_STORM,LIGHTNING_FIELD,STORM_BURST,SPARK,THUNDER_CLOUD,LIGHTNING_ROW,THUNDER_COMBO,ANCHOR_SPIN,ANCHOR_LEAP,WATER_WALKING -> Series.SCYLLA;
         };
     }
-    public enum Series { AMETHYST_CRAB, LIONFISH, ENDER_GOLEM, MONSTROSITY, SCYLLA, HARBINGER, ENDER_GUARDIAN }
+    public enum Series { AMETHYST_CRAB, LIONFISH, ENDER_GOLEM, MONSTROSITY, SCYLLA, HARBINGER, ENDER_GUARDIAN, IGNIS }
 }

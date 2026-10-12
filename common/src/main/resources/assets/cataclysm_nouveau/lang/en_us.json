@@ -138,5 +138,15 @@
   "cataclysm_nouveau.glyph_name.glyph_guardian_air_strike": "Guardian Aerial Slam",
   "cataclysm_nouveau.glyph_desc.glyph_guardian_air_strike": "Self or an ally teleports above an enemy, then releases a shockwave and radial Void Runes only after landing. Half caster health increases the drop height. Requires an enemy entity and clear space.",
   "cataclysm_nouveau.glyph_name.glyph_guardian_rocket_punch": "Guardian Rocket Punch",
-  "cataclysm_nouveau.glyph_desc.glyph_guardian_rocket_punch": "Self or an ally dashes horizontally toward a target, then punches with knockback and shield break. Selecting an enemy makes the caster act; otherwise aims at the selected point or forward."
+  "cataclysm_nouveau.glyph_desc.glyph_guardian_rocket_punch": "Self or an ally dashes horizontally toward a target, then punches with knockback and shield break. Selecting an enemy makes the caster act; otherwise aims at the selected point or forward.",
+  "cataclysm_nouveau.glyph_name.glyph_ignis_fireball": "Ignis Fireball",
+  "cataclysm_nouveau.glyph_desc.glyph_ignis_fireball": "Replaces the projectile with an Ignis fireball, retaining native trail, explosion, stacking Blazing Brand and 5 health restored on a successful hit. At two-thirds caster health or below, uses soul fire.",
+  "cataclysm_nouveau.glyph_name.glyph_ignis_abyss_fireball": "Ignis Abyss Fireball",
+  "cataclysm_nouveau.glyph_desc.glyph_ignis_abyss_fireball": "Replaces the projectile with an Abyss fireball, preserving wall bounces, native explosion, health-based damage, Blazing Brand and healing. Special Ars forms retain their own trajectory.",
+  "cataclysm_nouveau.glyph_name.glyph_ignis_blade_fireballs": "Ignis Blade Fireballs",
+  "cataclysm_nouveau.glyph_desc.glyph_ignis_blade_fireballs": "Deploys three native Ignis fireballs with their staggered preparation and synchronized release. Preserves target correction on release and 40 ticks later; the group pays once.",
+  "cataclysm_nouveau.glyph_name.glyph_ignis_air_smash": "Ignis Leaping Smash",
+  "cataclysm_nouveau.glyph_desc.glyph_ignis_air_smash": "Self or an ally leaps toward a target, then smashes only after landing and sends four advancing ground shockwaves. Retains native damage, launch and shield break without terrain destruction.",
+  "cataclysm_nouveau.glyph_name.glyph_ignis_sword_combo": "Ignis Sword Dance",
+  "cataclysm_nouveau.glyph_desc.glyph_ignis_sword_combo": "Self or an ally executes both native sword-dance phases, including lunges, sweeps, body check and finishing ground shockwaves. Hits stack Blazing Brand and heal the caster; the group pays once."
 }

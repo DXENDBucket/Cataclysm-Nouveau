@@ -12,6 +12,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 public abstract class HarbingerAnimationMixin {
     @Inject(method="sendAnimationMessage",at=@At("HEAD"),cancellable=true)
     private void harbinger$detached(Entity entity,Animation animation,CallbackInfo ci) {
+        if(entity instanceof dev.cataclysmnouveau.casting.SpellIgnis frame){frame.setAnimation(animation);ci.cancel();return;}
         if(entity instanceof SpellGuardian frame){frame.setAnimation(animation);ci.cancel();return;}
         if(entity instanceof SpellHarbinger frame){
             if(frame.acceptingRepeat && animation==The_Harbinger_Entity.CHARGE_ANIMATION)frame.repeatRequested=true;

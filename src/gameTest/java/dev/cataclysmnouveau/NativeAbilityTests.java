@@ -1442,6 +1442,106 @@ public final class NativeAbilityTests {
         }
     }
 
+    @GameTest(template="empty",batch="cat_ignis_fireball",timeoutTicks=100)
+    public static void ignisFireballNativeDamageBrandHealingExplosionAndAllies(GameTestHelper h) {
+        try(var a=new Arena(h)) {
+            var victim=a.target(a.center,false);var ally=a.target(a.center.add(.5,0,0),true);
+            var cast=CastContext.detached(a.p,new EntityHitResult(victim),null);
+            var fire=(Ignis_Fireball_Entity)IgnisCasting.create(Ability.IGNIS_FIREBALL,h.getLevel(),cast,new Vec3(0,0,1),victim,1);
+            close(h,fire.zPower,.2,"Normal fireball begins with native launched power");close(h,fire.getDeltaMovement().z,.25,"Native launch speed is retained");
+            ((ManagedProjectile)fire).confluxCataclysm$mode(2);fire.setPos(victim.position());a.p.setHealth(5);
+            h.getLevel().addFreshEntity(fire);((ProjectileHitAccess)fire).confluxCataclysm$nativeHit(new EntityHitResult(victim));
+            close(h,500-victim.getHealth(),Resources.augmentedDamage(6+500*.07F,1),"Native direct health-based damage is augmented once");
+            close(h,a.p.getHealth(),10,"Successful native projectile heals real owner by five");
+            h.assertTrue(fire.isRemoved() && victim.getLastDamageSource().getEntity()==a.p,"Native explosion and removal preserve owner");
+            h.assertTrue(victim.hasEffect(ModEffect.EFFECTBLAZING_BRAND) && victim.getEffect(ModEffect.EFFECTBLAZING_BRAND).getAmplifier()==1,"Native initial brand is level II");
+            close(h,ally.getHealth(),500,"Native explosion protects allies");close(h,ally.getDeltaMovement().length(),0,"Friendly explosion knockback is suppressed");
+            h.assertTrue(h.getLevel().getBlockState(a.base).is(Blocks.STONE),"Fireball keeps terrain");
+            var ordinary=new Ignis_Fireball_Entity(h.getLevel(),a.p);h.assertTrue(((ManagedProjectile)ordinary).confluxCataclysm$mode()==0,"Ordinary fireball has no bridge mode");
+            var soul=(Ignis_Fireball_Entity)IgnisCasting.create(Ability.IGNIS_FIREBALL,h.getLevel(),cast,new Vec3(0,0,1),victim,0);
+            h.assertTrue(soul.isSoul() && IgnisCasting.phase(a.p)==1,"Native two-thirds health gate selects soul fire");h.succeed();
+        }
+    }
+    @GameTest(template="empty",batch="cat_ignis_abyss",timeoutTicks=100)
+    public static void ignisAbyssNativeBounceLimitAndDirectDamage(GameTestHelper h) {
+        try(var a=new Arena(h)) {
+            var cast=CastContext.detached(a.p,null,null);var victim=a.target(a.center.add(4,0,0),false);
+            var fire=(Ignis_Abyss_Fireball_Entity)IgnisCasting.create(Ability.IGNIS_ABYSS_FIREBALL,h.getLevel(),cast,new Vec3(0,0,1),victim,1);
+            ((ManagedProjectile)fire).confluxCataclysm$mode(2);fire.setPos(a.center);fire.setDeltaMovement(0,0,1);
+            var wall=a.base.above();h.getLevel().setBlockAndUpdate(wall,Blocks.STONE.defaultBlockState());
+            try {
+                var hit=new BlockHitResult(a.center,Direction.NORTH,wall,false);
+                for(int bounce=0;bounce<6;bounce++)((ProjectileHitAccess)fire).confluxCataclysm$nativeHit(hit);
+                h.assertTrue(fire.getTotalBounces()==6 && !fire.isRemoved(),"Native abyss wall bounces retained");
+                ((ProjectileHitAccess)fire).confluxCataclysm$nativeHit(hit);h.assertTrue(fire.isRemoved(),"Native bounce exhaustion explodes and removes projectile");
+            } finally {h.getLevel().setBlockAndUpdate(wall,Blocks.AIR.defaultBlockState());}
+            var direct=(Ignis_Abyss_Fireball_Entity)IgnisCasting.create(Ability.IGNIS_ABYSS_FIREBALL,h.getLevel(),cast,new Vec3(0,0,1),victim,1);direct.setPos(victim.position());((ManagedProjectile)direct).confluxCataclysm$mode(2);
+            victim.setYRot(90);direct.hurt(h.getLevel().damageSources().mobAttack(victim),1);
+            h.assertTrue(direct.getDeltaMovement().x<-.9 && direct.getOwner()==a.p,"Native deflection redirects motion while retaining explicit cast ownership");
+            ((ProjectileHitAccess)direct).confluxCataclysm$nativeHit(new EntityHitResult(victim));
+            close(h,500-victim.getHealth(),Resources.augmentedDamage(10+500*.2F,1),"Native abyss twenty-percent damage uses bounded augmentation");h.succeed();
+        }
+    }
+    @GameTest(template="empty",batch="cat_ignis_orbit",timeoutTicks=100)
+    public static void ignisOrbitKeepsNativeTrailSingleMotionAndRepeatedBilling(GameTestHelper h) {
+        try(var a=new Arena(h)) {
+            var marker=new Marker();var r=resolver(h,a.p,new Spell(MethodProjectile.INSTANCE,GlyphCatalog.IGNIS_FIREBALL,marker));r.spellContext.nextPart();
+            var orbit=new EntityOrbitProjectile(h.getLevel(),r,a.p);orbit.setPos(a.center.add(0,3,0));ProjectileDispatch.convert(orbit);
+            var fire=h.getLevel().getEntitiesOfClass(Ignis_Fireball_Entity.class,new AABB(a.center,a.center).inflate(10)).getFirst();
+            var original=fire.position();fire.tick();h.assertTrue(fire.hasTrail() && fire.position().equals(original),"Native tick fills trail history without moving Ars payload twice");
+            for(int tick=0;tick<170;tick++)fire.tick();h.assertTrue(!fire.isRemoved(),"Native expiry cannot end an active Ars special form");
+            var enemy=a.target(a.center.add(0,0,2),false);var mana=CapabilityRegistry.getMana(a.p);mana.setMana(10000);var state=(ManagedProjectile)fire;
+            for(int i=1;i<=2;i++){enemy.invulnerableTime=0;state.confluxCataclysm$impact().accept(new EntityHitResult(enemy));h.assertTrue(marker.hits==i && !fire.isRemoved(),"Repeated payload continues after native impact");close(h,mana.getCurrentMana(),10000-i*CataclysmConfig.cost(Ability.IGNIS_FIREBALL),"Each recurring hit pays once");}
+            mana.setMana(0);state.confluxCataclysm$impact().accept(new EntityHitResult(enemy));h.assertTrue(fire.isRemoved() && orbit.isRemoved() && marker.hits==2,"Empty Mana ends repeated Ignis payload");h.succeed();
+        }
+    }
+    @GameTest(template="empty",batch="cat_ignis_blades",timeoutTicks=100)
+    public static void ignisPreparedBladeShotsTargetAndRootLifetime(GameTestHelper h) {
+        try(var a=new Arena(h)) {
+            a.p.setHealth(5);var enemy=a.target(a.center.add(0,0,8),false);
+            var mana=CapabilityRegistry.getMana(a.p);double before=mana.getCurrentMana();
+            a.cast(GlyphCatalog.IGNIS_BLADE_FIREBALLS,new EntityHitResult(enemy),true);
+            for(int i=0;i<25;i++)ExecutionSessions.tick();
+            var shots=h.getLevel().getEntitiesOfClass(Ignis_Fireball_Entity.class,new AABB(a.p.position(),a.p.position()).inflate(10));
+            h.assertTrue(shots.size()==3,"All three native blade placements are emitted");
+            for(var shot:shots){
+                h.assertTrue(shot.getOwner()==a.p && shot.isSoul() && !shot.getFired(),"Prepared native soul shots have real owner");
+                shot.setUp(1);shot.tick();var direction=enemy.position().add(0,enemy.getBbHeight()*.5,0).subtract(shot.position()).normalize();
+                h.assertTrue(shot.getFired() && new Vec3(shot.xPower,shot.yPower,shot.zPower).normalize().dot(direction)>.999,"Prepared shot acquires target even when owner is a player");
+                close(h,NativeDamageContexts.amplification(shot),1,"Children inherit augmentation once");
+            }
+            close(h,before-mana.getCurrentMana(),CataclysmConfig.cost(Ability.IGNIS_BLADE_FIREBALLS)+CataclysmConfig.amplifyCost(),"Native salvo pays once");
+            a.p.setHealth(0);ExecutionSessions.tick();h.assertTrue(shots.stream().allMatch(Entity::isRemoved),"Root death cancels every prepared shot");h.succeed();
+        }
+    }
+    @GameTest(template="empty",batch="cat_ignis_jump",timeoutTicks=100)
+    public static void ignisLeapingSmashWaitsForRealLandingAndRestoresGravity(GameTestHelper h) {
+        try(var a=new Arena(h)) {
+            var host=a.target(a.center,true);host.setYRot(0);host.setOnGround(true);var enemy=a.target(a.center.add(0,0,2),false);var ally=a.target(enemy.position(),true);
+            a.cast(GlyphCatalog.IGNIS_AIR_SMASH,new EntityHitResult(host),true);
+            for(int tick=1;tick<=30;tick++){ExecutionSessions.tick();if(tick==19)close(h,host.getDeltaMovement().y,1.3,"Native jump reaches real executor");}
+            close(h,enemy.getHealth(),500,"Midair timer does not create a landing attack");
+            host.setOnGround(true);ExecutionSessions.tick();for(int tick=1;tick<=5;tick++)ExecutionSessions.tick();
+            h.assertTrue(enemy.getHealth()<500 && enemy.getRemainingFireTicks()==0 && enemy.getLastDamageSource().getEntity()==a.p,"Actual landing starts native non-igniting smash with real damage ownership: health="+enemy.getHealth()+", fire="+enemy.getRemainingFireTicks()+", source="+enemy.getLastDamageSource()+", actor="+host.position()+", motion="+host.getDeltaMovement());
+            close(h,ally.getHealth(),500,"Smash protects allies");
+            a.p.setHealth(0);ExecutionSessions.tick();h.assertTrue(!IgnisCasting.isActing(host) && host.isNoGravity(),"Cancellation restores previous gravity state");h.succeed();
+        }
+    }
+    @GameTest(template="empty",batch="cat_ignis_combo",timeoutTicks=100)
+    public static void ignisBothSwordDancePhasesDamageBrandAndHealingOwnership(GameTestHelper h) {
+        try(var a=new Arena(h)) {
+            a.p.setHealth(5);var host=a.target(a.center,true);host.setYRot(0);host.setHealth(250);var enemy=a.target(a.center.add(0,0,3),false);var ally=a.target(enemy.position(),true);
+            a.cast(GlyphCatalog.IGNIS_SWORD_COMBO,new EntityHitResult(host),true);
+            for(int tick=1;tick<=83;tick++){enemy.invulnerableTime=0;ExecutionSessions.tick();}
+            h.assertTrue(enemy.hasEffect(ModEffect.EFFECTBLAZING_BRAND) && a.p.getHealth()>5,"Native sword hits brand and heal the root caster");
+            double afterFirst=enemy.getHealth();
+            for(int tick=84;tick<=215;tick++){enemy.invulnerableTime=0;ExecutionSessions.tick();}
+            h.assertTrue(enemy.getHealth()<afterFirst && !IgnisCasting.isActing(host),"Second native phase completes and releases actor");
+            close(h,host.getHealth(),250,"Heal does not accidentally target the detached Boss or ally executor");close(h,ally.getHealth(),500,"Both phases protect allies");
+            h.assertTrue(h.getLevel().getBlockState(a.base).is(Blocks.STONE),"Ground waves retain terrain");h.succeed();
+        }
+    }
+
     @GameTest(template="empty",batch="cat_harbinger_standalone_smoke",timeoutTicks=100)
     public static void standaloneSmokeDurationDamageFeeAndRootCleanup(GameTestHelper h) {
         try(var a=new Arena(h)) {

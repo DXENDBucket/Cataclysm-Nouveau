@@ -47,7 +47,9 @@ public final class CataclysmEffectGlyph extends AbstractEffect implements Trigge
         if (ability == Ability.DEATH_LASER) {
             HarbingerLaser.start(world,frame,stats.getAmpMultiplier(),stats.getDurationMultiplier(),firstCharge(context,stats.getAugments()));return;
         }
-        firstCharge(context, stats.getAugments()).trigger(() -> GuardianCasting.supports(ability)
+        firstCharge(context, stats.getAugments()).trigger(() -> IgnisCasting.supports(ability)
+                ? IgnisCasting.effect(ability,world,frame,stats.getAmpMultiplier())
+                : GuardianCasting.supports(ability)
                 ? GuardianCasting.effect(ability,world,frame,stats.getAmpMultiplier(),stats.getDurationMultiplier())
                 : HarbingerActions.supports(ability)
                 ? HarbingerActions.effect(ability,world,frame,stats.getAmpMultiplier(),stats.getDurationMultiplier())

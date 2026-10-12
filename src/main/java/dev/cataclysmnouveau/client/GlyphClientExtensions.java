@@ -37,6 +37,8 @@ public final class GlyphClientExtensions {
         event.registerItem(nativeItem(() -> ModItems.CERAUNUS.get()),GlyphCatalog.ANCHOR.getGlyph(),GlyphCatalog.WAVE.getGlyph(),GlyphCatalog.SPIN.getGlyph(),GlyphCatalog.LEAP.getGlyph());
         event.registerItem(nativeItem(() -> ModItems.LASER_GATLING.get()),GlyphCatalog.LASER_BOLT.getGlyph(),GlyphCatalog.DEATH_LASER.getGlyph());
         event.registerItem(nativeItem(() -> ModItems.WITHER_ASSULT_SHOULDER_WEAPON.get()),GlyphCatalog.MISSILE.getGlyph(),GlyphCatalog.HOMING.getGlyph(),GlyphCatalog.HOWITZER.getGlyph(),GlyphCatalog.HOWITZER_VOLLEY.getGlyph(),GlyphCatalog.MISSILE_SALVO.getGlyph());
+        event.registerItem(nativeItem(() -> ModItems.THE_INCINERATOR.get()),GlyphCatalog.IGNIS_BLADE_FIREBALLS.getGlyph(),GlyphCatalog.IGNIS_SWORD_COMBO.getGlyph());
+        event.registerItem(nativeItem(() -> ModItems.BULWARK_OF_THE_FLAME.get()),GlyphCatalog.IGNIS_AIR_SMASH.getGlyph());
         event.registerItem(nativeItem(() -> ModItems.INFERNAL_FORGE.get()),GlyphCatalog.QUAKE.getGlyph());
         event.registerItem(nativeItem(() -> ModItems.GAUNTLET_OF_GUARD.get()),GlyphCatalog.GRAVITY_PUNCH.getGlyph(),
             GlyphCatalog.GUARDIAN_UPPERCUT.getGlyph(),GlyphCatalog.GUARDIAN_ROCKET_PUNCH.getGlyph());

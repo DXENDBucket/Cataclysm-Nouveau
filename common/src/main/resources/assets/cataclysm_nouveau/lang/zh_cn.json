@@ -138,5 +138,15 @@
   "cataclysm_nouveau.glyph_name.glyph_guardian_air_strike": "空降重砸",
   "cataclysm_nouveau.glyph_desc.glyph_guardian_air_strike": "自身或友军移至敌人上方，实际落地后释放冲击与放射符文阵。半血时从更高处坠落；需要敌方实体与足够的空间。",
   "cataclysm_nouveau.glyph_name.glyph_guardian_rocket_punch": "火箭拳",
-  "cataclysm_nouveau.glyph_desc.glyph_guardian_rocket_punch": "自身或友军朝目标水平突进，随后重拳击退并禁盾。选中敌人时由施法者执行；没有实体目标时沿选定落点或朝向攻击。"
+  "cataclysm_nouveau.glyph_desc.glyph_guardian_rocket_punch": "自身或友军朝目标水平突进，随后重拳击退并禁盾。选中敌人时由施法者执行；没有实体目标时沿选定落点或朝向攻击。",
+  "cataclysm_nouveau.glyph_name.glyph_ignis_fireball": "焰魔火球",
+  "cataclysm_nouveau.glyph_desc.glyph_ignis_fireball": "替换为原生焰魔火球，命中叠加炽焰烙印并回复施法者5点生命。生命不高于三分之二时采用灵魂火球，保留原生拖尾与爆炸。",
+  "cataclysm_nouveau.glyph_name.glyph_ignis_abyss_fireball": "深渊火球",
+  "cataclysm_nouveau.glyph_desc.glyph_ignis_abyss_fireball": "替换为原生深渊火球，保留墙面反弹、爆炸、生命比例伤害、炽焰烙印和命中回血。特殊弹射物形态的轨迹由形态控制。",
+  "cataclysm_nouveau.glyph_name.glyph_ignis_blade_fireballs": "剑刃火球阵",
+  "cataclysm_nouveau.glyph_desc.glyph_ignis_blade_fireballs": "先后布下三枚原生焰魔火球，按原生准备延迟齐射；保留释放时与40tick后的方向修正。整组只付费一次。",
+  "cataclysm_nouveau.glyph_name.glyph_ignis_air_smash": "焰魔跃砸",
+  "cataclysm_nouveau.glyph_desc.glyph_ignis_air_smash": "自身或友军跃向目标，实际落地后砸击并展开四段地面冲击。保留伤害、挑起与禁盾；不会破坏地形。",
+  "cataclysm_nouveau.glyph_name.glyph_ignis_sword_combo": "焰魔剑舞",
+  "cataclysm_nouveau.glyph_desc.glyph_ignis_sword_combo": "自身或友军执行完整两段剑舞，包含突进、横扫、冲撞和收尾地面冲击，命中叠加烙印并为施法者回血。整组只付费一次。"
 }

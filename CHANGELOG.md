@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.1.0-dev.29
+
+- Add native Ignis Fireball and Abyss Fireball replacements, Blade Fireball salvo, Leaping Smash and the complete two-phase Sword Dance.
+- Keep native trail history, explosions and particle packets, Abyss wall bounces, health-based damage, Blazing Brand and healing. Prepared shots acquire the selected target even with a real player owner.
+- Use original two-thirds/one-third health gates for soul fire and shield-break state. Jump damage waits for real landing; ordinary smash does not ignite.
+- Preserve explicit cast ownership during deflection, ally protection, terrain, trigger billing, actor/child lifetimes and conflict cleanup. Ordinary Cataclysm behavior stays unchanged.
+- Add five ingot-based recipes, runtime-only models, native item-render delegation, descriptions and configurable costs/cooldowns. All 67 required server tests and binary/source distribution checks pass; client visuals remain unverified.
+
 ## 0.1.0-dev.28
 
 - Add Guardian Uppercut Combo, Blink Strike, Aerial Slam and Rocket Punch as effect glyphs, using complete native goals and attack bodies.

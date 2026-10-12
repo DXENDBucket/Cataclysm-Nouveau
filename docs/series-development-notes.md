@@ -93,3 +93,7 @@ dev.25实际客户端诊断进一步确认：三次施放在elapsed=1/age=1、li
 ## dev.28：末影守卫动作连段
 
 四项调用原生目标Goal与aiStep，不能只补伤害事件。实体传送必须落到真实执行者，而非未注册Boss调用帧；按执行者体积和原版取消事件检查。空降以真实onGround进行原生阶段切换，不按预设计时器生成“落地”伤害。AnimationHandler不得广播未注册Boss的id；只在调用帧内部改变状态。炮弹/符文子攻击继承来源能力、费用只在母动作启动收一次，不能统一误记为践踏，否则禁用配置和清理会错。对子攻击应用增强一次，MassDestruction也需替换真实伤害来源。不同动作对同一执行者的冲量互斥，不改生物永久AI标记。半血条件读取施法根，不按友军执行者血量切阶段。61项服务端检查通过不等于客户端动画/粒子已经人工确认。
+
+## dev.29：焰魔首批
+
+CMAbstractHurtingProjectile是本体独立运动基类，Ars特殊轨迹也要跑完整原生tick来保留64点trail。只在decorative scope抑制位移、碰撞与原生过期，费用及后续效果由一次命中入口处理。IgnisExplosion可直接复用原生粒子包；构造器补真实来源、友军伤害/击退过滤及一次增强，不替换成无特效的普通explode。玩家owner没有Mob.getTarget，需要单独保留准备火球目标并接timer0/-40两次修正。普通SMASH的firetime为0，整数串中最后5是heal参数，不能猜参数含义。完整剑舞须包含原生COMBO2，空降以真实落地切阶段。67项服务端通过，未验证客户端。详见ignis-abilities及handoff-ignis-dev29。

@@ -9,6 +9,7 @@ public final class NativeDamageContexts {
     public static CastContext context(Entity entity) {
         if (entity instanceof SpellHarbinger frame) return frame.cast;
         if (entity instanceof SpellGuardian frame) return frame.cast;
+        if (entity instanceof SpellIgnis frame) return frame.cast;
         if (entity instanceof SpellScylla frame) return frame.cast;
         if (entity instanceof SpellMonstrosity frame) return frame.cast;
         if (entity instanceof ScyllaPayload frame && frame.confluxScylla$cast() != null)
