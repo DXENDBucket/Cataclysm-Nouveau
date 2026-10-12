@@ -106,6 +106,7 @@ public final class HarbingerActions {
         return ExecutionSessions.start(new ExecutionSession<>(world,frame,boss,138,new ExecutionDriver<SpellHarbinger>() {
             private int age;private Vec3 impulse=Vec3.ZERO;private boolean stopped;
             public boolean occupiesCaster(){return actor==cast.caster();}
+            public java.util.List<ExecutionClaim> claims(ExecutionSession<SpellHarbinger> s){return java.util.List.of(ExecutionClaim.action(actor));}
             public boolean start(ExecutionSession<SpellHarbinger> s){CHARGING.add(actor.getUUID());goal.start();return true;}
             public boolean tick(ExecutionSession<SpellHarbinger> s) {
                 if(!world.hasChunkAt(actor.blockPosition()))return true;

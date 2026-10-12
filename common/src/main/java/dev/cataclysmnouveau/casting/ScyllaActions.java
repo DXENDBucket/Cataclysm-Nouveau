@@ -48,6 +48,7 @@ public final class ScyllaActions {
         return start(world,frame,ability,boss,combo?108:55,new ExecutionDriver<SpellScylla>() {
             private int age;
             public boolean occupiesCaster() {return actor==cast.caster();}
+            public java.util.List<ExecutionClaim> claims(ExecutionSession<SpellScylla> s){return java.util.List.of(ExecutionClaim.action(actor));}
             public boolean start(ExecutionSession<SpellScylla> session) {
                 ACTORS.add(actor.getUUID());if(goal!=null) goal.start();else boss.setAttackState(7);return true;
             }
@@ -83,6 +84,7 @@ public final class ScyllaActions {
         return start(world,cast,Ability.ANCHOR_LEAP,boss,160,new ExecutionDriver<SpellScylla>() {
             private int age;private boolean thrown,latched,released;
             public boolean occupiesCaster() {return actor==cast.caster();}
+            public java.util.List<ExecutionClaim> claims(ExecutionSession<SpellScylla> s){return java.util.List.of(ExecutionClaim.action(actor));}
             public boolean start(ExecutionSession<SpellScylla> session) {
                 ACTORS.add(actor.getUUID());LEAPING.add(actor.getUUID());actor.setNoGravity(false);jump.start();boss.attackTicks=9;jump.tick();
                 actor.setDeltaMovement(boss.getDeltaMovement());actor.setOnGround(false);actor.hurtMarked=true;return true;

@@ -83,6 +83,7 @@ public final class GuardianActions {
             private int age, phaseAge;
             private Vec3 facing = horizontal(boss.getLookAngle());
             public boolean occupiesCaster() { return executionActor == cast.caster(); }
+            public java.util.List<ExecutionClaim> claims(ExecutionSession<SpellGuardian> s){return java.util.List.of(ExecutionClaim.action(executionActor));}
             public boolean start(ExecutionSession<SpellGuardian> session) {
                 ACTORS.add(executionActor.getUUID());
                 if (executionActor instanceof Mob mob) mob.getNavigation().stop();

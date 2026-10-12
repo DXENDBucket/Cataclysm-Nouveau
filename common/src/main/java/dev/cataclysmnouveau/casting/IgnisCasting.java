@@ -186,6 +186,7 @@ public final class IgnisCasting {
                 reinforced?"Reinforced_Air_Smash":airborne?"Air_Smash":a==Ability.IGNIS_EARTH_SHUDDERS?"Earth_Shudders":"Combo1");
             private Vec3 heading=horizontal(host.getLookAngle());
             public boolean occupiesCaster(){return host==cast.caster();}
+            public java.util.List<ExecutionClaim> claims(ExecutionSession<SpellIgnis> s){return java.util.List.of(ExecutionClaim.action(host));}
             public boolean start(ExecutionSession<SpellIgnis> s){ACTORS.add(host.getUUID());if(host instanceof Mob mob)mob.getNavigation().stop();if(airborne)host.setNoGravity(false);goal.start();dev.cataclysmnouveau.network.IgnisPhantomSync.send(s.id(),host,boss,false);return true;}
             public boolean tick(ExecutionSession<SpellIgnis> s) {
                 if(!host.isAlive() || host.level()!=world || host.isPassenger() || !MonstrosityCasting.loadedArea(world,host.position(),area))return true;

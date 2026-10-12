@@ -1,5 +1,7 @@
 # 剑舞的执行锚点与转向（dev.33）
 
+dev.34 已将以下本地锚点样例迁移到Core ExecutionAnchor／ExecutionClaim；Core权限默认参照原施法者，持续复查友军关系。原有水平转向窗口、固定点姿态和原生动画不变。下面保留dev.33的历史实现说明，当前迁移与验证以README及handoff-dev34为准。
+
 本批仅迁移焰魔剑舞；不改变其他动作魔符的历史选点语义，也不修改固定 Core 0.1.19。使用原生 Combo1／Combo2 Goal、aiStep 和攻击体；没有复制灾变实现或资源。
 
 ## 锚点与角色

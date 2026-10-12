@@ -24,7 +24,7 @@ neoForge {
         gameTestServer {
             type = 'gameTestServer'
             gameDirectory = file('run/gametest')
-            systemProperty 'neoforge.enabledGameTestNamespaces', 'cataclysm_nouveau'
+            systemProperty 'neoforge.enabledGameTestNamespaces', providers.gradleProperty('gameTestNamespaces').getOrElse('cataclysm_nouveau')
             jvmArgument '-Xmx2G'
         }
     }
@@ -37,6 +37,8 @@ dependencies {
     implementation(project(':ars-conflux')) { transitive = false }
     compileOnly fileTree(dir: 'libs', include: '*.jar')
     runtimeOnly fileTree(dir: 'libs', include: '*.jar')
+    if (providers.gradleProperty('withIron').getOrElse('false').toBoolean())
+        runtimeOnly fileTree(dir:'libs/iron-coexistence',include:'*.jar')
     if (providers.gradleProperty('withArsSpells').getOrElse('false').toBoolean())
         runtimeOnly fileTree(dir: 'libs/ars-growth', include: '*.jar')
 }

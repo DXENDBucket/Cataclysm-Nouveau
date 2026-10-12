@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.1.0-dev.34
+
+- Migrate Sword Dance to Conflux 0.1.20's neutral entity/position anchor and actual actor claims. Keep native poses, steering windows, damage, Mana and cooldown.
+- Authorize beneficial executors through the original caster's Core alliance, and stop when that relationship changes; damage credit no longer grants executor control.
+- Record physical actor claims for existing Cataclysm action drivers so they cannot overlap remote Sword Dance and overwrite the same actor's motion. Shared channeling remains independent.
+- Remove the addon-specific anchor implementation, retain only Ignis-specific horizontal aim and hitbox adaptation, and avoid clearing another action's state when a prepared cast fails.
+- All 81 Cataclysm required tests and a separate real-Iron coexistence test pass. The latter checks allied native breath plus Sword Dance and common authorization cancellation. Binary/source distributions contain no upstream assets or implementation. Client graphics were not relaunched.
+
 ## 0.1.0-dev.33
 
 - Give Ignis Sword Dance explicit entity/position anchors. Beneficial entity selection accepts only self or allies, while block hits execute both phases at the fixed point without moving or occupying the caster. Enemy selection fails without payment.

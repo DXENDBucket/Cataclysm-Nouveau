@@ -64,6 +64,7 @@ public final class GuardianCasting {
         return ExecutionSessions.start(new ExecutionSession<>(world,frame,boss,61,new ExecutionDriver<SpellGuardian>() {
             private int age;
             public boolean occupiesCaster(){return actor==cast.caster();}
+            public java.util.List<ExecutionClaim> claims(ExecutionSession<SpellGuardian> s){return java.util.List.of(ExecutionClaim.action(actor));}
             public boolean start(ExecutionSession<SpellGuardian> s){PUNCHING.add(actor.getUUID());return true;}
             public boolean tick(ExecutionSession<SpellGuardian> s) {
                 if(!MonstrosityCasting.loadedArea(world,actor.position(),12))return true;

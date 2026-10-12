@@ -459,6 +459,24 @@ public final class NativeAbilityTests {
             for(var chunk:forced) h.getLevel().setChunkForced(chunk.x,chunk.z,false);
         }
     }
+    static void actualIronChannelAndSwordShareActor(GameTestHelper h) {
+        try(var a=new Arena(h)) {
+            var host=a.target(a.center,true);host.setYRot(0);a.target(a.center.add(0,0,3),false);
+            var part=com.hollingsworth.arsnouveau.api.registry.GlyphRegistry.getSpellPart(net.minecraft.resources.ResourceLocation.tryParse("irons_nouveau:glyph_poison_breath"));
+            h.assertTrue(part instanceof AbstractEffect,"Optional real Iron glyph is loaded");
+            var r=resolver(h,a.p,new Spell(MethodTouch.INSTANCE,part));
+            var frame=CastContext.of(r.spellContext,new EntityHitResult(host),new dev.arsconflux.api.resource.ArsManaAccount(r.spellContext.getCaster()));
+            dev.arsconflux.api.context.CastContexts.bind(r.spellContext,frame);
+            ((AbstractEffect)part).onResolve(new EntityHitResult(host),h.getLevel(),a.p,new SpellStats.Builder().build(),r.spellContext,r);
+            h.assertTrue(ExecutionSessions.isOccupied(host,dev.arsconflux.api.execution.ExecutionClaim.CHANNELING)
+                    && !ExecutionSessions.isCasting(a.p),"Real Iron breath claims actual ally's channel");
+            a.cast(GlyphCatalog.IGNIS_SWORD_COMBO,new EntityHitResult(host),false);
+            h.assertTrue(IgnisCasting.isActing(host) && ExecutionSessions.isOccupied(host,dev.arsconflux.api.execution.ExecutionClaim.CHANNELING),"Real Iron channel and Cataclysm action coexist through Core");
+            h.getLevel().getScoreboard().removePlayerFromTeam(host.getScoreboardName());ExecutionSessions.tick();
+            h.assertTrue(!IgnisCasting.isActing(host) && !ExecutionSessions.isCasting(host),"Both addons end after the same alliance is revoked");
+            h.assertTrue(h.getLevel().getEntities((Entity)null,host.getBoundingBox().inflate(32),e->e.getClass().getName().endsWith(".PoisonBreathProjectile")).isEmpty(),"Cancelled native Iron visual removed too");h.succeed();
+        }
+    }
     @GameTest(template="empty",batch="cat_mon_quake",timeoutTicks=100)
     public static void bossQuakeDamageOwnershipLowHealthAndRefund(GameTestHelper h) {
         try(var a=new Arena(h)) {
@@ -1826,6 +1844,35 @@ public final class NativeAbilityTests {
             for(int t=1;t<=19;t++)ExecutionSessions.tick();
             h.assertTrue(west.getHealth()<500 && east.getHealth()==500,"An allied non-player actor uses its attack target instead of its unchanged facing");
             host.discard();ExecutionSessions.tick();h.assertTrue(!IgnisCasting.isActing(host),"Actual executor removal releases its lock");h.succeed();
+        }
+    }
+    @GameTest(template="empty",batch="cat_core_anchor_migration",timeoutTicks=100)
+    public static void swordCoreClaimsAuthorizationAndLegacyActionConflict(GameTestHelper h) {
+        try(var a=new Arena(h)) {
+            var host=a.target(a.center,true);var enemy=a.target(a.center.add(0,0,3),false);
+            var credit=CastContext.detached(a.p,new EntityHitResult(enemy),null).withDamageOwner(enemy);
+            h.assertTrue(!IgnisCasting.effect(Ability.IGNIS_SWORD_COMBO,h.getLevel(),credit,0),"Damage credit cannot grant hostile executor control");
+            a.cast(GlyphCatalog.IGNIS_SWORD_COMBO,new EntityHitResult(host),false);
+            h.assertTrue(ExecutionSessions.isOccupied(host,dev.arsconflux.api.execution.ExecutionClaim.ENTITY_ACTION)
+                    && !ExecutionSessions.isCasting(a.p),"Core records actual remote actor, not payer");
+            double before=CapabilityRegistry.getMana(a.p).getCurrentMana();
+            a.cast(GlyphCatalog.IGNIS_AIR_SMASH,new EntityHitResult(host),false);
+            a.cast(GlyphCatalog.SPIN,new EntityHitResult(host),false);
+            close(h,CapabilityRegistry.getMana(a.p).getCurrentMana(),before,"Legacy physical actions cannot overlap remote Sword Dance and do not charge");
+            h.assertTrue(IgnisCasting.isActing(host),"Rejected actions do not clear the running action's state");
+            h.getLevel().getScoreboard().removePlayerFromTeam(host.getScoreboardName());ExecutionSessions.tick();
+            h.assertTrue(!IgnisCasting.isActing(host) && !ExecutionSessions.isOccupied(host,dev.arsconflux.api.execution.ExecutionClaim.ENTITY_ACTION),"Loss of alliance ends native action and releases its claim");
+            h.getLevel().getScoreboard().addPlayerToTeam(host.getScoreboardName(),a.team);
+            var channel=new dev.arsconflux.api.execution.ExecutionSession<>(h.getLevel(),CastContext.detached(a.p,null,null).withExecutor(host),0,30,new dev.arsconflux.api.execution.ExecutionDriver<Integer>() {
+                public java.util.List<dev.arsconflux.api.execution.ExecutionClaim> claims(dev.arsconflux.api.execution.ExecutionSession<Integer> s){return List.of(dev.arsconflux.api.execution.ExecutionClaim.channel(host));}
+                public boolean start(dev.arsconflux.api.execution.ExecutionSession<Integer> s){return true;}
+                public boolean tick(dev.arsconflux.api.execution.ExecutionSession<Integer> s){return false;}
+                public void close(dev.arsconflux.api.execution.ExecutionSession<Integer> s,dev.arsconflux.api.execution.ExecutionSession.EndReason reason){}
+            },hit->{},()->true,dev.arsconflux.api.execution.ExecutionScope.DIRECT);
+            h.assertTrue(ExecutionSessions.start(channel),"Shared channel starts");
+            a.cast(GlyphCatalog.IGNIS_SWORD_COMBO,new EntityHitResult(host),false);
+            h.assertTrue(IgnisCasting.isActing(host) && channel.active(),"Independent channel and physical action coexist");
+            channel.finish(dev.arsconflux.api.execution.ExecutionSession.EndReason.COMPLETED);h.succeed();
         }
     }
     @GameTest(template="empty",batch="cat_harbinger_standalone_smoke",timeoutTicks=100)
