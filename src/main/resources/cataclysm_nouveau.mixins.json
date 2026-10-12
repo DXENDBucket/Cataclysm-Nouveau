@@ -60,7 +60,8 @@
     "IgnisMotionMixin",
     "IgnisExplosionMixin",
     "IgnisAttackAccess",
-    "IgnisAdapterMixin"
+    "IgnisAdapterMixin",
+    "IgnisHealthDamageMixin"
   ],
   "client": [
     "client.GuardianVortexRenderProbeMixin"

@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.1.0-dev.30
+
+- Add default-enabled `damage.cap_health_damage`: otherwise uncapped maximum-health damage in addon casts cannot exceed the fixed damage of the same hit, before damage augments and Ars scaling.
+- Cover Ignis ordinary/soul/Abyss fireballs, prepared child shots, native melee and ground shockwaves, and Scylla lightning storms including child strikes. Keep original Cataclysm attacks, explosions and pre-existing native caps unchanged.
+- Keep all Mana costs and cooldowns unchanged. All 69 required server tests pass, including the disabled configuration, low-health targets and native unbound attacks.
+
 ## 0.1.0-dev.29
 
 - Add native Ignis Fireball and Abyss Fireball replacements, Blade Fireball salvo, Leaping Smash and the complete two-phase Sword Dance.

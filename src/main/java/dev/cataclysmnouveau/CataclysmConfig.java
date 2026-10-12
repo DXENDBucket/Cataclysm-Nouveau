@@ -9,6 +9,7 @@ public final class CataclysmConfig {
     private static final ModConfigSpec.IntValue HARBINGER_RANGE;
     private static final ModConfigSpec.IntValue GUARDIAN_BULLET_DELAY,GUARDIAN_VORTEX_LIFETIME,GUARDIAN_ACTION_RANGE;
     private static final ModConfigSpec.DoubleValue AUGMENT_FRACTION,AUGMENT_MIN,AUGMENT_MAX;
+    private static final ModConfigSpec.BooleanValue CAP_HEALTH_DAMAGE;
     private static final ModConfigSpec.IntValue AMPLIFY_COST, BOLT_WARMUP;
     private static final ModConfigSpec.DoubleValue BOLT_DAMAGE;
     private static final EnumMap<Ability, ModConfigSpec.DoubleValue> GROUND_DAMAGE = new EnumMap<>(Ability.class);
@@ -89,6 +90,8 @@ public final class CataclysmConfig {
         b.push("ticks");
         for(var a:Ability.values()) COOLDOWN_TICKS.put(a,b.defineInRange(a.id,defaultCooldown(a),0,72000));
         b.pop();b.pop();
+        b.push("damage");
+        CAP_HEALTH_DAMAGE=b.comment("Cap otherwise uncapped target maximum-health damage at the fixed damage of the same hit, before augments and Ars scaling. Only addon casts; false preserves native formulas and existing native caps.").define("cap_health_damage",true);b.pop();
         b.push("damage_augments");
         AUGMENT_FRACTION=b.comment("Base native hit fraction per Amplify/Dampen, before Ars equipment scaling. Each hit segment uses its own unaugmented base.").defineInRange("fraction",.20,0,1);
         AUGMENT_MIN=b.defineInRange("minimum",2.0,0,100000);
@@ -96,6 +99,7 @@ public final class CataclysmConfig {
         SPEC=b.build();
     }
     public static int cost(Ability a) { return SPEC.isLoaded()?COSTS.get(a).get():a.mana; }
+    public static boolean capHealthDamage() { return !SPEC.isLoaded() || CAP_HEALTH_DAMAGE.get(); }
     public static int amplifyCost() { return SPEC.isLoaded()?AMPLIFY_COST.get():10; }
     public static float boltDamage() { return SPEC.isLoaded()?BOLT_DAMAGE.get().floatValue():16; }
     public static int boltWarmup() { return SPEC.isLoaded()?BOLT_WARMUP.get():34; }

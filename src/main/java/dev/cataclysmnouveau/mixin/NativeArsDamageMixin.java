@@ -20,6 +20,7 @@ public abstract class NativeArsDamageMixin {
     private boolean nativeArs$entity(Entity target,DamageSource source,float amount,Operation<Boolean> original) {
         if(dev.cataclysmnouveau.casting.GuardianCasting.rejectDamage((Entity)(Object)this,target))return false;
         if(dev.cataclysmnouveau.casting.HarbingerCasting.rejectDamage((Entity)(Object)this,target)) return false;
+        amount=dev.cataclysmnouveau.casting.HealthDamage.limit((Entity)(Object)this,amount);
         if(NativeDamageContexts.context((Entity)(Object)this)!=null)
             amount=dev.cataclysmnouveau.casting.Resources.augmentedDamage(amount,NativeDamageContexts.amplification((Entity)(Object)this));
         return NativeSpellDamage.hurt(NativeDamageContexts.context((Entity)(Object)this),target,source,amount,(s,a)->original.call(target,s,a));
@@ -28,6 +29,7 @@ public abstract class NativeArsDamageMixin {
     private boolean nativeArs$living(LivingEntity target,DamageSource source,float amount,Operation<Boolean> original) {
         if(dev.cataclysmnouveau.casting.GuardianCasting.rejectDamage((Entity)(Object)this,target))return false;
         if(dev.cataclysmnouveau.casting.HarbingerCasting.rejectDamage((Entity)(Object)this,target)) return false;
+        amount=dev.cataclysmnouveau.casting.HealthDamage.limit((Entity)(Object)this,amount);
         if(NativeDamageContexts.context((Entity)(Object)this)!=null)
             amount=dev.cataclysmnouveau.casting.Resources.augmentedDamage(amount,NativeDamageContexts.amplification((Entity)(Object)this));
         return NativeSpellDamage.hurt(NativeDamageContexts.context((Entity)(Object)this),target,source,amount,(s,a)->original.call(target,s,a));

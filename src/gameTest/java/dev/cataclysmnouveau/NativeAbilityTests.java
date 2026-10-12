@@ -1451,7 +1451,7 @@ public final class NativeAbilityTests {
             close(h,fire.zPower,.2,"Normal fireball begins with native launched power");close(h,fire.getDeltaMovement().z,.25,"Native launch speed is retained");
             ((ManagedProjectile)fire).confluxCataclysm$mode(2);fire.setPos(victim.position());a.p.setHealth(5);
             h.getLevel().addFreshEntity(fire);((ProjectileHitAccess)fire).confluxCataclysm$nativeHit(new EntityHitResult(victim));
-            close(h,500-victim.getHealth(),Resources.augmentedDamage(6+500*.07F,1),"Native direct health-based damage is augmented once");
+            close(h,500-victim.getHealth(),Resources.augmentedDamage(15,1),"Capped direct hit and explosion respect native invulnerability; explosion is stronger here");
             close(h,a.p.getHealth(),10,"Successful native projectile heals real owner by five");
             h.assertTrue(fire.isRemoved() && victim.getLastDamageSource().getEntity()==a.p,"Native explosion and removal preserve owner");
             h.assertTrue(victim.hasEffect(ModEffect.EFFECTBLAZING_BRAND) && victim.getEffect(ModEffect.EFFECTBLAZING_BRAND).getAmplifier()==1,"Native initial brand is level II");
@@ -1479,8 +1479,56 @@ public final class NativeAbilityTests {
             victim.setYRot(90);direct.hurt(h.getLevel().damageSources().mobAttack(victim),1);
             h.assertTrue(direct.getDeltaMovement().x<-.9 && direct.getOwner()==a.p,"Native deflection redirects motion while retaining explicit cast ownership");
             ((ProjectileHitAccess)direct).confluxCataclysm$nativeHit(new EntityHitResult(victim));
-            close(h,500-victim.getHealth(),Resources.augmentedDamage(10+500*.2F,1),"Native abyss twenty-percent damage uses bounded augmentation");h.succeed();
+            close(h,500-victim.getHealth(),Resources.augmentedDamage(29,1),"Capped abyss direct hit and explosion respect native invulnerability");h.succeed();
         }
+    }
+    @GameTest(template="empty",batch="cat_health_damage",timeoutTicks=100)
+    public static void healthDamageCapsNativeHitsAndCanBeDisabled(GameTestHelper h) throws Exception {
+        var field=CataclysmConfig.class.getDeclaredField("CAP_HEALTH_DAMAGE");field.setAccessible(true);
+        var option=(net.neoforged.neoforge.common.ModConfigSpec.BooleanValue)field.get(null);boolean previous=option.get();
+        try(var a=new Arena(h)) {
+            var victim=a.target(a.center,false);var cast=CastContext.detached(a.p,null,null);
+            for(boolean cap:new boolean[]{true,false}) {
+                option.set(cap);
+                for(int kind=0;kind<3;kind++) {
+                    float fixed=kind==0?6:kind==1?8:10,fraction=kind==2?.2F:.07F;
+                    var shot=IgnisCasting.create(kind==2?Ability.IGNIS_ABYSS_FIREBALL:Ability.IGNIS_FIREBALL,h.getLevel(),cast,new Vec3(0,0,1),victim,1);
+                    if(shot instanceof Ignis_Fireball_Entity fire)fire.setSoul(kind==1);
+                    shot.setPos(victim.position().add(0,8,0));victim.setHealth(500);victim.invulnerableTime=0;
+                    ((ProjectileHitAccess)shot).confluxCataclysm$nativeHit(new EntityHitResult(victim));
+                    close(h,500-victim.getHealth(),Resources.augmentedDamage(fixed+(cap?Math.min(fixed,500*fraction):500*fraction),1),"Direct hit cap/toggle precedes augmentation, isolated from explosion");
+                }
+                victim.setHealth(500);victim.invulnerableTime=0;
+                var storm=NativeDamageContexts.bind(new com.github.L_Ender.cataclysm.entity.effect.Lightning_Storm_Entity(h.getLevel(),victim.getX(),victim.getY(),victim.getZ(),0,0,10,.04F,a.p,2),cast,1);
+                storm.damageEntityLivingBaseNearby(.1);storm.discard();
+                close(h,500-victim.getHealth(),Resources.augmentedDamage(cap?20:30,1),"Scylla native storm uses the same cap and toggle");
+            }
+            option.set(true);victim.setHealth(500);victim.invulnerableTime=0;
+            var nativeShot=new Ignis_Abyss_Fireball_Entity(h.getLevel(),a.p,0,0,1);nativeShot.setFired(true);nativeShot.setPos(victim.position().add(0,8,0));
+            ((ProjectileHitAccess)nativeShot).confluxCataclysm$nativeHit(new EntityHitResult(victim));
+            close(h,500-victim.getHealth(),110,"Unbound native fireballs retain uncapped health damage");
+            victim.getAttribute(Attributes.MAX_HEALTH).setBaseValue(20);victim.setHealth(20);victim.invulnerableTime=0;
+            var small=IgnisCasting.create(Ability.IGNIS_FIREBALL,h.getLevel(),cast,new Vec3(0,0,1),victim,0);small.setPos(victim.position().add(0,8,0));
+            ((ProjectileHitAccess)small).confluxCataclysm$nativeHit(new EntityHitResult(victim));
+            close(h,20-victim.getHealth(),7.4,"Below-cap health damage is retained");h.succeed();
+        } finally {option.set(previous);}
+    }
+    @GameTest(template="empty",batch="cat_health_damage_melee",timeoutTicks=100)
+    public static void ignisNativeMeleeCapsUseEachSegmentsFixedDamage(GameTestHelper h) throws Exception {
+        var field=CataclysmConfig.class.getDeclaredField("CAP_HEALTH_DAMAGE");field.setAccessible(true);
+        var option=(net.neoforged.neoforge.common.ModConfigSpec.BooleanValue)field.get(null);boolean previous=option.get();
+        try(var a=new Arena(h)) {
+            var victim=a.target(a.center.add(0,0,2),false);
+            var boss=new SpellIgnis(h.getLevel(),CastContext.detached(a.p,null,null),Ability.IGNIS_SWORD_COMBO,a.center,new Vec3(0,0,1),1);
+            var area=boss.getClass().getSuperclass().getDeclaredMethod("AreaAttack",float.class,float.class,float.class,float.class,float.class,int.class,int.class,int.class,int.class,boolean.class,float.class);area.setAccessible(true);
+            for(boolean cap:new boolean[]{true,false}) {
+                option.set(cap);victim.setHealth(500);victim.invulnerableTime=0;
+                area.invoke(boss,6F,6F,360F,.75F,.15F,0,0,0,0,false,0F);
+                double fixed=boss.getAttributeValue(Attributes.ATTACK_DAMAGE)*.75;
+                close(h,500-victim.getHealth(),Resources.augmentedDamage(fixed+(cap?Math.min(fixed,75):75),1),"Native melee cap uses its attack multiplier before augmentation");
+            }
+            boss.discard();h.succeed();
+        } finally {option.set(previous);}
     }
     @GameTest(template="empty",batch="cat_ignis_orbit",timeoutTicks=100)
     public static void ignisOrbitKeepsNativeTrailSingleMotionAndRepeatedBilling(GameTestHelper h) {
