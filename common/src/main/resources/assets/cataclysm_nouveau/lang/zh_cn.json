@@ -148,5 +148,16 @@
   "cataclysm_nouveau.glyph_name.glyph_ignis_air_smash": "焰魔跃砸",
   "cataclysm_nouveau.glyph_desc.glyph_ignis_air_smash": "自身或友军跃向目标，实际落地后砸击并展开四段地面冲击。保留伤害、挑起与禁盾；不会破坏地形。",
   "cataclysm_nouveau.glyph_name.glyph_ignis_sword_combo": "焰魔剑舞",
-  "cataclysm_nouveau.glyph_desc.glyph_ignis_sword_combo": "自身或友军执行完整两段剑舞，包含突进、横扫、冲撞和收尾地面冲击，命中叠加烙印并为施法者回血。整组只付费一次。"
+  "cataclysm_nouveau.glyph_desc.glyph_ignis_sword_combo": "自身或友军执行完整两段剑舞，包含突进、横扫、冲撞和收尾地面冲击，命中叠加烙印并为施法者回血。整组只付费一次。",
+  "cataclysm_nouveau.glyph_name.glyph_ignis_fireball_array": "焰魔五火球阵",
+  "cataclysm_nouveau.glyph_desc.glyph_ignis_fireball_array": "在触发位置蓄势生成四枚普通或灵魂火球与一枚深渊火球，依次发射。命中保留烙印、回血和原生爆炸。",
+  "cataclysm_nouveau.glyph_name.glyph_ignis_earth_shudders": "焰魔地动三连",
+  "cataclysm_nouveau.glyph_desc.glyph_ignis_earth_shudders": "自身或友军执行三次重砸，地面冲击先收拢再向外推进，保留点燃、烙印和命中回复。",
+  "cataclysm_nouveau.glyph_name.glyph_ignis_reinforced_smash": "焰魔强化跃砸",
+  "cataclysm_nouveau.glyph_desc.glyph_ignis_reinforced_smash": "自身或友军执行两次挥击与三发剑刃火球，随后起跳。实际落地后接强化重砸、地面波及两枚普通或灵魂火球与一枚深渊火球。",
+  "cataclysm_nouveau.glyph_name.glyph_ignis_ultimate": "焰魔终极焰斩",
+  "cataclysm_nouveau.glyph_desc.glyph_ignis_ultimate": "自身或友军蓄势后向前重斩，释放宽广地面冲击和八道烈焰打击。保留原生预备火环、持续火焰、烙印和消退爆炸。",
+  "cataclysm_nouveau.glyph_name.glyph_ignis_flame_strike": "烈焰打击",
+  "cataclysm_nouveau.glyph_desc.glyph_ignis_flame_strike": "在选定地面升起烈焰区域，周期伤害叠加炽焰烙印。基础持续3秒，时效增强改变持续时间；普通火焰消退后爆炸，灵魂火焰不会。",
+  "item.cataclysm_nouveau.ignitium_fragment": "焰锭碎片"
 }

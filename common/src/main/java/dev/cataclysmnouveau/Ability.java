@@ -51,7 +51,12 @@ public enum Ability {
     IGNIS_ABYSS_FIREBALL("ignis_abyss_fireball", "Ignis Abyss Fireball", 200),
     IGNIS_BLADE_FIREBALLS("ignis_blade_fireballs", "Ignis Blade Fireballs", 320),
     IGNIS_AIR_SMASH("ignis_air_smash", "Ignis Leaping Smash", 300),
-    IGNIS_SWORD_COMBO("ignis_sword_combo", "Ignis Sword Dance", 650);
+    IGNIS_SWORD_COMBO("ignis_sword_combo", "Ignis Sword Dance", 650),
+    IGNIS_FIREBALL_ARRAY("ignis_fireball_array", "Ignis Five-Fireball Array", 650),
+    IGNIS_EARTH_SHUDDERS("ignis_earth_shudders", "Ignis Earth Shudders", 600),
+    IGNIS_REINFORCED_SMASH("ignis_reinforced_smash", "Ignis Reinforced Leaping Smash", 850),
+    IGNIS_ULTIMATE("ignis_ultimate", "Ignis Ultimate Flame Slash", 900),
+    IGNIS_FLAME_STRIKE("ignis_flame_strike", "Ignis Flame Strike", 280);
     public final String id, name;
     public final int mana;
     Ability(String id, String name, int mana) { this.id=id; this.name=name; this.mana=mana; }
@@ -59,7 +64,8 @@ public enum Ability {
     /** Acquisition/source families, shared by all presentation surfaces. */
     public Series series() {
         return switch(this) {
-            case IGNIS_FIREBALL,IGNIS_ABYSS_FIREBALL,IGNIS_BLADE_FIREBALLS,IGNIS_AIR_SMASH,IGNIS_SWORD_COMBO -> Series.IGNIS;
+            case IGNIS_FIREBALL,IGNIS_ABYSS_FIREBALL,IGNIS_BLADE_FIREBALLS,IGNIS_AIR_SMASH,IGNIS_SWORD_COMBO,
+                    IGNIS_FIREBALL_ARRAY,IGNIS_EARTH_SHUDDERS,IGNIS_REINFORCED_SMASH,IGNIS_ULTIMATE,IGNIS_FLAME_STRIKE -> Series.IGNIS;
             case GUARDIAN_BULLET,VOID_VORTEX,GUARDIAN_STOMP,GRAVITY_PUNCH,GUARDIAN_UPPERCUT,GUARDIAN_BLINK,GUARDIAN_AIR_STRIKE,GUARDIAN_ROCKET_PUNCH -> Series.ENDER_GUARDIAN;
             case LASER_BOLT,WITHER_MISSILE,HOMING_MISSILE,WITHER_HOWITZER,DEATH_LASER,HARBINGER_CHARGE,HOWITZER_VOLLEY,MISSILE_SALVO,WITHER_SMOKE -> Series.HARBINGER;
             case AMETHYST_CLUSTER -> Series.AMETHYST_CRAB;

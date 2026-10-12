@@ -1502,6 +1502,10 @@ public final class NativeAbilityTests {
                 var storm=NativeDamageContexts.bind(new com.github.L_Ender.cataclysm.entity.effect.Lightning_Storm_Entity(h.getLevel(),victim.getX(),victim.getY(),victim.getZ(),0,0,10,.04F,a.p,2),cast,1);
                 storm.damageEntityLivingBaseNearby(.1);storm.discard();
                 close(h,500-victim.getHealth(),Resources.augmentedDamage(cap?20:30,1),"Scylla native storm uses the same cap and toggle");
+                victim.setHealth(500);victim.invulnerableTime=0;
+                var flame=NativeDamageContexts.bind(new com.github.L_Ender.cataclysm.entity.effect.Flame_Strike_Entity(h.getLevel(),victim.getX(),victim.getY(),victim.getZ(),0,60,0,0,2,6,6,false,a.p),cast,1);
+                for(int t=0;t<10;t++){++flame.tickCount;flame.tick();}
+                close(h,500-victim.getHealth(),Resources.augmentedDamage(cap?12:36,1),"Flame field also uses the cap and disabled mode");flame.discard();
             }
             option.set(true);victim.setHealth(500);victim.invulnerableTime=0;
             var nativeShot=new Ignis_Abyss_Fireball_Entity(h.getLevel(),a.p,0,0,1);nativeShot.setFired(true);nativeShot.setPos(victim.position().add(0,8,0));
@@ -1590,6 +1594,131 @@ public final class NativeAbilityTests {
         }
     }
 
+    private static List<CMAbstractHurtingProjectile> ignisShots(Arena a) {
+        return a.h.getLevel().getEntitiesOfClass(CMAbstractHurtingProjectile.class,new AABB(a.center,a.center).inflate(48),e->e.getOwner()==a.p && e instanceof ManagedProjectile m && m.confluxCataclysm$mode()>0);
+    }
+    private static List<com.github.L_Ender.cataclysm.entity.effect.Flame_Strike_Entity> ignisFlames(Arena a) {
+        return a.h.getLevel().getEntitiesOfClass(com.github.L_Ender.cataclysm.entity.effect.Flame_Strike_Entity.class,new AABB(a.center,a.center).inflate(48),e->e.getOwner()==a.p);
+    }
+    @GameTest(template="empty",batch="cat_ignis_five",timeoutTicks=100)
+    public static void ignisFiveShotArrayPreservesCompositionPreparationAndBilling(GameTestHelper h) {
+        try(var a=new Arena(h)) {
+            a.p.setHealth(5);var enemy=a.target(a.center.add(0,0,16),false);
+            double before=CapabilityRegistry.getMana(a.p).getCurrentMana();
+            a.cast(GlyphCatalog.IGNIS_FIREBALL_ARRAY,new EntityHitResult(enemy),true);
+            for(int t=0;t<6;t++)ExecutionSessions.tick();
+            var shots=ignisShots(a);h.assertTrue(shots.size()==5,"Five native prepared fireballs are spawned");
+            h.assertTrue(shots.stream().filter(e->e instanceof Ignis_Abyss_Fireball_Entity).count()==1,"One Abyss fireball, four ordinary fireballs");
+            h.assertTrue(shots.stream().filter(e->e instanceof Ignis_Fireball_Entity).allMatch(e->((Ignis_Fireball_Entity)e).isSoul()),"Soul phase snapshot is retained");
+            close(h,before-CapabilityRegistry.getMana(a.p).getCurrentMana(),CataclysmConfig.cost(Ability.IGNIS_FIREBALL_ARRAY)+CataclysmConfig.amplifyCost(),"Array pays once, not per native child");
+            for(int t=1;t<=109;t++) {
+                for(var shot:shots){shot.setPos(a.center.add(0,8,0));shot.setDeltaMovement(Vec3.ZERO);++shot.tickCount;shot.tick();}
+                if(Set.of(45,61,77,93,109).contains(t)) {
+                    long fired=shots.stream().filter(e->((IgnisProjectile)e).confluxIgnis$ready()).count();
+                    close(h,fired,t==45?1:t==61?2:t==77?3:t==93?4:5,"Native staggered preparation delays");
+                }
+            }
+            a.p.discard();ExecutionSessions.tick();h.assertTrue(shots.stream().allMatch(Entity::isRemoved),"Root loss cleans prepared children");h.succeed();
+        }
+    }
+    @GameTest(template="empty",batch="cat_ignis_earth",timeoutTicks=100)
+    public static void ignisEarthShuddersCompletesAllThreeStrikesAndProtectsAllies(GameTestHelper h) {
+        try(var a=new Arena(h)) {
+            var host=a.target(a.center,true);host.setYRot(0);var enemy=a.target(a.center.add(0,0,1.5),false);var ally=a.target(enemy.position(),true);
+            double before=CapabilityRegistry.getMana(a.p).getCurrentMana();a.cast(GlyphCatalog.IGNIS_EARTH_SHUDDERS,new EntityHitResult(host),true);
+            h.assertTrue(IgnisCasting.isActing(host),"Earth action locks its real executor");
+            double previous=500;
+            for(int t=1;t<=138;t++) {
+                enemy.invulnerableTime=0;ExecutionSessions.tick();
+                if(Set.of(32,73,117).contains(t)) {
+                    h.assertTrue(enemy.getHealth()<previous,"Every native heavy strike occurs: "+t);previous=enemy.getHealth();
+                }
+            }
+            h.assertTrue(enemy.hasEffect(ModEffect.EFFECTBLAZING_BRAND) && enemy.getRemainingFireTicks()>0,"Earth strikes retain brand and ignition");
+            close(h,ally.getHealth(),500,"Allied hit targets are protected");close(h,ally.getDeltaMovement().length(),0,"Allied physical movement is excluded");
+            h.assertTrue(!IgnisCasting.isActing(host) && enemy.getLastDamageSource().getEntity()==a.p,"Complete action unlocks and retains root ownership");
+            close(h,before-CapabilityRegistry.getMana(a.p).getCurrentMana(),CataclysmConfig.cost(Ability.IGNIS_EARTH_SHUDDERS)+CataclysmConfig.amplifyCost(),"Three strikes cost one group fee");h.succeed();
+        }
+    }
+    @GameTest(template="empty",batch="cat_ignis_reinforced",timeoutTicks=100)
+    public static void ignisReinforcedSmashIncludesAirAndBothLandingVariants(GameTestHelper h) {
+        for(boolean soul:new boolean[]{false,true})try(var a=new Arena(h)) {
+            a.p.setHealth(soul?5:a.p.getMaxHealth());var host=a.target(a.center,true);host.setYRot(0);host.setOnGround(true);
+            var enemy=a.target(a.center.add(0,0,2),false);var ally=a.target(enemy.position(),true);
+            a.cast(GlyphCatalog.IGNIS_REINFORCED_SMASH,new EntityHitResult(host),true);
+            for(int t=1;t<=84;t++){enemy.invulnerableTime=0;ExecutionSessions.tick();}
+            var airShots=ignisShots(a);h.assertTrue(airShots.size()==3 && host.getDeltaMovement().y>1.2,"Air stage has three blades and real launch at tick 84");
+            h.assertTrue(airShots.stream().allMatch(e->e instanceof Ignis_Fireball_Entity f && f.isSoul()==soul),"Correct native air variant");
+            host.setOnGround(false);ExecutionSessions.tick();h.assertTrue(ignisShots(a).size()==3,"No landing volley while still airborne");
+            host.setOnGround(true);host.setDeltaMovement(Vec3.ZERO);ExecutionSessions.tick();
+            for(int t=1;t<=46;t++){enemy.invulnerableTime=0;ExecutionSessions.tick();}
+            var all=ignisShots(a);h.assertTrue(all.size()==6 && all.stream().filter(e->e instanceof Ignis_Abyss_Fireball_Entity).count()==1,"Actual landing includes two more normal shots and one Abyss shot");
+            for(int t=47;t<=115;t++){enemy.invulnerableTime=0;ExecutionSessions.tick();}
+            h.assertTrue(!IgnisCasting.isActing(host) && host.isNoGravity(),"Complete native landing restores actor gravity");
+            h.assertTrue(enemy.getHealth()<500 && enemy.getLastDamageSource().getEntity()==a.p,"Air and landing use root damage owner");
+            close(h,ally.getHealth(),500,"Both variants protect allies");close(h,host.getHealth(),500,"Native child hits never harm the executor");
+        }
+        h.succeed();
+    }
+    @GameTest(template="empty",batch="cat_ignis_ultimate",timeoutTicks=100)
+    public static void ignisUltimateRetainsOpeningRingEightFieldsAndTerrain(GameTestHelper h) {
+        try(var a=new Arena(h)) {
+            for(int x=(a.base.getX()-40)>>4;x<=(a.base.getX()+40)>>4;x++)for(int z=(a.base.getZ()-40)>>4;z<=(a.base.getZ()+40)>>4;z++)
+                if(!h.getLevel().getForcedChunks().contains(net.minecraft.world.level.ChunkPos.asLong(x,z))){h.getLevel().setChunkForced(x,z,true);a.forced.add(new net.minecraft.world.level.ChunkPos(x,z));}
+            for(int x=-8;x<=8;x++)for(int z=19;z<=40;z++)h.getLevel().setBlockAndUpdate(a.base.offset(x,0,z),Blocks.STONE.defaultBlockState());
+            try {
+                var host=a.target(a.center,true);host.setYRot(0);var enemy=a.target(a.center.add(0,0,3),false);var ally=a.target(enemy.position(),true);
+                double before=CapabilityRegistry.getMana(a.p).getCurrentMana();a.cast(GlyphCatalog.IGNIS_ULTIMATE,new EntityHitResult(host),true);
+                h.assertTrue(ignisFlames(a).size()==1 && ignisFlames(a).getFirst().isSoul(),"Native ultimate Goal starts its waiting soul preparation ring");
+                for(int t=1;t<=74;t++){enemy.invulnerableTime=0;ExecutionSessions.tick();}
+                var fields=ignisFlames(a);h.assertTrue(fields.size()==9 && fields.stream().filter(e->!e.isSoul()).count()==8,"Eight native forward flame fields plus the original ring");
+                h.assertTrue(fields.stream().allMatch(e->NativeDamageContexts.context(e)!=null && !e.shouldBeSaved()),"All fields inherit true cast context and transient lifecycle");
+                h.assertTrue(enemy.getHealth()<500 && enemy.getLastDamageSource().getEntity()==a.p,"Native ultimate frontal strike has root ownership");
+                close(h,ally.getHealth(),500,"Ultimate excludes allied damage");close(h,ally.getDeltaMovement().length(),0,"Ultimate excludes allied launch");
+                close(h,before-CapabilityRegistry.getMana(a.p).getCurrentMana(),CataclysmConfig.cost(Ability.IGNIS_ULTIMATE)+CataclysmConfig.amplifyCost(),"Complete ultimate has one fee");
+                for(int t=75;t<=114;t++)ExecutionSessions.tick();h.assertTrue(!IgnisCasting.isActing(host),"Ultimate finishes naturally");
+                h.assertTrue(h.getLevel().getBlockState(a.base.offset(0,0,30)).is(Blocks.STONE),"Distant native ground-wave terrain is retained");
+                a.p.discard();ExecutionSessions.tick();h.assertTrue(fields.stream().allMatch(Entity::isRemoved),"Root loss cleans all lingering fields");h.succeed();
+            } finally {for(int x=-8;x<=8;x++)for(int z=19;z<=40;z++)h.getLevel().setBlockAndUpdate(a.base.offset(x,0,z),Blocks.AIR.defaultBlockState());}
+        }
+    }
+    @GameTest(template="empty",batch="cat_ignis_flame",timeoutTicks=100)
+    public static void ignisFlameKeepsNativeVisibilityPulsesBrandDurationAndAllies(GameTestHelper h) {
+        try(var a=new Arena(h)) {
+            var enemy=a.target(a.center,false);var ally=a.target(a.center,true);
+            var cast=CastContext.detached(a.p,new EntityHitResult(enemy),null);
+            h.assertTrue(IgnisCasting.effect(Ability.IGNIS_FLAME_STRIKE,h.getLevel(),cast,1,1),"Grounded field succeeds");
+            var flame=ignisFlames(a).getFirst();close(h,flame.getDuration(),90,"Extend Time changes native field duration");
+            h.assertTrue(flame.getOwner()==a.p && !flame.shouldBeSaved(),"Persistent area keeps true owner and is not saved");
+            for(int t=1;t<=9;t++){++flame.tickCount;flame.tick();}close(h,enemy.getHealth(),500,"Warmup cannot deal damage");h.assertTrue(!flame.isSee(),"Native visibility stays hidden during delay");
+            ++flame.tickCount;flame.tick();h.assertTrue(flame.isSee() && !flame.isWaiting(),"Native synced visibility and waiting transition are retained");
+            for(int t=11;t<=20;t++){++flame.tickCount;flame.tick();}
+            close(h,500-enemy.getHealth(),Resources.augmentedDamage(12,1),"Capped native six-percent pulse is augmented once");
+            h.assertTrue(enemy.hasEffect(ModEffect.EFFECTBLAZING_BRAND) && enemy.getLastDamageSource().getEntity()==a.p,"Native pulse brands and credits caster");
+            for(int t=21;t<=140 && !flame.isRemoved();t++){++flame.tickCount;flame.tick();}
+            h.assertTrue(flame.isRemoved(),"Native duration, shrinking and ending explosion complete");close(h,ally.getHealth(),500,"Native pulses and collapse spare allies");close(h,ally.getDeltaMovement().length(),0,"Collapse spares allied motion");
+            var missing=CastContext.detached(a.p,block(a.center.add(0,12,0)),null);
+            h.assertTrue(!IgnisCasting.effect(Ability.IGNIS_FLAME_STRIKE,h.getLevel(),missing,0),"Missing ground cannot start a field");h.succeed();
+        }
+    }
+    @GameTest(template="empty",batch="cat_ignis_flame_end",timeoutTicks=100)
+    public static void ignisFlameEndingExplosionRetainsBossRadiusAndSoulDifference(GameTestHelper h) {
+        try(var a=new Arena(h)) {
+            var enemy=a.target(a.center,false);var ally=a.target(a.center,true);
+            var cast=CastContext.detached(a.p,new EntityHitResult(enemy),null);
+            for(boolean soul:new boolean[]{false,true}) {
+                a.p.setHealth(soul?5:a.p.getMaxHealth());enemy.setHealth(500);enemy.invulnerableTime=0;
+                h.assertTrue(IgnisCasting.effect(Ability.IGNIS_FLAME_STRIKE,h.getLevel(),cast,1),"Ending test field starts");
+                var flame=ignisFlames(a).getFirst();h.assertTrue(flame.isSoul()==soul,"Field phase snapshot matches native mode");
+                flame.setDuration(1);flame.setRadius(0);flame.tickCount=91;flame.tick();
+                close(h,500-enemy.getHealth(),soul?0:Resources.augmentedDamage(29,1),"Normal ending uses Boss radius two; soul ending has no explosion");
+                h.assertTrue(flame.isRemoved(),"Both modes complete native removal");close(h,ally.getHealth(),500,"Ending protects allies");
+            }
+            enemy.setHealth(500);enemy.invulnerableTime=0;
+            var original=new com.github.L_Ender.cataclysm.entity.effect.Flame_Strike_Entity(h.getLevel(),a.center.x,a.center.y,a.center.z,0,1,0,0,0,6,6,false,a.p);original.tickCount=91;original.tick();
+            close(h,500-enemy.getHealth(),15,"Unbound native player field retains its original radius one explosion");h.succeed();
+        }
+    }
     @GameTest(template="empty",batch="cat_harbinger_standalone_smoke",timeoutTicks=100)
     public static void standaloneSmokeDurationDamageFeeAndRootCleanup(GameTestHelper h) {
         try(var a=new Arena(h)) {

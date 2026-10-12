@@ -1,6 +1,7 @@
 package dev.cataclysmnouveau.casting;
 
 import com.github.L_Ender.cataclysm.entity.effect.Lightning_Storm_Entity;
+import com.github.L_Ender.cataclysm.entity.effect.Flame_Strike_Entity;
 import com.github.L_Ender.cataclysm.entity.projectile.Ignis_Abyss_Fireball_Entity;
 import com.github.L_Ender.cataclysm.entity.projectile.Ignis_Fireball_Entity;
 import dev.cataclysmnouveau.CataclysmConfig;
@@ -20,6 +21,7 @@ public final class HealthDamage {
         if(source instanceof Ignis_Abyss_Fireball_Entity)return limit(total,10);
         if(source instanceof Ignis_Fireball_Entity fire)return limit(total,fire.isSoul()?8:6);
         if(source instanceof Lightning_Storm_Entity storm)return limit(total,storm.getDamage());
+        if(source instanceof Flame_Strike_Entity flame)return limit(total,flame.getDamage());
         return total;
     }
     /** Keep the native expression intact; only constrain the health input to that expression. */

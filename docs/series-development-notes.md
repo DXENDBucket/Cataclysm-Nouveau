@@ -97,3 +97,11 @@ dev.25实际客户端诊断进一步确认：三次施放在elapsed=1/age=1、li
 ## dev.29：焰魔首批
 
 CMAbstractHurtingProjectile是本体独立运动基类，Ars特殊轨迹也要跑完整原生tick来保留64点trail。只在decorative scope抑制位移、碰撞与原生过期，费用及后续效果由一次命中入口处理。IgnisExplosion可直接复用原生粒子包；构造器补真实来源、友军伤害/击退过滤及一次增强，不替换成无特效的普通explode。玩家owner没有Mob.getTarget，需要单独保留准备火球目标并接timer0/-40两次修正。普通SMASH的firetime为0，整数串中最后5是heal参数，不能猜参数含义。完整剑舞须包含原生COMBO2，空降以真实落地切阶段。67项服务端通过，未验证客户端。详见ignis-abilities及handoff-ignis-dev29。
+
+## dev.31：焰魔收束
+
+用户授权五火球阵、地动三连、强化跃砸、终极焰斩和独立烈焰打击，并明确无需继续做更多体术。终极Goal.start有额外预备灵魂火环，只跑aiStep会漏掉；强化落地46tick有两普通／灵魂＋一深渊准备弹，不能只做空中三发。准备弹109＋160tick超过首批240tick的会话容限，本批子弹会话改为400tick，原生timer仍正常到期。
+
+持续烈焰复用Flame_Strike_Entity，不能省去同步visibility/waiting、原生收缩、结束粒子与普通模式爆炸。替换真实owner后仍使用Boss版半径2，不误切成玩家武器版1；爆炸绑定载荷自身的施法上下文，按Core进行友军、来源和Ars缩放。服务器端才读取绑定做伤害桥接，避免集成客户端同id实体读到服务器绑定。
+
+取得全套改为八整焰锭＋两碎片；一焰锭拆九碎片，因此九锭（三次固定掉落）覆盖十项。原五项Mana和冷却保持不变。75项服务端通过、MixinExtras0.5.3正常加载；客户端仍待人工确认，不将服务端测试写成画面验收。

@@ -13,6 +13,7 @@ public final class SpellIgnis extends Ignis_Entity {
     public final CastContext cast;
     public final Ability ability;
     public final double amplification;
+    public int spawnedFlames;
     public SpellIgnis(ServerLevel world,CastContext cast,Ability ability,Vec3 point,Vec3 direction,double amp) {
         super(ModEntities.IGNIS.get(),world);
         this.cast=cast;this.ability=ability;amplification=amp;
@@ -27,6 +28,11 @@ public final class SpellIgnis extends Ignis_Entity {
     public Goal nativeGoal(String name) {
         return goalSelector.getAvailableGoals().stream().map(w->w.getGoal()).filter(g->g.getClass().getSimpleName().equals(name)).findFirst()
             .orElseThrow(()->new IllegalStateException("Missing native Ignis goal: "+name));
+    }
+    public Goal activeNativeGoal() {
+        return goalSelector.getAvailableGoals().stream().map(w->w.getGoal())
+            .filter(g->g instanceof com.github.L_Ender.cataclysm.entity.AnimationMonster.AI.AnimationGoal<?> && g.canUse())
+            .findFirst().orElseThrow(()->new IllegalStateException("Missing native goal for Ignis animation"));
     }
     @Override public boolean isAlliedTo(Entity other){return other==this || cast!=null && HarbingerCasting.allied(cast,other);}
     @Override public boolean shouldBeSaved(){return false;}

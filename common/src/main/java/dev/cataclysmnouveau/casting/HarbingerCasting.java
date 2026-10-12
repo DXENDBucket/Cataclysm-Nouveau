@@ -36,7 +36,7 @@ public final class HarbingerCasting {
         return Allies.areAllies(c.caster(),target) || Allies.areAllies(c.damageOwner(),target) || Allies.areAllies(c.executor(),target);
     }
     public static boolean rejectDamage(Entity source,Entity target) {
-        if(!nativePayload(source) && !(source instanceof Death_Laser_Beam_Entity) && !(source instanceof Wither_Smoke_Effect_Entity))return false;
+        if(!nativePayload(source) && !(source instanceof Death_Laser_Beam_Entity) && !(source instanceof Wither_Smoke_Effect_Entity) && !(source instanceof com.github.L_Ender.cataclysm.entity.effect.Flame_Strike_Entity) && !(source instanceof SpellIgnis))return false;
         var c=NativeSpellDamage.context(source);if(c==null)return false;
         return allied(c,target) || source instanceof Death_Laser_Beam_Entity beam && beam.tickCount>20+beam.getDuration();
     }

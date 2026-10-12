@@ -22,6 +22,7 @@ public final class CataclysmNouveau {
             .icon(()->GlyphCatalog.AMETHYST.getGlyph().getDefaultInstance())
             .displayItems((params,output)->{
                 output.accept(CataclysmItems.GUARDIAN_VOID_FRAGMENT.get());
+                output.accept(CataclysmItems.IGNITIUM_FRAGMENT.get());
                 GlyphCatalog.ALL.forEach(g->output.accept(g.getGlyph()));
             }).build());
         tabs.register(bus);

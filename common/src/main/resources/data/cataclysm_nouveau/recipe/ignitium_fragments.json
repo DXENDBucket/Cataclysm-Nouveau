@@ -1,0 +1,13 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "misc",
+  "ingredients": [
+    {
+      "item": "cataclysm:ignitium_ingot"
+    }
+  ],
+  "result": {
+    "id": "cataclysm_nouveau:ignitium_fragment",
+    "count": 9
+  }
+}

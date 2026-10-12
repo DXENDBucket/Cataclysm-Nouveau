@@ -1,5 +1,14 @@
 # Changelog
 
+## 0.1.0-dev.31
+
+- Complete the selected Ignis series with Five-Fireball Array, Earth Shudders, Reinforced Leaping Smash, Ultimate Flame Slash and standalone Flame Strike effect glyphs.
+- Invoke native goals and attack bodies: staggered mixed salvo, three ground strikes, both actual-landing variants and their six total fireballs, the ultimate preparation ring, eight forward fields and broad shockwaves.
+- Keep Flame Strike's native synced visibility, waiting period, pulses, Blazing Brand, shrinking, ending particles and Boss-radius explosion; soul fields do not explode. Standalone fields support time augments.
+- Extend health-damage caps and Ars scaling to flame fields, keep real ownership and allied damage/motion protection, and clean all delayed children through Conflux sessions. Native Cataclysm casts remain unchanged.
+- Add configurable fees/cooldowns, bilingual descriptions, runtime-only icons and recipes. Split one Ignitium Ingot into nine fragments for the two basic fireball glyphs; nine ingots cover all ten glyphs, within three fixed-loot kills. Existing Mana costs and cooldowns are unchanged.
+- All 75 required server tests and binary/source distribution checks pass with MixinExtras 0.5.3. Client visuals remain unverified.
+
 ## 0.1.0-dev.30
 
 - Add default-enabled `damage.cap_health_damage`: otherwise uncapped maximum-health damage in addon casts cannot exceed the fixed damage of the same hit, before damage augments and Ars scaling.
