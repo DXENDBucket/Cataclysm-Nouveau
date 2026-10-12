@@ -88,6 +88,8 @@ public final class NativeCarrierCasting {
             try {
                 if(!session.activate(()->{
                     payload.setPos(hit.getLocation());
+                    boolean continued=dev.arsconflux.api.projectile.ImpactTriggers.resolve(hit,
+                            dev.arsconflux.api.projectile.ImpactTriggers.Policy.ENTITY_DAMAGE, () -> {
                     if(payload instanceof Player_Ceraunus_Entity anchor) {
                         ((ProjectileHitAccess)anchor).confluxCataclysm$nativeHit(hit);
                         if(hit instanceof BlockHitResult) session.world().broadcastEntityEvent(anchor,(byte)73);
@@ -97,7 +99,8 @@ public final class NativeCarrierCasting {
                         wave.setYRot((float)Math.toDegrees(Math.atan2(-direction.x,direction.z)));
                         ((WaveControl)wave).confluxCataclysm$attack(1.5,-direction.x,-direction.z);
                     }
-                    session.impact(hit);return true;
+                    });
+                    if(continued) session.impact(hit);return true;
                 })) session.finish(ExecutionSession.EndReason.DENIED);
             } finally {state.confluxCataclysm$resolving(false);}
         }

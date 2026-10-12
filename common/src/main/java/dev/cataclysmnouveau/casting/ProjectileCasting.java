@@ -62,8 +62,10 @@ public final class ProjectileCasting {
             state.confluxCataclysm$resolving(true);
             try {
                 if (!session.activate(()->{
-                    payload.setPos(hit.getLocation());NativePayloads.hit(payload,hit);
-                    if(ability!=Ability.SPARK || repeated || !(hit instanceof EntityHitResult target) || sparkTargets.add(target.getEntity().getUUID())) session.impact(hit);
+                    payload.setPos(hit.getLocation());
+                    var policy=ability==Ability.SPARK?dev.arsconflux.api.projectile.ImpactTriggers.Policy.ACTIVATION:dev.arsconflux.api.projectile.ImpactTriggers.Policy.ENTITY_DAMAGE;
+                    boolean continued=dev.arsconflux.api.projectile.ImpactTriggers.resolve(hit,policy,()->NativePayloads.hit(payload,hit));
+                    if(continued && (ability!=Ability.SPARK || repeated || !(hit instanceof EntityHitResult target) || sparkTargets.add(target.getEntity().getUUID()))) session.impact(hit);
                     return true;
                 })) session.finish(ExecutionSession.EndReason.DENIED);
             } finally { state.confluxCataclysm$resolving(false); }

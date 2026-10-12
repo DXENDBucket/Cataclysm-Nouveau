@@ -34,6 +34,22 @@ import java.util.*;
 
 @GameTestHolder("cataclysm_nouveau") @PrefixGameTestTemplate(false)
 public final class NativeAbilityTests {
+    public static void rejectedProjectileContactsKeepNativeAftermath(GameTestHelper h) {
+        var p=player(h);var mana=CapabilityRegistry.getMana(p);
+        try {
+            for(var glyph:List.of(GlyphCatalog.AMETHYST,GlyphCatalog.SPIKE,GlyphCatalog.FLARE)) {
+                mana.setMana(10000);var marker=new Marker();var cast=resolver(h,p,new Spell(MethodProjectile.INSTANCE,glyph,marker));cast.spellContext.nextPart();
+                var carrier=new EntityOrbitProjectile(h.getLevel(),cast,p);carrier.setPos(scene(h).add(0,2,0));
+                h.assertTrue(ProjectileDispatch.convert(carrier),"Actual repeating replacement");
+                var victim=cow(h,scene(h).add(0,1,3));var callback=ArsSpellAccess.resolver(carrier);var hit=new EntityHitResult(victim);
+                callback.onResolveEffect(h.getLevel(),hit);h.assertTrue(marker.hits==1,"Accepted native damage continues: "+glyph.ability);
+                callback.onResolveEffect(h.getLevel(),hit);h.assertTrue(marker.hits==1,"Rejected hurt cannot continue: "+glyph.ability);
+                callback.onResolveEffect(h.getLevel(),block(scene(h).add(0,0,5)));h.assertTrue(marker.hits==2,"Block native aftermath still continues");
+                victim.discard();payloads(h).forEach(Entity::discard);ExecutionSessions.tick();
+            }
+            h.succeed();
+        } finally {clean(h,p);}
+    }
     private static Vec3 scene(GameTestHelper h) {
         var origin=h.absoluteVec(new Vec3(4,0,4));
         return new Vec3(origin.x,h.getLevel().getMaxBuildHeight()-48,origin.z);

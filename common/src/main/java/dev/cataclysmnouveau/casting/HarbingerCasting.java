@@ -109,7 +109,7 @@ public final class HarbingerCasting {
             if(payload instanceof IgnisProjectile fire && !fire.confluxIgnis$ready())return;
             if(hit instanceof EntityHitResult e && allied(s.context(),e.getEntity()))return;
             direction=trajectory==null?payload.getDeltaMovement().normalize():trajectory.incomingDirection();state.confluxCataclysm$resolving(true);
-            try{if(!s.activate(()->{payload.setPos(hit.getLocation());((ProjectileHitAccess)payload).confluxCataclysm$nativeHit(hit);s.impact(hit);return true;}))s.finish(ExecutionSession.EndReason.DENIED);}
+            try{if(!s.activate(()->{payload.setPos(hit.getLocation());boolean continued=dev.arsconflux.api.projectile.ImpactTriggers.resolve(hit,dev.arsconflux.api.projectile.ImpactTriggers.Policy.ENTITY_DAMAGE,()->((ProjectileHitAccess)payload).confluxCataclysm$nativeHit(hit));if(continued)s.impact(hit);return true;}))s.finish(ExecutionSession.EndReason.DENIED);}
             finally{state.confluxCataclysm$resolving(false);}
         }
         public boolean tick(ExecutionSession<Projectile> s){return trajectory==null?payload.isRemoved():trajectory.tick(s.world());}
