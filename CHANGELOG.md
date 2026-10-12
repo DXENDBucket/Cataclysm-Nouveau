@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.1.0-dev.24
+
+- Synchronize culling protection for managed Void Vortices, and describe their full native visual extent separately from the physical box. Keep the native renderer, particles, origin, lifespan and damage behavior.
+- Verify that receiving spawn metadata installs the protection; ordinary Cataclysm vortices keep their original culling rules. Client confirmation remains pending.
+
 ## 0.1.0-dev.23
 
 - Add Guardian Bullet, Void Vortex, Guardian Stomp, and Gravity Punch with native preparation, control, rune patterns and attack bodies. Include the half-health triple stomp.

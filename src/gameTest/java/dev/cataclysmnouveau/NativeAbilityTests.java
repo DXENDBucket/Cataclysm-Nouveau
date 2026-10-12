@@ -1295,6 +1295,15 @@ public final class NativeAbilityTests {
             var clouds=h.getLevel().getEntitiesOfClass(com.github.L_Ender.cataclysm.entity.effect.Void_Vortex_Entity.class,new AABB(a.center,a.center).inflate(4));
             h.assertTrue(clouds.size()==1,"One native vortex");var vortex=clouds.getFirst();
             h.assertTrue(!vortex.shouldBeSaved() && ((GuardianChild)vortex).confluxGuardian$managed(),"Vortex is opt-in and transient");
+            h.assertTrue(vortex.noCulling,"Managed vortex retains renderer and particle ticks under entity culling");
+            close(h,vortex.getBoundingBoxForCulling().getXsize(),6,"Culling extent covers the native six-block plane");
+            close(h,vortex.getBoundingBox().getXsize(),2.5,"Visual extent does not expand the physical box");
+            var replica=new com.github.L_Ender.cataclysm.entity.effect.Void_Vortex_Entity(com.github.L_Ender.cataclysm.init.ModEntities.VOID_VORTEX.get(),h.getLevel());
+            h.assertTrue(!replica.noCulling && !((GuardianChild)replica).confluxGuardian$managed(),"Ordinary native vortex keeps its original culling rules");
+            replica.getEntityData().assignValues(vortex.getEntityData().getNonDefaultValues());
+            h.assertTrue(replica.noCulling && ((GuardianChild)replica).confluxGuardian$managed(),"Receiving spawn metadata installs culling protection");
+            close(h,replica.getLifespan(),vortex.getLifespan(),"Spawn metadata preserves the native lifespan");
+            ((GuardianChild)replica).confluxGuardian$managed(false);h.assertTrue(!replica.noCulling,"Clearing the marker restores native culling behavior");
             var enemy=a.target(a.center.add(1,2,0),false);var ally=a.target(enemy.position(),true);
             vortex.tickCount=16;vortex.tick();h.assertTrue(enemy.getDeltaMovement().y< -1.9 && enemy.hurtMarked,"Native downward pull is synchronized from server");close(h,ally.getDeltaMovement().length(),0,"Core allies are not pulled");
             close(h,enemy.getHealth(),500,"Pull is not a fabricated periodic damage field");enemy.setPos(a.center.add(.5,0,0));ally.setPos(enemy.position());vortex.setLifespan(1);vortex.tick();

@@ -21,6 +21,16 @@ public abstract class GuardianVortexMixin extends Entity implements GuardianChil
     private void guardian$define(SynchedEntityData.Builder builder,CallbackInfo ci){builder.define(guardian$MANAGED,false);}
     public boolean confluxGuardian$managed(){return entityData.get(guardian$MANAGED);}
     public void confluxGuardian$managed(boolean value){entityData.set(guardian$MANAGED,value);}
+    @Override public void onSyncedDataUpdated(EntityDataAccessor<?> key) {
+        super.onSyncedDataUpdated(key);
+        // This must run on the receiving entity too, not only where the server spawns it.
+        if(guardian$MANAGED.equals(key))noCulling=confluxGuardian$managed();
+    }
+    @Override public AABB getBoundingBoxForCulling() {
+        // Native rendering covers a 6x6 ground plane and a descending trail above it.
+        // Keep the physical box unchanged; this box describes only the visual extent.
+        return confluxGuardian$managed()?new AABB(getX()-3,getY(),getZ()-3,getX()+3,getY()+6,getZ()+3):super.getBoundingBoxForCulling();
+    }
     @Override public boolean shouldBeSaved(){return !confluxGuardian$managed() && super.shouldBeSaved();}
     @Inject(method="tick",at=@At("HEAD"),cancellable=true)
     private void guardian$rootAlive(CallbackInfo ci){var cast=NativeSpellDamage.context(this);if(confluxGuardian$managed() && cast!=null && (cast.caster()==null || !cast.caster().isAlive() || cast.caster().level()!=level())){discard();ci.cancel();}}
