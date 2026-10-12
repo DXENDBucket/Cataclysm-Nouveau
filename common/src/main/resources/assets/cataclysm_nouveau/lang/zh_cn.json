@@ -130,5 +130,13 @@
   "cataclysm_nouveau.glyph_name.glyph_guardian_stomp": "守卫践踏",
   "cataclysm_nouveau.glyph_desc.glyph_guardian_stomp": "短暂蓄势后生成三圈虚空符文，以及沿触发方向展开的一至三排符文。施法时生命不高于一半，连续施展三次。",
   "cataclysm_nouveau.glyph_name.glyph_gravity_punch": "引力重拳",
-  "cataclysm_nouveau.glyph_desc.glyph_gravity_punch": "自身或选中的友军先牵引附近敌人到前方，再挥出具有禁盾能力的原生重拳。增幅提升伤害。"
+  "cataclysm_nouveau.glyph_desc.glyph_gravity_punch": "自身或选中的友军先牵引附近敌人到前方，再挥出具有禁盾能力的原生重拳。增幅提升伤害。",
+  "cataclysm_nouveau.glyph_name.glyph_guardian_uppercut": "守卫上勾连段",
+  "cataclysm_nouveau.glyph_desc.glyph_guardian_uppercut": "自身或友军突进上勾，挑飞、眩晕并禁盾，随后布下九枚守卫炮弹；施法者半血时再追加重击与扇形符文阵。",
+  "cataclysm_nouveau.glyph_name.glyph_guardian_blink": "闪现突袭",
+  "cataclysm_nouveau.glyph_desc.glyph_guardian_blink": "自身或友军预测敌人位置后闪现突袭，随后挑起、眩晕并禁盾。需要敌方实体目标和安全落点；选中敌人时由施法者执行。",
+  "cataclysm_nouveau.glyph_name.glyph_guardian_air_strike": "空降重砸",
+  "cataclysm_nouveau.glyph_desc.glyph_guardian_air_strike": "自身或友军移至敌人上方，实际落地后释放冲击与放射符文阵。半血时从更高处坠落；需要敌方实体与足够的空间。",
+  "cataclysm_nouveau.glyph_name.glyph_guardian_rocket_punch": "火箭拳",
+  "cataclysm_nouveau.glyph_desc.glyph_guardian_rocket_punch": "自身或友军朝目标水平突进，随后重拳击退并禁盾。选中敌人时由施法者执行；没有实体目标时沿选定落点或朝向攻击。"
 }

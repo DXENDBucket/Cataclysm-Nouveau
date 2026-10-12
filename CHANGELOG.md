@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.1.0-dev.28
+
+- Add Guardian Uppercut Combo, Blink Strike, Aerial Slam and Rocket Punch as effect glyphs, using complete native goals and attack bodies.
+- Preserve the nine prepared bullets, half-health uppercut follow-up/rune fan, predicted blink, and actual-landing shockwave/radial runes. Real actors move; detached Boss frames are never spawned or broadcast as animation entities.
+- Honor teleport cancellation, clear space, loaded chunks, real damage ownership, allies, trigger fees and cancellation cleanup. Prevent conflicting movement actions.
+- Four fragment-based Scribe recipes, runtime-reference icons, bilingual text, Boss-series ordering and configurable Mana/cooldowns. All 61 required server tests and binary/source distribution checks pass; client presentation remains unverified.
+
 ## 0.1.0-dev.27
 
 - Disassemble a Gauntlet of Guard into nine Void Gauntlet Fragments.

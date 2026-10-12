@@ -38,7 +38,8 @@ public final class GlyphClientExtensions {
         event.registerItem(nativeItem(() -> ModItems.LASER_GATLING.get()),GlyphCatalog.LASER_BOLT.getGlyph(),GlyphCatalog.DEATH_LASER.getGlyph());
         event.registerItem(nativeItem(() -> ModItems.WITHER_ASSULT_SHOULDER_WEAPON.get()),GlyphCatalog.MISSILE.getGlyph(),GlyphCatalog.HOMING.getGlyph(),GlyphCatalog.HOWITZER.getGlyph(),GlyphCatalog.HOWITZER_VOLLEY.getGlyph(),GlyphCatalog.MISSILE_SALVO.getGlyph());
         event.registerItem(nativeItem(() -> ModItems.INFERNAL_FORGE.get()),GlyphCatalog.QUAKE.getGlyph());
-        event.registerItem(nativeItem(() -> ModItems.GAUNTLET_OF_GUARD.get()),GlyphCatalog.GRAVITY_PUNCH.getGlyph());
+        event.registerItem(nativeItem(() -> ModItems.GAUNTLET_OF_GUARD.get()),GlyphCatalog.GRAVITY_PUNCH.getGlyph(),
+            GlyphCatalog.GUARDIAN_UPPERCUT.getGlyph(),GlyphCatalog.GUARDIAN_ROCKET_PUNCH.getGlyph());
     }
     private static net.minecraft.client.renderer.texture.TextureAtlasSprite statusIcon(net.minecraft.world.effect.MobEffectInstance instance) {
         return Minecraft.getInstance().getMobEffectTextures().get(instance.getEffect().value()==dev.cataclysmnouveau.CataclysmEffects.WATER_WALKING.value()

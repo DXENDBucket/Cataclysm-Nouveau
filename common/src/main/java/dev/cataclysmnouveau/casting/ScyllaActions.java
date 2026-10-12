@@ -23,6 +23,7 @@ public final class ScyllaActions {
     private static final Set<UUID> ACTORS=new HashSet<>();
     private static final Set<UUID> LEAPING=new HashSet<>();
     public static boolean isLeaping(Entity actor) {return LEAPING.contains(actor.getUUID());}
+    public static boolean isActing(Entity actor) {return ACTORS.contains(actor.getUUID());}
     public static boolean supports(Ability ability) {
         return switch(ability) {case THUNDER_COMBO,ANCHOR_SPIN,ANCHOR_LEAP,WATER_WALKING->true;default->false;};
     }
@@ -31,7 +32,7 @@ public final class ScyllaActions {
                 || !actor.isAlive() || actor.level()!=world || !Allies.areAllies(cast.caster(),actor)) return false;
         if(ability==Ability.WATER_WALKING) return actor.addEffect(new MobEffectInstance(CataclysmEffects.WATER_WALKING,
                 MonstrosityCasting.scaledTicks(CataclysmConfig.waterWalkingDuration(),duration),0,false,true),cast.caster());
-        if(actor.isPassenger() || ACTORS.contains(actor.getUUID()) || ExecutionSessions.isCasting(actor)) return false;
+        if(actor.isPassenger() || ACTORS.contains(actor.getUUID()) || GuardianCasting.isPunching(actor) || HarbingerActions.isCharging(actor) || ExecutionSessions.isCasting(actor)) return false;
         var frame=cast.withExecutor(actor);
         var boss=new SpellScylla(world,frame,actor.position(),Resources.amplification(amp));
         Vec3 forward=actor.getLookAngle();heading(boss,forward);

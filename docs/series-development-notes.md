@@ -83,8 +83,13 @@ dev.10 巨兽示例：两种犄角配方、一种锻锤配方、七种电池配�
 
 ## dev.24：漩涡裁剪保护
 
+
 后续用户确认 dev.24 仍然闪现后消失，不能将此保护认定为问题修复。原生 Boss 漩涡尚未对照测试。
 
 dev.25实际客户端诊断进一步确认：三次施放在elapsed=1/age=1、life=300时DISCARDED，managed/noCulling=true、EntityCulling两个标志false、资源来自mod/cataclysm、只调用1–2次renderer。dev.26修复root存活检查缺少服务端边界：仅服务端读取施法上下文并判断施法者死亡/换维度；同样补HarbingerSmokeMixin及GuardianRuneStateMixin。不要用服务器metadata副本测试代替真正客户端tick。固定Core的NativeSpellDamage为WeakHashMap<Entity,CastContext>，Entity按id相等，单人游戏同id客户端副本会读到服务器绑定；已记录供后续独立Core任务审计，本附属任务未更改固定Core。
 
 用户反馈只闪现黑色图像，但之后仍有牵引/结束爆炸，排除服务器实体立即失效。实际本体Renderer绘制6×6贴地平面及上方下降粒子，而EntityType物理框2.5×0.5；测试包启用EntityCulling。补联动标记的接收同步回调，令vanilla noCulling=true；可见边界独立覆盖6格宽的图像和上方粒子，不移动实体也不扩大物理框/牵引区域。普通本体不改。服务器metadata测试通过不等于用户端最终画面已确认；首次旧环形焰柱自然到期测试遇到区块激活延迟，未改业务或旧断言，复跑56项全部通过。
+
+## dev.28：末影守卫动作连段
+
+四项调用原生目标Goal与aiStep，不能只补伤害事件。实体传送必须落到真实执行者，而非未注册Boss调用帧；按执行者体积和原版取消事件检查。空降以真实onGround进行原生阶段切换，不按预设计时器生成“落地”伤害。AnimationHandler不得广播未注册Boss的id；只在调用帧内部改变状态。炮弹/符文子攻击继承来源能力、费用只在母动作启动收一次，不能统一误记为践踏，否则禁用配置和清理会错。对子攻击应用增强一次，MassDestruction也需替换真实伤害来源。不同动作对同一执行者的冲量互斥，不改生物永久AI标记。半血条件读取施法根，不按友军执行者血量切阶段。61项服务端检查通过不等于客户端动画/粒子已经人工确认。

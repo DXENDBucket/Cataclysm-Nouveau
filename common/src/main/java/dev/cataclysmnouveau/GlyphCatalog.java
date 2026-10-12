@@ -50,8 +50,12 @@ public final class GlyphCatalog {
     public static final CataclysmEffectGlyph VORTEX=new CataclysmEffectGlyph(Ability.VOID_VORTEX);
     public static final CataclysmEffectGlyph GUARDIAN_STOMP=new CataclysmEffectGlyph(Ability.GUARDIAN_STOMP);
     public static final CataclysmEffectGlyph GRAVITY_PUNCH=new CataclysmEffectGlyph(Ability.GRAVITY_PUNCH);
+    public static final CataclysmEffectGlyph GUARDIAN_UPPERCUT=new CataclysmEffectGlyph(Ability.GUARDIAN_UPPERCUT);
+    public static final CataclysmEffectGlyph GUARDIAN_BLINK=new CataclysmEffectGlyph(Ability.GUARDIAN_BLINK);
+    public static final CataclysmEffectGlyph GUARDIAN_AIR_STRIKE=new CataclysmEffectGlyph(Ability.GUARDIAN_AIR_STRIKE);
+    public static final CataclysmEffectGlyph GUARDIAN_ROCKET_PUNCH=new CataclysmEffectGlyph(Ability.GUARDIAN_ROCKET_PUNCH);
     public static final List<CataclysmProjectileGlyph> PROJECTILES=List.of(AMETHYST,SPIKE,ANCHOR,WAVE,FLARE,LAVA,WATER_SPEAR,LIGHTNING_SPEAR,SPARK,LASER_BOLT,MISSILE,HOMING,HOWITZER,GUARDIAN_BULLET);
-    public static final List<AbstractSpellPart> ALL=List.<AbstractSpellPart>of(BOLT,RUNE,JET,QUAKE,FISSURE,RINGS,CHARGE,ABSORB,MONSTROUS,FRACTURE,LAVA_WALKING,SERPENT,STORM,FIELD,BURST,AMETHYST,SPIKE,ANCHOR,WAVE,FLARE,LAVA,WATER_SPEAR,LIGHTNING_SPEAR,SPARK,CLOUD,ROW,COMBO,SPIN,LEAP,WATER_WALKING,LASER_BOLT,MISSILE,HOMING,HOWITZER,DEATH_LASER,HARBINGER_CHARGE,HOWITZER_VOLLEY,MISSILE_SALVO,SMOKE,GUARDIAN_BULLET,VORTEX,GUARDIAN_STOMP,GRAVITY_PUNCH)
+    public static final List<AbstractSpellPart> ALL=List.<AbstractSpellPart>of(BOLT,RUNE,JET,QUAKE,FISSURE,RINGS,CHARGE,ABSORB,MONSTROUS,FRACTURE,LAVA_WALKING,SERPENT,STORM,FIELD,BURST,AMETHYST,SPIKE,ANCHOR,WAVE,FLARE,LAVA,WATER_SPEAR,LIGHTNING_SPEAR,SPARK,CLOUD,ROW,COMBO,SPIN,LEAP,WATER_WALKING,LASER_BOLT,MISSILE,HOMING,HOWITZER,DEATH_LASER,HARBINGER_CHARGE,HOWITZER_VOLLEY,MISSILE_SALVO,SMOKE,GUARDIAN_BULLET,VORTEX,GUARDIAN_STOMP,GRAVITY_PUNCH,GUARDIAN_UPPERCUT,GUARDIAN_BLINK,GUARDIAN_AIR_STRIKE,GUARDIAN_ROCKET_PUNCH)
             .stream().sorted(Comparator.comparing(GlyphCatalog::displayOrderKey)).toList();
     /** Core retains Ars categories; within each category, group native series before registry names. */
     public static String displayOrderKey(AbstractSpellPart part) {

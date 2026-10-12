@@ -42,7 +42,11 @@ public enum Ability {
     GUARDIAN_BULLET("guardian_bullet", "Guardian Bullet", 45),
     VOID_VORTEX("void_vortex", "Void Vortex", 220),
     GUARDIAN_STOMP("guardian_stomp", "Guardian Stomp", 320),
-    GRAVITY_PUNCH("gravity_punch", "Gravity Punch", 160);
+    GRAVITY_PUNCH("gravity_punch", "Gravity Punch", 160),
+    GUARDIAN_UPPERCUT("guardian_uppercut", "Guardian Uppercut Combo", 420),
+    GUARDIAN_BLINK("guardian_blink", "Guardian Blink Strike", 180),
+    GUARDIAN_AIR_STRIKE("guardian_air_strike", "Guardian Aerial Slam", 450),
+    GUARDIAN_ROCKET_PUNCH("guardian_rocket_punch", "Guardian Rocket Punch", 160);
     public final String id, name;
     public final int mana;
     Ability(String id, String name, int mana) { this.id=id; this.name=name; this.mana=mana; }
@@ -50,7 +54,7 @@ public enum Ability {
     /** Acquisition/source families, shared by all presentation surfaces. */
     public Series series() {
         return switch(this) {
-            case GUARDIAN_BULLET,VOID_VORTEX,GUARDIAN_STOMP,GRAVITY_PUNCH -> Series.ENDER_GUARDIAN;
+            case GUARDIAN_BULLET,VOID_VORTEX,GUARDIAN_STOMP,GRAVITY_PUNCH,GUARDIAN_UPPERCUT,GUARDIAN_BLINK,GUARDIAN_AIR_STRIKE,GUARDIAN_ROCKET_PUNCH -> Series.ENDER_GUARDIAN;
             case LASER_BOLT,WITHER_MISSILE,HOMING_MISSILE,WITHER_HOWITZER,DEATH_LASER,HARBINGER_CHARGE,HOWITZER_VOLLEY,MISSILE_SALVO,WITHER_SMOKE -> Series.HARBINGER;
             case AMETHYST_CLUSTER -> Series.AMETHYST_CRAB;
             case LIONFISH_SPIKE -> Series.LIONFISH;

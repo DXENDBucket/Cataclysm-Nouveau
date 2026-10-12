@@ -130,5 +130,13 @@
   "cataclysm_nouveau.glyph_name.glyph_guardian_stomp": "Guardian Stomp",
   "cataclysm_nouveau.glyph_desc.glyph_guardian_stomp": "After a short windup, form three rings of Void Runes and one to three rows along the trigger direction. At or below half health when cast, perform three consecutive stomps.",
   "cataclysm_nouveau.glyph_name.glyph_gravity_punch": "Gravity Punch",
-  "cataclysm_nouveau.glyph_desc.glyph_gravity_punch": "The caster or a selected ally pulls nearby enemies in front before delivering a native shield-disabling heavy punch. Amplify increases damage."
+  "cataclysm_nouveau.glyph_desc.glyph_gravity_punch": "The caster or a selected ally pulls nearby enemies in front before delivering a native shield-disabling heavy punch. Amplify increases damage.",
+  "cataclysm_nouveau.glyph_name.glyph_guardian_uppercut": "Guardian Uppercut Combo",
+  "cataclysm_nouveau.glyph_desc.glyph_guardian_uppercut": "Self or an ally lunges into an uppercut, lifting and stunning enemies before deploying nine prepared Guardian bullets. At half caster health, adds a heavy strike and a fan of Void Runes.",
+  "cataclysm_nouveau.glyph_name.glyph_guardian_blink": "Guardian Blink Strike",
+  "cataclysm_nouveau.glyph_desc.glyph_guardian_blink": "Self or an ally predicts an enemy position, safely blinks there, then strikes with lift, stun and shield break. Requires an enemy entity; selecting an enemy makes the caster act.",
+  "cataclysm_nouveau.glyph_name.glyph_guardian_air_strike": "Guardian Aerial Slam",
+  "cataclysm_nouveau.glyph_desc.glyph_guardian_air_strike": "Self or an ally teleports above an enemy, then releases a shockwave and radial Void Runes only after landing. Half caster health increases the drop height. Requires an enemy entity and clear space.",
+  "cataclysm_nouveau.glyph_name.glyph_guardian_rocket_punch": "Guardian Rocket Punch",
+  "cataclysm_nouveau.glyph_desc.glyph_guardian_rocket_punch": "Self or an ally dashes horizontally toward a target, then punches with knockback and shield break. Selecting an enemy makes the caster act; otherwise aims at the selected point or forward."
 }

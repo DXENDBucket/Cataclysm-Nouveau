@@ -70,3 +70,11 @@ Boss还有未破盔时箭矢免疫、对部分炮弹免疫、伤害/DPS限制、
 配置：`ender_guardian.bullet_preparation_ticks`默认30，`vortex_lifetime_ticks`默认300；费用/主动冷却沿用`mana`和`cooldowns.ticks`。普通本体能力保持原行为。新四项参与原有系列排序、增强/削弱公式与Ars属性事件链，创造模式沿用原有免费/绕过冷却规则。只提供NeoForge1.21.1。
 
 服务端验证见docs/handoff-guardian-dev23.md；客户端画面未人工验证。
+
+## 第二批与系列边界（dev.28）
+
+上勾连段、闪现突袭、空降重砸、火箭拳已按用户授权接入，行为、费用与目标规则见README“末影守卫动作扩展”。四项各耗一枚虚空残片，八项守卫能力总计七枚残片加一枚傀儡核心。一只护手分解九枚满足本系列获取预算。
+
+原生UppercutAndBulletGoal／RageUppercut／HugmeGoal／TeleportStrikeGoal／RocketPunchGoal由未注册到世界的调用帧执行，攻击体调用原生aiStep；真正的执行者承接冲量和传送。原生九枚炮弹全部保留准备与飞行；半血上勾拳再释放70枚符文。空降只有实际着地才能切AIR_STRIKE2并释放冲击，传送失败或超时直接清理。传送按真正执行者的空间检测和取消事件决定，不按Boss体积决定。
+
+用户明确不做震退爆发和转阶段震爆，普通拳/横扫、防护与回血也维持不接入；没有自动制作所有剩余候选的授权。

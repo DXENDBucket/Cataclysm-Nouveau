@@ -97,7 +97,7 @@ public final class HarbingerActions {
     private static boolean charge(ServerLevel world,CastContext cast,double amp) {
         if(!(cast.target() instanceof EntityHitResult hit) || !(hit.getEntity() instanceof LivingEntity actor)
                 || !actor.isAlive() || actor.level()!=world || !Allies.areAllies(cast.caster(),actor) || actor.isPassenger()
-                || CHARGING.contains(actor.getUUID()) || ScyllaActions.isLeaping(actor) || ExecutionSessions.isCasting(actor))return false;
+                || CHARGING.contains(actor.getUUID()) || ScyllaActions.isActing(actor) || GuardianCasting.isPunching(actor) || ExecutionSessions.isCasting(actor))return false;
         Vec3 forward=actor.getLookAngle();var frame=cast.withExecutor(actor);
         var boss=new SpellHarbinger(world,frame,Ability.HARBINGER_CHARGE,actor.position(),0,amp);
         var target=marker(world,loadedAim(world,actor,actor.getEyePosition(),forward).add(0,2-actor.getEyeHeight(),0));

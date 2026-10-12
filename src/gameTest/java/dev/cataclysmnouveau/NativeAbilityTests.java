@@ -1339,6 +1339,109 @@ public final class NativeAbilityTests {
         }
     }
 
+    @GameTest(template="empty",batch="cat_guardian_uppercut",timeoutTicks=100)
+    public static void guardianUppercutNativeComboChildrenHalfHealthAndCleanup(GameTestHelper h) {
+        try(var a=new Arena(h)) {
+            a.p.setHealth(5);
+            var host=a.target(a.center,true);host.setYRot(0);var enemy=a.target(a.center.add(0,0,3),false);var ally=a.target(enemy.position(),true);
+            var mana=CapabilityRegistry.getMana(a.p);double before=mana.getCurrentMana();
+            a.cast(GlyphCatalog.GUARDIAN_UPPERCUT,new EntityHitResult(host),true);
+            h.assertTrue(GuardianActions.isActing(host),"Allied actor owns movement control");
+            double paid=mana.getCurrentMana();a.cast(GlyphCatalog.GUARDIAN_ROCKET_PUNCH,new EntityHitResult(host),false);
+            close(h,mana.getCurrentMana(),paid,"A second conflicting action is refunded");
+            for(int tick=1;tick<=54;tick++) {
+                enemy.invulnerableTime=0;ExecutionSessions.tick();
+                if(tick==26)h.assertTrue(host.getDeltaMovement().z>.8,"Native uppercut lunge reaches actual actor");
+                if(tick==27)h.assertTrue(enemy.getHealth()<500 && enemy.hasEffect(ModEffect.EFFECTSTUN) && enemy.getDeltaMovement().y>=.5,"Uppercut retains damage, stun and launch");
+            }
+            var box=new AABB(a.center,a.center).inflate(20);
+            var bullets=h.getLevel().getEntitiesOfClass(Ender_Guardian_Bullet_Entity.class,box);
+            h.assertTrue(bullets.size()==9,"Full native nine-bullet preparation pattern");
+            for(var bullet:bullets) {
+                h.assertTrue(bullet.getOwner()==a.p && ((ManagedProjectile)bullet).confluxCataclysm$sourceAbility()==Ability.GUARDIAN_UPPERCUT,"Combo children retain root ownership and source ability");
+                close(h,NativeDamageContexts.amplification(bullet),1,"Child amplification snapshot applied once");
+            }
+            double afterFirst=enemy.getHealth();
+            for(int tick=55;tick<=84;tick++){enemy.invulnerableTime=0;ExecutionSessions.tick();}
+            var runes=h.getLevel().getEntitiesOfClass(Void_Rune_Entity.class,box);
+            h.assertTrue(runes.size()==70 && enemy.getHealth()<afterFirst,"Half-health combo adds complete 70-rune fan and second native hit");
+            close(h,ally.getHealth(),500,"Combo protects nearby allies");close(h,host.getHealth(),500,"Combo protects executor");
+            h.assertTrue(enemy.getLastDamageSource().getEntity()==a.p,"Root caster owns native melee");
+            close(h,before-mana.getCurrentMana(),CataclysmConfig.cost(Ability.GUARDIAN_UPPERCUT)+CataclysmConfig.amplifyCost(),"Entire combo pays once, including children");
+            a.p.setHealth(0);ExecutionSessions.tick();
+            h.assertTrue(!GuardianActions.isActing(host) && bullets.stream().allMatch(Entity::isRemoved) && runes.stream().allMatch(Entity::isRemoved),"Root loss clears action and delayed children");
+            h.succeed();
+        }
+    }
+    @GameTest(template="empty",batch="cat_guardian_blink",timeoutTicks=100)
+    public static void guardianBlinkMovesRealActorAndUsesNativeHit(GameTestHelper h) {
+        try(var a=new Arena(h)) {
+            var host=a.target(a.center,true);host.setYRot(0);var enemy=a.target(a.center.add(0,0,7),false);
+            var before=host.position();a.cast(GlyphCatalog.GUARDIAN_BLINK,new EntityHitResult(host),true);
+            for(int tick=1;tick<=20;tick++)ExecutionSessions.tick();
+            h.assertTrue(host.position().distanceTo(before)>4 && h.getLevel().noCollision(host),"Native predicted teleport moves real executor to a clear grounded spot");
+            enemy.setPos(host.position().add(0,0,2));
+            for(int tick=21;tick<=38;tick++)ExecutionSessions.tick();
+            h.assertTrue(enemy.getHealth()<500 && enemy.hasEffect(ModEffect.EFFECTSTUN) && enemy.getDeltaMovement().y>=.6,"Blink completes native stun/lift strike");
+            h.assertTrue(enemy.getLastDamageSource().getEntity()==a.p,"Blink damage source remains root caster");
+            a.p.setHealth(0);ExecutionSessions.tick();h.assertTrue(!GuardianActions.isActing(host),"Blink cancellation clears control");h.succeed();
+        }
+    }
+    @GameTest(template="empty",batch="cat_guardian_air_strike",timeoutTicks=100)
+    public static void guardianAirStrikeWaitsForLandingThenNativeShockwaveAndRunes(GameTestHelper h) {
+        try(var a=new Arena(h)) {
+            a.p.setHealth(5);var host=a.target(a.center,true);host.setYRot(0);host.setOnGround(true);
+            var enemy=a.target(a.center.add(0,0,7),false);var ally=a.target(enemy.position(),true);
+            a.cast(GlyphCatalog.GUARDIAN_AIR_STRIKE,new EntityHitResult(host),true);
+            h.assertTrue(GuardianActions.isActing(host) && !host.isNoGravity(),"Air strike temporarily enables real fall physics");
+            for(int tick=1;tick<=60;tick++)ExecutionSessions.tick();
+            close(h,host.getY(),enemy.getY()+8,"Half-health native goal chooses eight-block drop");
+            var box=new AABB(a.center,a.center).inflate(20);
+            h.assertTrue(h.getLevel().getEntitiesOfClass(Void_Rune_Entity.class,box).isEmpty() && enemy.getHealth()==500,"Elapsed time alone cannot trigger the landing attack");
+            host.setPos(enemy.position());host.setOnGround(true);ExecutionSessions.tick();
+            for(int tick=1;tick<=3;tick++)ExecutionSessions.tick();
+            var runes=h.getLevel().getEntitiesOfClass(Void_Rune_Entity.class,box);
+            h.assertTrue(Set.of(64,80,96).contains(runes.size()),"Native random radial pattern is complete");
+            h.assertTrue(enemy.getHealth()<500 && enemy.getLastDamageSource().getEntity()==a.p,"Landing shockwave retains damage and root ownership");
+            close(h,ally.getHealth(),500,"Landing protects allies");close(h,host.getHealth(),500,"Landing protects executor");
+            a.p.setHealth(0);ExecutionSessions.tick();h.assertTrue(host.isNoGravity() && !GuardianActions.isActing(host),"Root loss restores original floating state");h.succeed();
+        }
+    }
+    @GameTest(template="empty",batch="cat_guardian_rocket",timeoutTicks=100)
+    public static void guardianRocketPunchNativeImpulseDamageAndInvalidTargetRefund(GameTestHelper h) {
+        try(var a=new Arena(h)) {
+            var host=a.target(a.center,true);host.setYRot(0);var enemy=a.target(a.center.add(0,0,6),false);var ally=a.target(enemy.position(),true);
+            a.cast(GlyphCatalog.GUARDIAN_ROCKET_PUNCH,new EntityHitResult(host),true);
+            for(int tick=1;tick<=24;tick++)ExecutionSessions.tick();
+            close(h,host.getDeltaMovement().z,6*.3F,"Rocket punch uses native target-distance horizontal impulse");
+            for(int tick=25;tick<=28;tick++)ExecutionSessions.tick();
+            h.assertTrue(enemy.getHealth()<500 && enemy.getLastDamageSource().getEntity()==a.p && enemy.getDeltaMovement().z>0,"Native rocket punch hits and knocks back enemies");
+            close(h,ally.getHealth(),500,"Rocket punch excludes allied targets");
+            a.p.setHealth(0);ExecutionSessions.tick();h.assertTrue(!GuardianActions.isActing(host),"Rocket cancellation releases control");
+            a.p.setHealth(20);a.p.setPos(a.center.add(0,0,-6));a.p.setYRot(180);var mana=CapabilityRegistry.getMana(a.p);double before=mana.getCurrentMana();
+            a.cast(GlyphCatalog.GUARDIAN_BLINK,block(a.center),false);close(h,mana.getCurrentMana(),before,"Blink without enemy entity has no charge");
+            h.succeed();
+        }
+    }
+    @GameTest(template="empty",batch="cat_guardian_teleport_safety",timeoutTicks=100)
+    public static void guardianTeleportCancellationAndBlockedAirDestination(GameTestHelper h) {
+        try(var a=new Arena(h)) {
+            var host=a.target(a.center,true);host.setYRot(0);var enemy=a.target(a.center.add(0,0,7),false);
+            var frame=new SpellGuardian(h.getLevel(),CastContext.detached(a.p,new EntityHitResult(host),null).withExecutor(host),host.position(),host.getLookAngle(),0,Ability.GUARDIAN_BLINK);
+            java.util.function.Consumer<net.neoforged.neoforge.event.entity.EntityTeleportEvent.EnderEntity> denial=e->{if(e.getEntity()==host)e.setCanceled(true);};
+            net.neoforged.neoforge.common.NeoForge.EVENT_BUS.addListener(denial);
+            try {var original=host.position();h.assertTrue(!GuardianActions.teleport(frame,enemy.position(),true) && original.equals(host.position()),"Real actor teleport event veto is honored");}
+            finally {net.neoforged.neoforge.common.NeoForge.EVENT_BUS.unregister(denial);frame.discard();}
+            var obstruction=BlockPos.containing(enemy.position().add(0,4,0));h.getLevel().setBlockAndUpdate(obstruction,Blocks.STONE.defaultBlockState());
+            try {
+                double before=CapabilityRegistry.getMana(a.p).getCurrentMana();a.cast(GlyphCatalog.GUARDIAN_AIR_STRIKE,new EntityHitResult(host),false);
+                h.assertTrue(!GuardianActions.isActing(host) && host.isNoGravity(),"Blocked air destination does not start or change gravity");
+                close(h,CapabilityRegistry.getMana(a.p).getCurrentMana(),before,"Blocked destination refunds trigger fee");
+            } finally {h.getLevel().setBlockAndUpdate(obstruction,Blocks.AIR.defaultBlockState());}
+            h.succeed();
+        }
+    }
+
     @GameTest(template="empty",batch="cat_harbinger_standalone_smoke",timeoutTicks=100)
     public static void standaloneSmokeDurationDamageFeeAndRootCleanup(GameTestHelper h) {
         try(var a=new Arena(h)) {

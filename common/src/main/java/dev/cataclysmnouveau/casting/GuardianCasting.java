@@ -19,14 +19,15 @@ import java.util.*;
 
 public final class GuardianCasting {
     private static final Set<UUID> PUNCHING=new HashSet<>();
-    public static boolean isPunching(Entity actor){return PUNCHING.contains(actor.getUUID());}
+    public static boolean isPunching(Entity actor){return PUNCHING.contains(actor.getUUID()) || GuardianActions.isActing(actor);}
     public static boolean rejectDamage(Entity source,Entity target) {
         if(!(source instanceof SpellGuardian || source instanceof GuardianBullet || source instanceof GuardianChild child && child.confluxGuardian$managed()))return false;
         var cast=NativeDamageContexts.context(source);return cast!=null && HarbingerCasting.allied(cast,target);
     }
-    public static boolean supports(Ability a){return a==Ability.VOID_VORTEX || a==Ability.GUARDIAN_STOMP || a==Ability.GRAVITY_PUNCH;}
+    public static boolean supports(Ability a){return a==Ability.VOID_VORTEX || a==Ability.GUARDIAN_STOMP || a==Ability.GRAVITY_PUNCH || GuardianActions.supports(a);}
     private static boolean enabled(Ability a){return GlyphCatalog.ALL.stream().anyMatch(g->g instanceof CataclysmEffectGlyph e && e.ability==a && e.isEnabled());}
     public static boolean effect(Ability a,ServerLevel world,CastContext cast,double amp,double duration) {
+        if(GuardianActions.supports(a))return GuardianActions.effect(a,world,cast,amp);
         if(a==Ability.GRAVITY_PUNCH)return punch(world,cast,amp);
         Vec3 point=NativePayloads.groundPoint(world,cast);if(point==null)return false;
         if(a==Ability.VOID_VORTEX) {
@@ -56,7 +57,7 @@ public final class GuardianCasting {
     private static boolean punch(ServerLevel world,CastContext cast,double amp) {
         if(!(cast.target() instanceof EntityHitResult hit) || !(hit.getEntity() instanceof LivingEntity actor)
                 || !actor.isAlive() || actor.level()!=world || !HarbingerCasting.allied(cast,actor)
-                || actor.isPassenger() || PUNCHING.contains(actor.getUUID()) || ExecutionSessions.isCasting(actor))return false;
+                || actor.isPassenger() || isPunching(actor) || ScyllaActions.isActing(actor) || HarbingerActions.isCharging(actor) || ExecutionSessions.isCasting(actor))return false;
         var frame=cast.withExecutor(actor);
         var boss=new SpellGuardian(world,frame,actor.position(),actor.getLookAngle(),amp);
         boss.setAnimation(Ender_Guardian_Entity.GUARDIAN_RIGHT_STRONG_ATTACK);
@@ -88,7 +89,7 @@ public final class GuardianCasting {
     }
     public static boolean rune(ServerLevel world,Entity child,SpellGuardian boss) {
         if(child instanceof Void_Rune_Entity rune)rune.setCaster(boss.cast.damageOwner());
-        return cloud(world,child,boss.cast,boss.amplification,Ability.GUARDIAN_STOMP);
+        return cloud(world,child,boss.cast,boss.amplification,boss.ability);
     }
     public static Explosion explosion(Entity source,Level world,double x,double y,double z,float radius) {
         var cast=NativeSpellDamage.context(source);
