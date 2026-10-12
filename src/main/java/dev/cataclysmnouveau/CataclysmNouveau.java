@@ -16,6 +16,7 @@ public final class CataclysmNouveau {
         CataclysmEffects.register(bus);
         CataclysmItems.register(bus);
         GlyphCatalog.register();
+        bus.addListener(dev.cataclysmnouveau.network.IgnisPhantomPayload::register);
         bus.addListener((FMLCommonSetupEvent event)->event.enqueueWork(GlyphCatalog::configureCarriers));
         var tabs=DeferredRegister.create(Registries.CREATIVE_MODE_TAB,"cataclysm_nouveau");
         tabs.register("glyphs",()->CreativeModeTab.builder().title(Component.translatable("itemGroup.cataclysm_nouveau"))

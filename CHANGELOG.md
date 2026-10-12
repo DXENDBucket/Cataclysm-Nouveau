@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.1.0-dev.32
+
+- Add an optional client-side translucent Ignis Sword Dance phantom, using the native renderer, model, textures and both animation phases.
+- Sync actual executor identity, attack direction, phase and progress through small four-tick snapshots. Normal completion and cancellation close the visual; removed actors use a separate nearby-observer close path instead of relying on their tracking entry.
+- Blend all textured native layers without phantom depth writes, keep native scale by default, and lower opacity for the local first-person executor. Client configuration can disable or adjust the visual.
+- Never spawn a real Boss or run a proxy's tick, AI, damage or movement. Mana, cooldowns and existing gameplay stay unchanged. All 77 required server tests and distribution checks pass; client graphics await manual verification.
+
 ## 0.1.0-dev.31
 
 - Complete the selected Ignis series with Five-Fireball Array, Earth Shudders, Reinforced Leaping Smash, Ultimate Flame Slash and standalone Flame Strike effect glyphs.

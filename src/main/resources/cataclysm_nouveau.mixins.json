@@ -65,7 +65,10 @@
     "IgnisFlameStateMixin"
   ],
   "client": [
-    "client.GuardianVortexRenderProbeMixin"
+    "client.GuardianVortexRenderProbeMixin",
+    "client.PhantomRenderTypeAccess",
+    "client.PhantomCompositeStateAccess",
+    "client.PhantomTextureStateAccess"
   ],
   "injectors": {
     "defaultRequire": 1

@@ -183,7 +183,7 @@ public final class IgnisCasting {
                 reinforced?"Reinforced_Air_Smash":airborne?"Air_Smash":a==Ability.IGNIS_EARTH_SHUDDERS?"Earth_Shudders":"Combo1");
             private Vec3 heading=horizontal(host.getLookAngle());
             public boolean occupiesCaster(){return host==cast.caster();}
-            public boolean start(ExecutionSession<SpellIgnis> s){ACTORS.add(host.getUUID());if(host instanceof Mob mob)mob.getNavigation().stop();if(airborne)host.setNoGravity(false);goal.start();return true;}
+            public boolean start(ExecutionSession<SpellIgnis> s){ACTORS.add(host.getUUID());if(host instanceof Mob mob)mob.getNavigation().stop();if(airborne)host.setNoGravity(false);goal.start();dev.cataclysmnouveau.network.IgnisPhantomSync.send(s.id(),host,boss,false);return true;}
             public boolean tick(ExecutionSession<SpellIgnis> s) {
                 if(!host.isAlive() || host.level()!=world || host.isPassenger() || !MonstrosityCasting.loadedArea(world,host.position(),area))return true;
                 boolean landing=airborne && (animation==Ignis_Entity.SMASH || animation==Ignis_Entity.REINFORCED_SMASH || animation==Ignis_Entity.REINFORCED_SMASH_SOUL);
@@ -202,6 +202,7 @@ public final class IgnisCasting {
                     if(!expected)return true;
                     goal.stop();boss.setAnimation(next);animation=next;phaseAge=0;
                     if(!airborne){goal=boss.nativeGoal("Combo2");goal.start();}
+                    dev.cataclysmnouveau.network.IgnisPhantomSync.send(s.id(),host,boss,false);
                     return false;
                 }
                 boss.yBodyRot=boss.getYRot();boss.yHeadRot=boss.getYRot();boss.aiStep();
@@ -222,9 +223,10 @@ public final class IgnisCasting {
                     :animation==Ignis_Entity.COMBO1?Set.of(19,38,61,76).contains(phaseAge)
                     :animation==Ignis_Entity.COMBO2 && Set.of(32,59,74,108,110,112,114,116).contains(phaseAge);
                 if(strike){host.swing(InteractionHand.MAIN_HAND);MonstrosityCasting.impactVisual(world,host.position().add(heading.scale(2)),true,true);world.sendParticles(boss.getBossPhase()>0?ParticleTypes.SOUL_FIRE_FLAME:ParticleTypes.FLAME,host.getX(),host.getEyeY(),host.getZ(),20,.8,.4,.8,.03);}
+                if(age%4==0)dev.cataclysmnouveau.network.IgnisPhantomSync.send(s.id(),host,boss,false);
                 return airborne && !landing?age>=(reinforced?280:200):phaseAge>=animation.getDuration();
             }
-            public void close(ExecutionSession<SpellIgnis> s,ExecutionSession.EndReason reason){ACTORS.remove(host.getUUID());goal.stop();boss.discard();if(!host.isRemoved())host.setNoGravity(oldGravity);if(host.level()==world && !host.isRemoved()){host.setDeltaMovement(host.getDeltaMovement().multiply(.2,1,.2));host.hurtMarked=true;}}
+            public void close(ExecutionSession<SpellIgnis> s,ExecutionSession.EndReason reason){dev.cataclysmnouveau.network.IgnisPhantomSync.send(s.id(),host,boss,true);ACTORS.remove(host.getUUID());goal.stop();boss.discard();if(!host.isRemoved())host.setNoGravity(oldGravity);if(host.level()==world && !host.isRemoved()){host.setDeltaMovement(host.getDeltaMovement().multiply(.2,1,.2));host.hurtMarked=true;}}
         },hit->{},()->enabled(a),ExecutionScope.DIRECT));
     }
     private IgnisCasting() {}

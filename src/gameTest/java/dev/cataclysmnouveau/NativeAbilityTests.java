@@ -430,7 +430,10 @@ public final class NativeAbilityTests {
         final List<net.minecraft.world.level.ChunkPos> forced=new ArrayList<>();
         final List<Entity> actors=new ArrayList<>();final net.minecraft.world.scores.PlayerTeam team;
         Arena(GameTestHelper h) {
-            this.h=h;p=player(h);p.setNoGravity(true);center=scene(h).add(0,1,0);base=BlockPos.containing(scene(h));
+            this(h,packet->{});
+        }
+        Arena(GameTestHelper h,java.util.function.Consumer<net.minecraft.network.protocol.Packet<?>> observer) {
+            this.h=h;p=player(h,observer);p.setNoGravity(true);center=scene(h).add(0,1,0);base=BlockPos.containing(scene(h));
             p.setPos(center.add(-22,2,0));
             for(int x=(base.getX()-20)>>4;x<=(base.getX()+20)>>4;x++) for(int z=(base.getZ()-20)>>4;z<=(base.getZ()+20)>>4;z++)
                 if(!h.getLevel().getForcedChunks().contains(net.minecraft.world.level.ChunkPos.asLong(x,z))) {
@@ -1717,6 +1720,45 @@ public final class NativeAbilityTests {
             enemy.setHealth(500);enemy.invulnerableTime=0;
             var original=new com.github.L_Ender.cataclysm.entity.effect.Flame_Strike_Entity(h.getLevel(),a.center.x,a.center.y,a.center.z,0,1,0,0,0,6,6,false,a.p);original.tickCount=91;original.tick();
             close(h,500-enemy.getHealth(),15,"Unbound native player field retains its original radius one explosion");h.succeed();
+        }
+    }
+    @GameTest(template="empty",batch="cat_ignis_phantom_protocol",timeoutTicks=100)
+    public static void ignisPhantomPayloadKeepsRolesDimensionPoseAndStages(GameTestHelper h) {
+        try(var a=new Arena(h)) {
+            var actor=a.target(a.center,true);a.p.setHealth(5);
+            var boss=new SpellIgnis(h.getLevel(),CastContext.detached(a.p,null,null).withExecutor(actor),Ability.IGNIS_SWORD_COMBO,a.center,new Vec3(-1,0,0),1);
+            boss.setAnimation(com.github.L_Ender.cataclysm.entity.AnimationMonster.BossMonsters.Ignis_Entity.COMBO2);boss.setAnimationTick(37);
+            var data=dev.cataclysmnouveau.network.IgnisPhantomSync.snapshot(UUID.randomUUID(),actor,boss,false);
+            var buffer=new net.minecraft.network.RegistryFriendlyByteBuf(io.netty.buffer.Unpooled.buffer(),h.getLevel().registryAccess());
+            try {
+                dev.cataclysmnouveau.network.IgnisPhantomPayload.CODEC.encode(buffer,data);
+                h.assertTrue(data.equals(dev.cataclysmnouveau.network.IgnisPhantomPayload.CODEC.decode(buffer)),"Visual snapshot roundtrips without client class loading");
+                h.assertTrue(data.actorId()==actor.getId() && data.actorUuid().equals(actor.getUUID()) && !data.actorUuid().equals(a.p.getUUID()),"Visual anchor is actual executor, not payer");
+                h.assertTrue(data.phase()==2 && data.animation()==2 && data.age()==37 && data.dimension().equals(h.getLevel().dimension().location()),"Stage, root phase, actual progress and dimension retained");
+                close(h,data.yaw(),90,"Attack-facing pose is retained");
+                h.assertTrue(dev.cataclysmnouveau.network.IgnisPhantomSync.snapshot(data.token(),actor,boss,true).closed(),"Cancellation has explicit close snapshot");
+                h.succeed();
+            }finally{buffer.release();boss.discard();}
+        }
+    }
+    @GameTest(template="empty",batch="cat_ignis_phantom_lifecycle",timeoutTicks=100)
+    public static void ignisSwordDanceVisualPacketsFollowBothPhasesAndCancellation(GameTestHelper h) {
+        var frames=new ArrayList<dev.cataclysmnouveau.network.IgnisPhantomPayload>();
+        try(var a=new Arena(h,packet->{if(packet instanceof net.minecraft.network.protocol.common.ClientboundCustomPayloadPacket p
+                && p.payload() instanceof dev.cataclysmnouveau.network.IgnisPhantomPayload data)frames.add(data);})) {
+            a.p.setPos(a.center);a.p.setYRot(0);a.p.setHealth(5);
+            var enemy=a.target(a.center.add(0,0,3),false);
+            double before=CapabilityRegistry.getMana(a.p).getCurrentMana();a.cast(GlyphCatalog.IGNIS_SWORD_COMBO,new EntityHitResult(a.p),true);
+            h.assertTrue(!frames.isEmpty() && frames.getFirst().animation()==1 && !frames.getFirst().closed(),"Executor receives a visual start packet");
+            for(int t=1;t<=215;t++){enemy.invulnerableTime=0;ExecutionSessions.tick();}
+            h.assertTrue(frames.stream().anyMatch(p->p.animation()==2 && !p.closed()) && frames.getLast().closed(),"Both native phases and natural completion are synced");
+            h.assertTrue(frames.stream().filter(p->p.animation()==2).findFirst().orElseThrow().age()<5,"Second phase starts at its own animation age");
+            h.assertTrue(frames.size()>40 && frames.size()<65 && frames.stream().allMatch(p->p.token().equals(frames.getFirst().token())),"One visual token with bounded four-tick updates");
+            close(h,before-CapabilityRegistry.getMana(a.p).getCurrentMana(),CataclysmConfig.cost(Ability.IGNIS_SWORD_COMBO)+CataclysmConfig.amplifyCost(),"Visuals do not add resource charges");
+            h.assertTrue(h.getLevel().getEntitiesOfClass(com.github.L_Ender.cataclysm.entity.AnimationMonster.BossMonsters.Ignis_Entity.class,new AABB(a.center,a.center).inflate(32)).isEmpty(),"No real Boss is spawned for the phantom");
+            frames.clear();enemy.setHealth(500);a.cast(GlyphCatalog.IGNIS_SWORD_COMBO,new EntityHitResult(a.p),false);
+            h.assertTrue(!frames.isEmpty() && !frames.getLast().closed(),"A subsequent action has a new visual start");
+            a.p.discard();ExecutionSessions.tick();h.assertTrue(frames.getLast().closed(),"Root cancellation sends visual close");h.succeed();
         }
     }
     @GameTest(template="empty",batch="cat_harbinger_standalone_smoke",timeoutTicks=100)
