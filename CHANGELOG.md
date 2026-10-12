@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.1.0-dev.27
+
+- Disassemble a Gauntlet of Guard into nine Void Gauntlet Fragments.
+- Require a fragment for Guardian Stomp as well as Vortex and Gravity Punch. Keep golem Void Cores for the weaker standalone Void Rune and Guardian Bullet.
+
 ## 0.1.0-dev.26
 
 - Fix managed Void Vortex client replicas being discarded on their first tick in integrated-server games. Check caster death/world changes only on the server.
