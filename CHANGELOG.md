@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.1.0-dev.33
+
+- Give Ignis Sword Dance explicit entity/position anchors. Beneficial entity selection accepts only self or allies, while block hits execute both phases at the fixed point without moving or occupying the caster. Enemy selection fails without payment.
+- Let players steer from their facing and mobs follow their attack target during preparation windows, with a 20-degree-per-tick limit. Lock direction during strikes and finishing waves; native damage and the phantom share the authoritative pose.
+- Preserve native goals, attack bodies, root ownership/healing, allied protection, group Mana and cooldown. Positional lunges never transfer movement to the caster; fixed-point direction prefers incoming projectile geometry and remains frozen.
+- Upgrade phantom protocol to version 2 with an explicit positional flag and nearby-observer delivery. Render positional visuals without a tracked actor and interpolate authoritative yaw for both modes.
+- All 80 required server tests pass, including three new anchor/steering integration tests. Binary/source distribution checks pass. The earlier dev.32 phantom received user visual feedback; new steering and position rendering still await manual verification.
+
 ## 0.1.0-dev.32
 
 - Add an optional client-side translucent Ignis Sword Dance phantom, using the native renderer, model, textures and both animation phases.

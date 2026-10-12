@@ -26,6 +26,8 @@ import java.util.function.Supplier;
 public final class IgnisCasting {
     private static final Set<UUID> ACTORS=new HashSet<>();
     public static boolean isActing(Entity actor){return ACTORS.contains(actor.getUUID());}
+    static void lockActor(Entity actor){ACTORS.add(actor.getUUID());}
+    static void unlockActor(Entity actor){ACTORS.remove(actor.getUUID());}
     public static boolean projectile(Ability a){return a==Ability.IGNIS_FIREBALL || a==Ability.IGNIS_ABYSS_FIREBALL;}
     public static boolean supports(Ability a){return switch(a){case IGNIS_BLADE_FIREBALLS,IGNIS_AIR_SMASH,IGNIS_SWORD_COMBO,
             IGNIS_FIREBALL_ARRAY,IGNIS_EARTH_SHUDDERS,IGNIS_REINFORCED_SMASH,IGNIS_ULTIMATE,IGNIS_FLAME_STRIKE->true;default->false;};}
@@ -77,6 +79,7 @@ public final class IgnisCasting {
     public static boolean effect(Ability a,ServerLevel world,CastContext cast,double amp,double duration) {
         if(cast.target()==null || cast.target().getType()==HitResult.Type.MISS)return false;
         if(a==Ability.IGNIS_FLAME_STRIKE)return flame(world,cast,amp,duration);
+        if(a==Ability.IGNIS_SWORD_COMBO)return IgnisSwordDance.start(world,cast,amp);
         if(a==Ability.IGNIS_BLADE_FIREBALLS || a==Ability.IGNIS_FIREBALL_ARRAY)return blades(a,world,cast,amp);
         return action(a,world,cast,amp);
     }

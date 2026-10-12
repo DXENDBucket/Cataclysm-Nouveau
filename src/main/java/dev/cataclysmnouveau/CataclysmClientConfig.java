@@ -18,7 +18,7 @@ public final class CataclysmClientConfig {
             .define("vortex", false);
         builder.pop();
         builder.push("action_phantoms");
-        IGNIS_PHANTOM=builder.comment("Visual-only native Ignis Sword Dance phantom, for yourself and tracked allies/players.").define("ignis_sword_dance",true);
+        IGNIS_PHANTOM=builder.comment("Visual-only native Ignis Sword Dance phantom, for entity and position anchored actions.").define("ignis_sword_dance",true);
         PHANTOM_OPACITY=builder.comment("Opacity of all native model layers. Does not change damage or attack range.").defineInRange("opacity",.28,0,1);
         FIRST_PERSON_OPACITY=builder.comment("Lower opacity when the local player is the executor and the camera is first person.").defineInRange("first_person_opacity",.14,0,1);
         PHANTOM_SCALE=builder.comment("Visual scale only; 1 keeps the original Boss weapon reach. Does not change hitboxes.").defineInRange("scale",1.0,.25,2);

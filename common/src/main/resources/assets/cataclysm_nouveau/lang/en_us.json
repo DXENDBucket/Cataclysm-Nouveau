@@ -148,7 +148,7 @@
   "cataclysm_nouveau.glyph_name.glyph_ignis_air_smash": "Ignis Leaping Smash",
   "cataclysm_nouveau.glyph_desc.glyph_ignis_air_smash": "Self or an ally leaps toward a target, then smashes only after landing and sends four advancing ground shockwaves. Retains native damage, launch and shield break without terrain destruction.",
   "cataclysm_nouveau.glyph_name.glyph_ignis_sword_combo": "Ignis Sword Dance",
-  "cataclysm_nouveau.glyph_desc.glyph_ignis_sword_combo": "Self or an ally executes both native sword-dance phases, including lunges, sweeps, body check and finishing ground shockwaves. Hits stack Blazing Brand and heal the caster; the group pays once.",
+  "cataclysm_nouveau.glyph_desc.glyph_ignis_sword_combo": "Self or an ally performs both sword-dance phases, steering between strikes and locking direction during swings. On a block hit, a phantom performs the dance at that fixed position and heading without moving the caster. Hits stack Blazing Brand and heal the caster; the group pays once.",
   "cataclysm_nouveau.glyph_name.glyph_ignis_fireball_array": "Ignis Five-Fireball Array",
   "cataclysm_nouveau.glyph_desc.glyph_ignis_fireball_array": "Prepare four normal or soul fireballs and one Abyss fireball at the resolved location, launching in sequence with native explosions, brand and healing.",
   "cataclysm_nouveau.glyph_name.glyph_ignis_earth_shudders": "Ignis Earth Shudders",

@@ -1761,6 +1761,73 @@ public final class NativeAbilityTests {
             a.p.discard();ExecutionSessions.tick();h.assertTrue(frames.getLast().closed(),"Root cancellation sends visual close");h.succeed();
         }
     }
+    @GameTest(template="empty",batch="cat_ignis_steering",timeoutTicks=100)
+    public static void ignisPlayerSteeringLocksDuringStrikesAndUsesDamageHeading(GameTestHelper h) {
+        var frames=new ArrayList<dev.cataclysmnouveau.network.IgnisPhantomPayload>();
+        try(var a=new Arena(h,packet->{if(packet instanceof net.minecraft.network.protocol.common.ClientboundCustomPayloadPacket p
+                && p.payload() instanceof dev.cataclysmnouveau.network.IgnisPhantomPayload data)frames.add(data);})) {
+            a.p.setPos(a.center);a.p.setYRot(0);
+            var west=a.target(a.center.add(-3,0,0),false);var east=a.target(a.center.add(3,0,0),false);
+            a.cast(GlyphCatalog.IGNIS_SWORD_COMBO,new EntityHitResult(a.p),false);a.p.setYRot(90);
+            for(int t=1;t<=8;t++)ExecutionSessions.tick();
+            close(h,frames.getLast().yaw(),90,"Player camera steers the native frame during preparation");
+            for(int t=9;t<=16;t++)ExecutionSessions.tick();a.p.setYRot(180);
+            for(int t=17;t<=19;t++)ExecutionSessions.tick();
+            h.assertTrue(west.getHealth()<500 && east.getHealth()==500,"First native strike uses locked west-facing damage, not the changed camera");
+            for(int t=20;t<=44;t++)ExecutionSessions.tick();
+            close(h,frames.getLast().yaw(),90,"First swing/recovery cannot rotate its attacks");
+            for(int t=45;t<=48;t++)ExecutionSessions.tick();
+            close(h,frames.getLast().yaw(),170,"The next windup approaches the new heading by at most 20 degrees per tick");
+            for(int t=49;t<=52;t++)ExecutionSessions.tick();
+            close(h,frames.getLast().yaw(),180,"Steering resumes between strikes");
+            a.p.setHealth(0);ExecutionSessions.tick();
+            h.assertTrue(frames.getLast().closed() && !IgnisCasting.isActing(a.p),"Cancellation releases a steering actor and its visual");h.succeed();
+        }
+    }
+    @GameTest(template="empty",batch="cat_ignis_position",timeoutTicks=100)
+    public static void ignisPositionSwordDanceKeepsGeometryOwnershipAndIndependentActor(GameTestHelper h) {
+        var frames=new ArrayList<dev.cataclysmnouveau.network.IgnisPhantomPayload>();
+        try(var a=new Arena(h,packet->{if(packet instanceof net.minecraft.network.protocol.common.ClientboundCustomPayloadPacket p
+                && p.payload() instanceof dev.cataclysmnouveau.network.IgnisPhantomPayload data)frames.add(data);})) {
+            var west=a.target(a.center.add(-3,0,0),false);var east=a.target(a.center.add(3,0,0),false);var friend=a.target(west.position(),true);
+            var original=a.p.position();var motion=new Vec3(.2,.1,.3);a.p.setDeltaMovement(motion);a.p.setYRot(0);
+            var cast=CastContext.detached(a.p,block(a.center),null).withIncomingDirection(new Vec3(-1,0,0));
+            h.assertTrue(IgnisCasting.effect(Ability.IGNIS_SWORD_COMBO,h.getLevel(),cast,0),"A beneficial action accepts a block position");
+            h.assertTrue(!IgnisCasting.isActing(a.p) && !ExecutionSessions.isCasting(a.p),"Position action does not occupy the caster");
+            var first=frames.getFirst();
+            h.assertTrue(first.positionAnchored() && first.actorId()==-1 && first.position().equals(a.center),"Position snapshot does not invent an entity executor");
+            close(h,first.yaw(),90,"Projectile incoming direction wins over caster facing");
+            var buffer=new net.minecraft.network.RegistryFriendlyByteBuf(io.netty.buffer.Unpooled.buffer(),h.getLevel().registryAccess());
+            try{dev.cataclysmnouveau.network.IgnisPhantomPayload.CODEC.encode(buffer,first);h.assertTrue(first.equals(dev.cataclysmnouveau.network.IgnisPhantomPayload.CODEC.decode(buffer)),"Position protocol roundtrips");}finally{buffer.release();}
+            a.p.setYRot(180);
+            for(int t=1;t<=19;t++)ExecutionSessions.tick();
+            h.assertTrue(west.getHealth()<500 && west.getLastDamageSource().getEntity()==a.p && east.getHealth()==500,"Damage occurs at the fixed point with real ownership and frozen direction");
+            close(h,friend.getHealth(),500,"Position action still protects allied entities");
+            for(int t=20;t<=215;t++){west.invulnerableTime=0;ExecutionSessions.tick();}
+            h.assertTrue(frames.getLast().closed() && frames.stream().anyMatch(p->p.animation()==2),"Fixed point completes both native phases");
+            h.assertTrue(frames.stream().allMatch(p->p.positionAnchored() && p.position().equals(a.center) && Math.abs(p.yaw()-90)<.001),"Camera and native lunge never move or turn a fixed anchor");
+            h.assertTrue(a.p.position().equals(original) && a.p.getDeltaMovement().equals(motion),"Caster movement is untouched, including cleanup");
+            frames.clear();double before=CapabilityRegistry.getMana(a.p).getCurrentMana();
+            a.cast(GlyphCatalog.IGNIS_SWORD_COMBO,block(a.center),false);
+            close(h,before-CapabilityRegistry.getMana(a.p).getCurrentMana(),CataclysmConfig.cost(Ability.IGNIS_SWORD_COMBO),"Position invocation pays the same group cost once");
+            a.p.discard();ExecutionSessions.tick();h.assertTrue(frames.getLast().closed(),"Owner removal ends a remote position visual");h.succeed();
+        }
+    }
+    @GameTest(template="empty",batch="cat_ignis_anchor_permissions",timeoutTicks=100)
+    public static void ignisBeneficialEntitySelectionRejectsEnemiesAndMobUsesAttackTarget(GameTestHelper h) {
+        try(var a=new Arena(h)) {
+            var west=a.target(a.center.add(-3,0,0),false);var east=a.target(a.center.add(3,0,0),false);
+            double before=CapabilityRegistry.getMana(a.p).getCurrentMana();
+            a.cast(GlyphCatalog.IGNIS_SWORD_COMBO,new EntityHitResult(west),false);
+            close(h,CapabilityRegistry.getMana(a.p).getCurrentMana(),before,"Enemy selection fails without charging or commandeering");
+            h.assertTrue(!IgnisCasting.isActing(west) && !IgnisCasting.isActing(a.p),"Enemy selection has no implicit caster fallback");
+            var host=a.target(a.center,true);host.setYRot(0);((Mob)host).setTarget(west);
+            a.cast(GlyphCatalog.IGNIS_SWORD_COMBO,new EntityHitResult(host),false);
+            for(int t=1;t<=19;t++)ExecutionSessions.tick();
+            h.assertTrue(west.getHealth()<500 && east.getHealth()==500,"An allied non-player actor uses its attack target instead of its unchanged facing");
+            host.discard();ExecutionSessions.tick();h.assertTrue(!IgnisCasting.isActing(host),"Actual executor removal releases its lock");h.succeed();
+        }
+    }
     @GameTest(template="empty",batch="cat_harbinger_standalone_smoke",timeoutTicks=100)
     public static void standaloneSmokeDurationDamageFeeAndRootCleanup(GameTestHelper h) {
         try(var a=new Arena(h)) {

@@ -12,16 +12,16 @@ import java.util.UUID;
 /** Actual attack pose is authoritative; the visual proxy never controls the executor. */
 public final class IgnisPhantomSync {
     public static IgnisPhantomPayload snapshot(UUID token,LivingEntity actor,SpellIgnis frame,boolean closed){
-        return new IgnisPhantomPayload(token,frame.level().dimension().location(),actor.getId(),actor.getUUID(),
-            closed?frame.position():actor.position(),frame.getYRot(),frame.getBossPhase(),frame.getAnimation()==Ignis_Entity.COMBO2?2:1,
+        return new IgnisPhantomPayload(token,frame.level().dimension().location(),actor==null?-1:actor.getId(),actor==null?new UUID(0,0):actor.getUUID(),
+            actor==null,closed || actor==null?frame.position():actor.position(),frame.getYRot(),frame.getBossPhase(),frame.getAnimation()==Ignis_Entity.COMBO2?2:1,
             frame.getAnimationTick(),closed);
     }
     public static void send(UUID token,LivingEntity actor,SpellIgnis frame,boolean closed){
         if(frame.ability!=Ability.IGNIS_SWORD_COMBO)return;
         var data=snapshot(token,actor,frame,closed);
-        if(!closed){PacketDistributor.sendToPlayersTrackingEntityAndSelf(actor,data);return;}
+        if(!closed && actor!=null){PacketDistributor.sendToPlayersTrackingEntityAndSelf(actor,data);return;}
         // Removed/transferred actors may have already left the tracking map. Use the last attack world/pose.
-        ServerPlayer self=actor instanceof ServerPlayer player?player:null;
+        ServerPlayer self=actor instanceof ServerPlayer player?player:actor==null && frame.cast.caster() instanceof ServerPlayer player?player:null;
         PacketDistributor.sendToPlayersNear((ServerLevel)frame.level(),self,frame.getX(),frame.getY(),frame.getZ(),96,data);
         if(self!=null)PacketDistributor.sendToPlayer(self,data);
     }
