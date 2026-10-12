@@ -1,3 +1,10 @@
+## 0.1.0-dev.36
+
+- Opt existing physical actions into Conflux claim replacement, across Ignis, Scylla, Harbinger, Guardian and Monstrosity shoulder actions. Minimum Core is 0.1.21.
+- Validate incoming targets and ability-specific prerequisites before handoff; insufficient resources or invalid targets leave the current action running. Other actors and shared channels are independent.
+- Sample gravity after old cleanup, and restore only successfully acquired state. Add explicit shoulder action claims and guard prepared-driver cleanup.
+- Keep native attack timing, costs and cooldowns. Successful triggers pay separately even when a later body effect in the same Ars recipe immediately replaces an earlier one.
+
 ## 0.1.0-dev.35
 
 - Migrate Leaping Smash, Reinforced Leaping Smash, Earth Shudders and Ultimate Flame Slash to Conflux entity/position execution anchors. Reject hostile entity and MISS selections instead of implicitly executing on the caster.

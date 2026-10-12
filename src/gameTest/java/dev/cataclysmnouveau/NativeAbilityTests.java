@@ -908,8 +908,8 @@ public final class NativeAbilityTests {
         a.cast(GlyphCatalog.COMBO,new EntityHitResult(actor),true);
         double paid=10000-CataclysmConfig.cost(Ability.THUNDER_COMBO)-CataclysmConfig.amplifyCost();
         close(h,CapabilityRegistry.getMana(a.p).getCurrentMana(),paid,"Combo pays once on start");
-        a.cast(GlyphCatalog.COMBO,new EntityHitResult(actor),false);
-        close(h,CapabilityRegistry.getMana(a.p).getCurrentMana(),paid,"Busy recipient rejects and refunds a second action");
+        CapabilityRegistry.getMana(a.p).setMana(0);a.cast(GlyphCatalog.COMBO,new EntityHitResult(actor),false);
+        close(h,CapabilityRegistry.getMana(a.p).getCurrentMana(),0,"Unfunded replacement preserves the combo");CapabilityRegistry.getMana(a.p).setMana(paid);
         h.runAfterDelay(25,()->{
             h.assertTrue(victim.getHealth()<500 && victim.getLastDamageSource().getEntity()==a.p,"Native first melee strike credits payer, not recipient or Boss");
             close(h,ally.getHealth(),500,"Native melee excludes nearby allies");
@@ -1043,6 +1043,10 @@ public final class NativeAbilityTests {
                 actor.setPos(a.center.add(0,5,0));h.getLevel().addFreshEntity(actor);a.actors.add(actor);
             } catch(ReflectiveOperationException error) {a.close();throw new IllegalStateException(error);}
         } else actor=a.target(a.center.add(0,5,0),true);
+        // Fix the requested aim and provide a real landing surface beyond the native jump's travel.
+        if(actor instanceof Mob mob)mob.setNoAi(true);
+        loadIgnisUltimateArea(a);
+        for(int x=-30;x<=30;x++)for(int z=19;z<=38;z++)h.getLevel().setBlockAndUpdate(a.base.offset(x,0,z),Blocks.STONE.defaultBlockState());
         actor.setNoGravity(true);actor.setYRot(0);actor.setXRot(20);
         var anchors=new ArrayList<Player_Ceraunus_Entity>();
         java.util.function.Consumer<net.neoforged.neoforge.event.entity.EntityJoinLevelEvent> observer=e->{if(e.getEntity() instanceof Player_Ceraunus_Entity hook && hook.getOwner()==actor)anchors.add(hook);};
@@ -1051,7 +1055,7 @@ public final class NativeAbilityTests {
         h.assertTrue(ScyllaActions.isLeaping(actor) && !actor.isNoGravity(),"Airborne hovering ally is accepted and temporarily follows action gravity");
         actor.setXRot(35);Vec3 launchDirection=actor.getLookAngle();
         h.runAfterDelay(9,()->{h.assertTrue(anchors.size()==1,"Airborne recipient throws its own native chain");var hook=anchors.get(0);h.assertTrue(hook.isNoGravity() && hook.getDeltaMovement().normalize().dot(launchDirection)>.999,"Launch uses current post-jump look, without old-point downward correction or ballistic drop");});
-        h.runAfterDelay(170,()->{try {h.assertTrue(!ScyllaActions.isLeaping(actor) && actor.isNoGravity() && anchors.get(0).isRemoved(),"Action clears the hook/AI lock and restores pre-existing floating state");h.succeed();}finally{net.neoforged.neoforge.common.NeoForge.EVENT_BUS.unregister(observer);a.close();}});
+        h.runAfterDelay(170,()->{try {h.assertTrue(!ScyllaActions.isLeaping(actor) && actor.isNoGravity() && anchors.get(0).isRemoved(),"Action clears the hook/AI lock and restores pre-existing floating state");h.succeed();}finally{net.neoforged.neoforge.common.NeoForge.EVENT_BUS.unregister(observer);for(int x=-30;x<=30;x++)for(int z=19;z<=38;z++)h.getLevel().setBlockAndUpdate(a.base.offset(x,0,z),Blocks.AIR.defaultBlockState());a.close();}});
     }
     private static final class Marker extends AbstractEffect {
         int hits;
@@ -1368,8 +1372,8 @@ public final class NativeAbilityTests {
             var mana=CapabilityRegistry.getMana(a.p);double before=mana.getCurrentMana();
             a.cast(GlyphCatalog.GUARDIAN_UPPERCUT,new EntityHitResult(host),true);
             h.assertTrue(GuardianActions.isActing(host),"Allied actor owns movement control");
-            double paid=mana.getCurrentMana();a.cast(GlyphCatalog.GUARDIAN_ROCKET_PUNCH,new EntityHitResult(host),false);
-            close(h,mana.getCurrentMana(),paid,"A second conflicting action is refunded");
+            double paid=mana.getCurrentMana();mana.setMana(0);a.cast(GlyphCatalog.GUARDIAN_ROCKET_PUNCH,new EntityHitResult(host),false);
+            close(h,mana.getCurrentMana(),0,"Unfunded replacement preserves the uppercut");mana.setMana(paid);
             for(int tick=1;tick<=54;tick++) {
                 enemy.invulnerableTime=0;ExecutionSessions.tick();
                 if(tick==26)h.assertTrue(host.getDeltaMovement().z>.8,"Native uppercut lunge reaches actual actor");
@@ -1855,10 +1859,11 @@ public final class NativeAbilityTests {
             a.cast(GlyphCatalog.IGNIS_SWORD_COMBO,new EntityHitResult(host),false);
             h.assertTrue(ExecutionSessions.isOccupied(host,dev.arsconflux.api.execution.ExecutionClaim.ENTITY_ACTION)
                     && !ExecutionSessions.isCasting(a.p),"Core records actual remote actor, not payer");
-            double before=CapabilityRegistry.getMana(a.p).getCurrentMana();
+            double before=CapabilityRegistry.getMana(a.p).getCurrentMana();CapabilityRegistry.getMana(a.p).setMana(0);
             a.cast(GlyphCatalog.IGNIS_AIR_SMASH,new EntityHitResult(host),false);
             a.cast(GlyphCatalog.SPIN,new EntityHitResult(host),false);
-            close(h,CapabilityRegistry.getMana(a.p).getCurrentMana(),before,"Legacy physical actions cannot overlap remote Sword Dance and do not charge");
+            close(h,CapabilityRegistry.getMana(a.p).getCurrentMana(),0,"Unfunded replacement preserves remote Sword Dance without charging");
+            CapabilityRegistry.getMana(a.p).setMana(before);
             h.assertTrue(IgnisCasting.isActing(host),"Rejected actions do not clear the running action's state");
             h.getLevel().getScoreboard().removePlayerFromTeam(host.getScoreboardName());ExecutionSessions.tick();
             h.assertTrue(!IgnisCasting.isActing(host) && !ExecutionSessions.isOccupied(host,dev.arsconflux.api.execution.ExecutionClaim.ENTITY_ACTION),"Loss of alliance ends native action and releases its claim");
@@ -1981,8 +1986,10 @@ public final class NativeAbilityTests {
                 a.cast(glyph,new EntityHitResult(host),false);
                 h.assertTrue(IgnisCasting.isActing(host) && ExecutionSessions.isOccupied(host,dev.arsconflux.api.execution.ExecutionClaim.ENTITY_ACTION) && channel.active(),"Native action can coexist with actual actor's channel");
                 double mana=CapabilityRegistry.getMana(a.p).getCurrentMana();Vec3 motion=host.getDeltaMovement();boolean gravity=host.isNoGravity();
+                CapabilityRegistry.getMana(a.p).setMana(0);
                 a.cast(GlyphCatalog.IGNIS_SWORD_COMBO,new EntityHitResult(host),false);
-                close(h,CapabilityRegistry.getMana(a.p).getCurrentMana(),mana,"Conflicting sword dance is refunded");
+                close(h,CapabilityRegistry.getMana(a.p).getCurrentMana(),0,"Unfunded sword dance does not replace the running action");
+                CapabilityRegistry.getMana(a.p).setMana(mana);
                 h.assertTrue(IgnisCasting.isActing(host) && host.getDeltaMovement().equals(motion) && host.isNoGravity()==gravity,"Rejected action cannot alter the running action");
                 if(glyph.ability==Ability.IGNIS_REINFORCED_SMASH)for(int t=0;t<84;t++)ExecutionSessions.tick();
                 var ownShots=List.copyOf(ignisShots(a));var ownFlames=List.copyOf(ignisFlames(a));
@@ -2015,4 +2022,88 @@ public final class NativeAbilityTests {
         }
         public void close(){players.remove(player);}
     }
+
+    @GameTest(template="empty",batch="cat_action_replacement",timeoutTicks=100)
+    public static void physicalActionsReplaceAcrossSeriesKeepOtherActorsAndRestoreGravity(GameTestHelper h){
+        try(var a=new Arena(h)){
+            var mana=CapabilityRegistry.getMana(a.p);mana.setMaxMana(50000);mana.setMana(50000);
+            var host=a.target(a.center,true);host.setOnGround(true);host.setYRot(0);
+            var enemy=a.target(a.center.add(0,0,3),false);var other=a.target(a.center.add(12,0,0),true);
+            a.cast(GlyphCatalog.IGNIS_SWORD_COMBO,new EntityHitResult(other),false);
+            var channel=new dev.arsconflux.api.execution.ExecutionSession<>(h.getLevel(),CastContext.detached(a.p,null,null).withExecutor(host),0,400,new dev.arsconflux.api.execution.ExecutionDriver<Integer>(){
+                public List<dev.arsconflux.api.execution.ExecutionClaim> claims(dev.arsconflux.api.execution.ExecutionSession<Integer> s){return List.of(dev.arsconflux.api.execution.ExecutionClaim.channel(host));}
+                public boolean start(dev.arsconflux.api.execution.ExecutionSession<Integer> s){return true;}
+                public boolean tick(dev.arsconflux.api.execution.ExecutionSession<Integer> s){return false;}
+                public void close(dev.arsconflux.api.execution.ExecutionSession<Integer> s,dev.arsconflux.api.execution.ExecutionSession.EndReason reason){}
+            },hit->{},()->true,dev.arsconflux.api.execution.ExecutionScope.DIRECT);ExecutionSessions.start(channel);
+            double before=mana.getCurrentMana();
+            a.cast(GlyphCatalog.IGNIS_REINFORCED_SMASH,new EntityHitResult(host),false);
+            for(int t=0;t<84;t++)ExecutionSessions.tick();
+            var children=List.copyOf(ignisShots(a));h.assertTrue(children.size()==3 && !host.isNoGravity(),"Prepared native action has children and changed gravity");
+            double costs=CataclysmConfig.cost(Ability.IGNIS_REINFORCED_SMASH);
+            var steps=List.of(GlyphCatalog.IGNIS_AIR_SMASH,GlyphCatalog.IGNIS_SWORD_COMBO,GlyphCatalog.SPIN,
+                    GlyphCatalog.COMBO,GlyphCatalog.HARBINGER_CHARGE,GlyphCatalog.GRAVITY_PUNCH,
+                    GlyphCatalog.GUARDIAN_UPPERCUT,GlyphCatalog.GUARDIAN_ROCKET_PUNCH,GlyphCatalog.CHARGE);
+            for(var glyph:steps){
+                a.cast(glyph,new EntityHitResult(host),false);costs+=CataclysmConfig.cost(glyph.ability);
+                close(h,mana.getCurrentMana(),before-costs,"Replacement charges new action exactly once: "+glyph.ability);
+                h.assertTrue(ExecutionSessions.isOccupied(host,dev.arsconflux.api.execution.ExecutionClaim.ENTITY_ACTION)
+                        && channel.active() && IgnisCasting.isActing(other),"Replacement leaves shared channels and other actor's action intact");
+                boolean ignis=glyph==GlyphCatalog.IGNIS_AIR_SMASH || glyph==GlyphCatalog.IGNIS_SWORD_COMBO;
+                boolean scylla=glyph==GlyphCatalog.SPIN || glyph==GlyphCatalog.COMBO;
+                boolean guardian=glyph==GlyphCatalog.GRAVITY_PUNCH || glyph==GlyphCatalog.GUARDIAN_UPPERCUT || glyph==GlyphCatalog.GUARDIAN_ROCKET_PUNCH;
+                h.assertTrue(IgnisCasting.isActing(host)==ignis && ScyllaActions.isActing(host)==scylla
+                        && HarbingerActions.isCharging(host)==(glyph==GlyphCatalog.HARBINGER_CHARGE)
+                        && GuardianCasting.isPunching(host)==(ignis || guardian),"Only latest body's native state remains: "+glyph.ability);
+            }
+            h.assertTrue(children.stream().allMatch(Entity::isRemoved) && host.isNoGravity(),"Interrupted children are removed and chained airborne actions restore original gravity");
+            for(int t=0;t<33;t++)ExecutionSessions.tick();
+            h.assertTrue(!ExecutionSessions.isOccupied(host,dev.arsconflux.api.execution.ExecutionClaim.ENTITY_ACTION) && channel.active(),"Final native shoulder action completes independently");
+            channel.finish(dev.arsconflux.api.execution.ExecutionSession.EndReason.COMPLETED);h.succeed();
+        }
+    }
+    @GameTest(template="empty",batch="cat_action_invalid_replacement",timeoutTicks=100)
+    public static void invalidBodyReplacementRetainsPreviousActionAndItsPhysicalState(GameTestHelper h){
+        try(var a=new Arena(h)){
+            var host=a.target(a.center.add(0,20,0),true);host.setYRot(0);host.setXRot(-90);
+            a.cast(GlyphCatalog.IGNIS_SWORD_COMBO,new EntityHitResult(host),false);
+            var mana=CapabilityRegistry.getMana(a.p);double before=mana.getCurrentMana();Vec3 motion=host.getDeltaMovement();
+            a.cast(GlyphCatalog.LEAP,new EntityHitResult(host),false);
+            a.cast(GlyphCatalog.GUARDIAN_BLINK,new EntityHitResult(host),false);
+            close(h,mana.getCurrentMana(),before,"Missing hook surface and missing teleport target cannot interrupt or charge");
+            h.assertTrue(IgnisCasting.isActing(host) && host.getDeltaMovement().equals(motion) && host.isNoGravity(),"Old physical state remains when replacement cannot be prepared");
+            var forbidden=a.target(a.center.add(0,0,2),false);
+            a.cast(GlyphCatalog.IGNIS_EARTH_SHUDDERS,new EntityHitResult(forbidden),false);
+            close(h,mana.getCurrentMana(),before,"Hostile executor is rejected before interruption");
+            h.assertTrue(IgnisCasting.isActing(host),"Invalid selection leaves old action running");h.succeed();
+        }
+    }
+
+
+    public static void boundIronWeaponReleasesReplacementRecipeWithoutStoppingSharedChannel(GameTestHelper h){
+        var frames=new ArrayList<dev.cataclysmnouveau.network.IgnisPhantomPayload>();
+        try(var a=new Arena(h,packet->{if(packet instanceof net.minecraft.network.protocol.common.ClientboundCustomPayloadPacket p
+                && p.payload() instanceof dev.cataclysmnouveau.network.IgnisPhantomPayload data)frames.add(data);})){
+            a.p.setGameMode(GameType.CREATIVE);a.p.setPos(a.center);a.p.setYRot(0);
+            a.cast(GlyphCatalog.IGNIS_SWORD_COMBO,new EntityHitResult(a.p),false);
+            var old=frames.getLast().token();var tool=new ItemStack(net.minecraft.world.item.Items.IRON_SWORD);
+            a.p.setItemInHand(net.minecraft.world.InteractionHand.MAIN_HAND,tool);
+            var api=Class.forName("dev.ironsnouveau.casting.BoundSpellSupport");
+            api.getMethod("bind",ItemStack.class,Spell.class,int.class).invoke(null,tool,new Spell(MethodSelf.INSTANCE,GlyphCatalog.IGNIS_AIR_SMASH),1);
+            var cast=api.getMethod("cast",LivingEntity.class,ItemStack.class,net.minecraft.world.InteractionHand.class);
+            h.assertTrue((Boolean)cast.invoke(null,a.p,tool,net.minecraft.world.InteractionHand.MAIN_HAND),"Real bound-weapon entry can release a new body recipe while the old action is running");
+            h.assertTrue(frames.stream().anyMatch(f->f.token().equals(old) && f.closed())
+                    && frames.getLast().animation()==3 && !frames.getLast().closed() && !a.p.isNoGravity(),"Native bound cast closes old sword action and starts the actual leaping action");
+            var channel=new dev.arsconflux.api.execution.ExecutionSession<>(h.getLevel(),CastContext.detached(a.p,null,null),0,30,new dev.arsconflux.api.execution.ExecutionDriver<Integer>(){
+                public List<dev.arsconflux.api.execution.ExecutionClaim> claims(dev.arsconflux.api.execution.ExecutionSession<Integer> s){return List.of(dev.arsconflux.api.execution.ExecutionClaim.channel(a.p));}
+                public boolean start(dev.arsconflux.api.execution.ExecutionSession<Integer> s){return true;}
+                public boolean tick(dev.arsconflux.api.execution.ExecutionSession<Integer> s){return false;}
+                public void close(dev.arsconflux.api.execution.ExecutionSession<Integer> s,dev.arsconflux.api.execution.ExecutionSession.EndReason reason){}
+            },hit->{},()->true,dev.arsconflux.api.execution.ExecutionScope.DIRECT);ExecutionSessions.start(channel);
+            h.assertTrue(!(Boolean)cast.invoke(null,a.p,tool,net.minecraft.world.InteractionHand.MAIN_HAND)
+                    && channel.active() && IgnisCasting.isActing(a.p),"Bound entry retains channel restriction and leaves running sessions unchanged");
+            channel.finish(dev.arsconflux.api.execution.ExecutionSession.EndReason.COMPLETED);h.succeed();
+        }catch(ReflectiveOperationException e){throw new AssertionError("Optional real Iron binding API call failed",e);}
+    }
+
 }

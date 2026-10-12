@@ -26,14 +26,12 @@ final class IgnisSwordDance {
         var geometry=new IgnisActionGeometry(world,cast,anchor);
         if(!geometry.present(cast,20))return false;
         LivingEntity actor=anchor.entity();
-        if(actor!=null && (IgnisCasting.isActing(actor) || GuardianCasting.isPunching(actor)
-                || HarbingerActions.isCharging(actor) || ScyllaActions.isActing(actor) || ExecutionSessions.isOccupied(actor,ExecutionClaim.ENTITY_ACTION)))return false;
         var context=cast.withExecutor(actor);
         final Vec3 initialFacing=geometry.initialFacing;
         var boss=new SpellIgnis(world,context,Ability.IGNIS_SWORD_COMBO,anchor.sample().origin(),initialFacing,amp);
         var aim=new ArmorStand(world,anchor.sample().origin().x,anchor.sample().origin().y,anchor.sample().origin().z);
         boss.setTarget(aim);boss.setAnimation(Ignis_Entity.COMBO1);
-        return ExecutionSessions.start(new ExecutionSession<>(world,context,boss,245,new ExecutionDriver<SpellIgnis>() {
+        return ExecutionSessions.startReplacing(new ExecutionSession<>(world,context,boss,245,new ExecutionDriver<SpellIgnis>() {
             private int age,phaseAge;
             private Animation animation=Ignis_Entity.COMBO1;
             private net.minecraft.world.entity.ai.goal.Goal goal=boss.nativeGoal("Combo1");

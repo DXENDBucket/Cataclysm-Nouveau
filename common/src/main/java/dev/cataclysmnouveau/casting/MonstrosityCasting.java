@@ -104,7 +104,7 @@ public final class MonstrosityCasting {
         // An allied entity can perform the dash. An enemy/block selects the caster's dash direction.
         LivingEntity actor=cast.target() instanceof EntityHitResult hit && hit.getEntity() instanceof LivingEntity target
                 && Allies.areAllies(cast.caster(),target)?target:cast.caster();
-        if(actor.isPassenger() || ExecutionSessions.isCasting(actor)) return false;
+        if(actor.isPassenger() || !actor.isAlive() || actor.level()!=world || !world.hasChunkAt(actor.blockPosition())) return false;
         Vec3 heading=actor==cast.caster()?direction(cast):actor.getLookAngle();
         heading=heading.multiply(1,0,1).normalize();
         if(heading.lengthSqr()<.01) return false;
@@ -112,10 +112,11 @@ public final class MonstrosityCasting {
         var frame=cast.withExecutor(actor);
         var boss=new SpellMonstrosity(world,frame,actor.position(),forward,amp);
         return scheduled(world,frame,Ability.SHOULDER_CHECK,ticks+2,new ExecutionDriver<SpellMonstrosity>() {
-            private int age;
+            private int age;private boolean started;
             public boolean occupiesCaster() {return true;}
+            public java.util.List<ExecutionClaim> claims(ExecutionSession<SpellMonstrosity> s){return java.util.List.of(ExecutionClaim.action(actor));}
             public boolean start(ExecutionSession<SpellMonstrosity> s) {
-                boss.setAttackState(8);impactVisual(world,actor.position(),false,false);return true;
+                started=true;boss.setAttackState(8);impactVisual(world,actor.position(),false,false);return true;
             }
             public boolean tick(ExecutionSession<SpellMonstrosity> s) {
                 if(age++>=ticks || actor.horizontalCollision || !world.hasChunkAt(actor.blockPosition())) return true;
@@ -129,7 +130,7 @@ public final class MonstrosityCasting {
                 return false;
             }
             public void close(ExecutionSession<SpellMonstrosity> s,ExecutionSession.EndReason reason) {
-                if(actor.level()==world && !actor.isRemoved()) {actor.setDeltaMovement(actor.getDeltaMovement().multiply(.2,1,.2));actor.hurtMarked=true;}
+                if(started && actor.level()==world && !actor.isRemoved()) {actor.setDeltaMovement(actor.getDeltaMovement().multiply(.2,1,.2));actor.hurtMarked=true;}boss.discard();
             }
         },boss);
     }
@@ -143,8 +144,9 @@ public final class MonstrosityCasting {
     }
     public static int scaledTicks(int ticks,double duration) {return (int)Math.max(2,Math.min(1200,Math.round(ticks*Math.max(.1,1+.5*duration))));}
     private static boolean scheduled(ServerLevel world,CastContext cast,Ability ability,int ticks,ExecutionDriver<SpellMonstrosity> driver,SpellMonstrosity boss) {
-        return ExecutionSessions.start(new ExecutionSession<>(world,cast,boss,ticks,driver,hit->{},
-                ()->GlyphCatalog.ALL.stream().filter(g->g instanceof dev.cataclysmnouveau.glyph.CataclysmEffectGlyph e && e.ability==ability).allMatch(g->g.isEnabled()),ExecutionScope.DIRECT));
+        var session=new ExecutionSession<>(world,cast,boss,ticks,driver,hit->{},
+                ()->GlyphCatalog.ALL.stream().filter(g->g instanceof dev.cataclysmnouveau.glyph.CataclysmEffectGlyph e && e.ability==ability).allMatch(g->g.isEnabled()),ExecutionScope.DIRECT);
+        return ability==Ability.SHOULDER_CHECK?ExecutionSessions.startReplacing(session):ExecutionSessions.start(session);
     }
     public static boolean loadedArea(ServerLevel world,Vec3 point,int radius) {
         var min=BlockPos.containing(point).offset(-radius,0,-radius);var max=BlockPos.containing(point).offset(radius,0,radius);

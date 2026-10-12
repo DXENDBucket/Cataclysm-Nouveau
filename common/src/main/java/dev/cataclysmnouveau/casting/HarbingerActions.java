@@ -97,17 +97,17 @@ public final class HarbingerActions {
     private static boolean charge(ServerLevel world,CastContext cast,double amp) {
         if(!(cast.target() instanceof EntityHitResult hit) || !(hit.getEntity() instanceof LivingEntity actor)
                 || !actor.isAlive() || actor.level()!=world || !Allies.areAllies(cast.caster(),actor) || actor.isPassenger()
-                || CHARGING.contains(actor.getUUID()) || ScyllaActions.isActing(actor) || GuardianCasting.isPunching(actor) || ExecutionSessions.isCasting(actor))return false;
+                || !world.hasChunkAt(actor.blockPosition()))return false;
         Vec3 forward=actor.getLookAngle();var frame=cast.withExecutor(actor);
         var boss=new SpellHarbinger(world,frame,Ability.HARBINGER_CHARGE,actor.position(),0,amp);
         var target=marker(world,loadedAim(world,actor,actor.getEyePosition(),forward).add(0,2-actor.getEyeHeight(),0));
         boss.setTarget(target);boss.setAnimation(The_Harbinger_Entity.CHARGE_ANIMATION);
         var goal=boss.nativeGoal("ChargeGoal");
-        return ExecutionSessions.start(new ExecutionSession<>(world,frame,boss,138,new ExecutionDriver<SpellHarbinger>() {
-            private int age;private Vec3 impulse=Vec3.ZERO;private boolean stopped;
+        return ExecutionSessions.startReplacing(new ExecutionSession<>(world,frame,boss,138,new ExecutionDriver<SpellHarbinger>() {
+            private int age;private Vec3 impulse=Vec3.ZERO;private boolean stopped,started;
             public boolean occupiesCaster(){return actor==cast.caster();}
             public java.util.List<ExecutionClaim> claims(ExecutionSession<SpellHarbinger> s){return java.util.List.of(ExecutionClaim.action(actor));}
-            public boolean start(ExecutionSession<SpellHarbinger> s){CHARGING.add(actor.getUUID());goal.start();return true;}
+            public boolean start(ExecutionSession<SpellHarbinger> s){started=true;CHARGING.add(actor.getUUID());goal.start();return true;}
             public boolean tick(ExecutionSession<SpellHarbinger> s) {
                 if(!world.hasChunkAt(actor.blockPosition()))return true;
                 if(++age>=45) {
@@ -133,8 +133,8 @@ public final class HarbingerActions {
                 return false;
             }
             public void close(ExecutionSession<SpellHarbinger> s,ExecutionSession.EndReason reason) {
-                CHARGING.remove(actor.getUUID());boss.setIsCharge(false);if(!stopped)goal.stop();boss.discard();
-                if(actor.level()==world && !actor.isRemoved()){actor.setDeltaMovement(actor.getDeltaMovement().multiply(.2,1,.2));actor.hurtMarked=true;}
+                if(started){CHARGING.remove(actor.getUUID());boss.setIsCharge(false);if(!stopped)goal.stop();}target.discard();boss.discard();
+                if(started && actor.level()==world && !actor.isRemoved()){actor.setDeltaMovement(actor.getDeltaMovement().multiply(.2,1,.2));actor.hurtMarked=true;}
             }
         },impact->{},()->enabled(Ability.HARBINGER_CHARGE),ExecutionScope.DIRECT));
     }

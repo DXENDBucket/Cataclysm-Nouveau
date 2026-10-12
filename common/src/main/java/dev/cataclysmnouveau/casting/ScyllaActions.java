@@ -32,7 +32,7 @@ public final class ScyllaActions {
                 || !actor.isAlive() || actor.level()!=world || !Allies.areAllies(cast.caster(),actor)) return false;
         if(ability==Ability.WATER_WALKING) return actor.addEffect(new MobEffectInstance(CataclysmEffects.WATER_WALKING,
                 MonstrosityCasting.scaledTicks(CataclysmConfig.waterWalkingDuration(),duration),0,false,true),cast.caster());
-        if(actor.isPassenger() || ACTORS.contains(actor.getUUID()) || GuardianCasting.isPunching(actor) || HarbingerActions.isCharging(actor) || ExecutionSessions.isCasting(actor)) return false;
+        if(actor.isPassenger() || !MonstrosityCasting.loadedArea(world,actor.position(),ability==Ability.ANCHOR_LEAP?14:12)) return false;
         var frame=cast.withExecutor(actor);
         var boss=new SpellScylla(world,frame,actor.position(),Resources.amplification(amp));
         Vec3 forward=actor.getLookAngle();heading(boss,forward);
@@ -46,11 +46,11 @@ public final class ScyllaActions {
         boolean combo=ability==Ability.THUNDER_COMBO;
         Goal goal=combo?boss.nativeGoal("WhipAndSpearGoal"):null;
         return start(world,frame,ability,boss,combo?108:55,new ExecutionDriver<SpellScylla>() {
-            private int age;
+            private int age;private boolean started;
             public boolean occupiesCaster() {return actor==cast.caster();}
             public java.util.List<ExecutionClaim> claims(ExecutionSession<SpellScylla> s){return java.util.List.of(ExecutionClaim.action(actor));}
             public boolean start(ExecutionSession<SpellScylla> session) {
-                ACTORS.add(actor.getUUID());if(goal!=null) goal.start();else boss.setAttackState(7);return true;
+                started=true;ACTORS.add(actor.getUUID());if(goal!=null) goal.start();else boss.setAttackState(7);return true;
             }
             public boolean tick(ExecutionSession<SpellScylla> session) {
                 if(!MonstrosityCasting.loadedArea(world,actor.position(),12)) return true;
@@ -69,7 +69,7 @@ public final class ScyllaActions {
                 return age>=52;
             }
             public void close(ExecutionSession<SpellScylla> session,ExecutionSession.EndReason reason) {
-                ACTORS.remove(actor.getUUID());if(goal!=null) goal.stop();
+                if(started){ACTORS.remove(actor.getUUID());if(goal!=null) goal.stop();}marker.discard();boss.discard();
             }
         });
     }
@@ -77,16 +77,15 @@ public final class ScyllaActions {
         var selection=anchorAim(world,actor,forward);
         if(selection==null) return false;
         Vec3 target=selection.getLocation();
-        boolean hadNoGravity=actor.isNoGravity();
         var marker=new ArmorStand(world,target.x,target.y,target.z);boss.setTarget(marker);
         Goal jump=boss.nativeGoal("Scylla_Flying");
         var anchor=new Player_Ceraunus_Entity(world,actor);anchor.setBaseDamage(0);
         return start(world,cast,Ability.ANCHOR_LEAP,boss,160,new ExecutionDriver<SpellScylla>() {
-            private int age;private boolean thrown,latched,released;
+            private int age;private boolean thrown,latched,released,started,hadNoGravity;
             public boolean occupiesCaster() {return actor==cast.caster();}
             public java.util.List<ExecutionClaim> claims(ExecutionSession<SpellScylla> s){return java.util.List.of(ExecutionClaim.action(actor));}
             public boolean start(ExecutionSession<SpellScylla> session) {
-                ACTORS.add(actor.getUUID());LEAPING.add(actor.getUUID());actor.setNoGravity(false);jump.start();boss.attackTicks=9;jump.tick();
+                hadNoGravity=actor.isNoGravity();started=true;ACTORS.add(actor.getUUID());LEAPING.add(actor.getUUID());actor.setNoGravity(false);jump.start();boss.attackTicks=9;jump.tick();
                 actor.setDeltaMovement(boss.getDeltaMovement());actor.setOnGround(false);actor.hurtMarked=true;return true;
             }
             public boolean tick(ExecutionSession<SpellScylla> session) {
@@ -140,10 +139,10 @@ public final class ScyllaActions {
                 return age>=155;
             }
             public void close(ExecutionSession<SpellScylla> session,ExecutionSession.EndReason reason) {
-                ACTORS.remove(actor.getUUID());LEAPING.remove(actor.getUUID());actor.setNoGravity(hadNoGravity);jump.stop();
+                if(started){ACTORS.remove(actor.getUUID());LEAPING.remove(actor.getUUID());if(!actor.isRemoved())actor.setNoGravity(hadNoGravity);jump.stop();}
                 var state=(ManagedProjectile)anchor;state.confluxCataclysm$impact(null);state.confluxCataclysm$resolving(false);
-                anchor.discard();
-                if(actor.level()==world && !actor.isRemoved()) {actor.setDeltaMovement(actor.getDeltaMovement().multiply(.2,1,.2));actor.hurtMarked=true;}
+                anchor.discard();marker.discard();boss.discard();
+                if(started && actor.level()==world && !actor.isRemoved()) {actor.setDeltaMovement(actor.getDeltaMovement().multiply(.2,1,.2));actor.hurtMarked=true;}
             }
         });
     }
@@ -156,10 +155,10 @@ public final class ScyllaActions {
             hit=world.clip(new ClipContext(from,to,ClipContext.Block.COLLIDER,ClipContext.Fluid.NONE,actor));
             if(hit.getType()==HitResult.Type.BLOCK) return hit;
         }
-        return hit;
+        return null;
     }
     private static boolean start(ServerLevel world,CastContext cast,Ability ability,SpellScylla boss,int ticks,ExecutionDriver<SpellScylla> driver) {
-        return ExecutionSessions.start(new ExecutionSession<>(world,cast,boss,ticks,driver,hit->{},
+        return ExecutionSessions.startReplacing(new ExecutionSession<>(world,cast,boss,ticks,driver,hit->{},
                 ()->GlyphCatalog.ALL.stream().filter(g->g instanceof dev.cataclysmnouveau.glyph.CataclysmEffectGlyph e
                         && e.ability==ability).allMatch(g->g.isEnabled()),ExecutionScope.DIRECT));
     }

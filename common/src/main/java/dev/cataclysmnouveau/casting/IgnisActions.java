@@ -27,12 +27,8 @@ final class IgnisActions {
         int area=ability==Ability.IGNIS_ULTIMATE?40:20;
         if(!geometry.present(cast,area))return false;
         LivingEntity actor=geometry.actor;
-        if(actor!=null && (IgnisCasting.isActing(actor) || GuardianCasting.isPunching(actor)
-                || HarbingerActions.isCharging(actor) || ScyllaActions.isActing(actor)
-                || ExecutionSessions.isOccupied(actor,ExecutionClaim.ENTITY_ACTION)))return false;
         boolean reinforced=ability==Ability.IGNIS_REINFORCED_SMASH;
         boolean airborne=ability==Ability.IGNIS_AIR_SMASH || reinforced;
-        boolean oldGravity=actor!=null && actor.isNoGravity();
         int launchTick=reinforced?84:19;
         var frame=cast.withExecutor(actor);
         var boss=new SpellIgnis(world,frame,ability,geometry.point(),geometry.initialFacing,amp);
@@ -45,13 +41,13 @@ final class IgnisActions {
             case IGNIS_ULTIMATE->Ignis_Entity.ULTIMATE_ATTACK;
             default->throw new IllegalArgumentException("Not an Ignis anchored action: "+ability);
         });
-        return ExecutionSessions.start(new ExecutionSession<>(world,frame,boss,reinforced?400:245,new ExecutionDriver<SpellIgnis>() {
+        return ExecutionSessions.startReplacing(new ExecutionSession<>(world,frame,boss,reinforced?400:245,new ExecutionDriver<SpellIgnis>() {
             private int age,phaseAge;
             private Animation animation=boss.getAnimation();
             private final net.minecraft.world.entity.ai.goal.Goal goal=ability==Ability.IGNIS_ULTIMATE?boss.activeNativeGoal():boss.nativeGoal(
                     reinforced?"Reinforced_Air_Smash":airborne?"Air_Smash":"Earth_Shudders");
             private Vec3 heading=geometry.initialFacing;
-            private boolean started;
+            private boolean started,oldGravity;
             public List<ExecutionClaim> claims(ExecutionSession<SpellIgnis> s){return actor==null?List.of():List.of(ExecutionClaim.action(actor));}
             private void pose() {
                 aim.setPos(geometry.aimPoint(heading));boss.pose(geometry.point(),heading);boss.setBoundingBox(geometry.bounds());
@@ -59,7 +55,7 @@ final class IgnisActions {
                 boss.setDeltaMovement(actor==null?Vec3.ZERO:actor.getDeltaMovement());boss.setAnimationTick(phaseAge);
             }
             public boolean start(ExecutionSession<SpellIgnis> s) {
-                started=true;
+                oldGravity=actor!=null && actor.isNoGravity();started=true;
                 boss.projectileAim=()->geometry.projectileTarget(heading);
                 if(actor!=null){IgnisCasting.lockActor(actor);if(actor instanceof Mob mob)mob.getNavigation().stop();if(airborne)actor.setNoGravity(false);}
                 heading=geometry.desired(heading);pose();goal.start();IgnisPhantomSync.send(s.id(),actor,boss,false);return true;

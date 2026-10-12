@@ -44,9 +44,7 @@ public final class GuardianActions {
             if (HarbingerCasting.allied(cast, selected)) actor = selected;
             else target = selected;
         }
-        if (actor == null || !actor.isAlive() || actor.level() != world || actor.isPassenger()
-                || GuardianCasting.isPunching(actor) || ScyllaActions.isActing(actor)
-                || HarbingerActions.isCharging(actor) || ExecutionSessions.isCasting(actor)) return false;
+        if (actor == null || !actor.isAlive() || actor.level() != world || actor.isPassenger()) return false;
         var frame = cast.withExecutor(actor);
         if (target == null) target = HarbingerCasting.target(world, actor.getEyePosition(), actor.getLookAngle(), frame);
         boolean needsEnemy = ability == Ability.GUARDIAN_BLINK || ability == Ability.GUARDIAN_AIR_STRIKE;
@@ -77,15 +75,14 @@ public final class GuardianActions {
             default -> "RocketPunchGoal";
         });
         final LivingEntity executionActor = actor;
-        final boolean hadNoGravity = actor.isNoGravity();
         int end = ability == Ability.GUARDIAN_AIR_STRIKE ? 200 : animation.getDuration();
-        return ExecutionSessions.start(new ExecutionSession<>(world, frame, boss, end + 5, new ExecutionDriver<SpellGuardian>() {
-            private int age, phaseAge;
+        return ExecutionSessions.startReplacing(new ExecutionSession<>(world, frame, boss, end + 5, new ExecutionDriver<SpellGuardian>() {
+            private int age, phaseAge;private boolean started,hadNoGravity;
             private Vec3 facing = horizontal(boss.getLookAngle());
             public boolean occupiesCaster() { return executionActor == cast.caster(); }
             public java.util.List<ExecutionClaim> claims(ExecutionSession<SpellGuardian> s){return java.util.List.of(ExecutionClaim.action(executionActor));}
             public boolean start(ExecutionSession<SpellGuardian> session) {
-                ACTORS.add(executionActor.getUUID());
+                hadNoGravity=executionActor.isNoGravity();started=true;ACTORS.add(executionActor.getUUID());
                 if (executionActor instanceof Mob mob) mob.getNavigation().stop();
                 if (ability == Ability.GUARDIAN_AIR_STRIKE) executionActor.setNoGravity(false);
                 goal.start();
@@ -152,11 +149,10 @@ public final class GuardianActions {
                 return landing ? phaseAge >= Ender_Guardian_Entity.GUARDIAN_AIR_STRIKE2.getDuration() : age >= end;
             }
             public void close(ExecutionSession<SpellGuardian> session, ExecutionSession.EndReason reason) {
-                ACTORS.remove(executionActor.getUUID());
-                goal.stop();
+                if(started){ACTORS.remove(executionActor.getUUID());goal.stop();}
                 boss.discard();
-                if (!executionActor.isRemoved()) executionActor.setNoGravity(hadNoGravity);
-                if (executionActor.level() == world && !executionActor.isRemoved()) {
+                if (started && !executionActor.isRemoved() && ability==Ability.GUARDIAN_AIR_STRIKE) executionActor.setNoGravity(hadNoGravity);
+                if (started && executionActor.level() == world && !executionActor.isRemoved()) {
                     executionActor.setDeltaMovement(executionActor.getDeltaMovement().multiply(.2, 1, .2));
                     executionActor.hurtMarked = true;
                 }
