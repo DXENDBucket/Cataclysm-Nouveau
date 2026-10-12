@@ -16,6 +16,7 @@ import java.util.*;
 /** Native capabilities supply their own timing policy; Conflux supplies active-use transactions. */
 public final class CataclysmActiveCasts implements ActiveCastProvider {
     private static final String DEADLINES="cataclysm_nouveau_cooldowns";
+    private static final PersistentCooldowns.Namespace STORE = PersistentCooldowns.register(CarrierRegistry.id("cataclysm_nouveau:cooldowns"), DEADLINES);
     public static void register() {ActiveCasts.register(CarrierRegistry.id("cataclysm_nouveau:cooldowns"),new CataclysmActiveCasts());}
     private static EnumSet<Ability> collect(List<Spell> spells) {
         var found=EnumSet.noneOf(Ability.class);
@@ -26,13 +27,12 @@ public final class CataclysmActiveCasts implements ActiveCastProvider {
         return found;
     }
     private static boolean applies(LivingEntity caster) {
-        return caster.level() instanceof ServerLevel && CataclysmConfig.cooldownsEnabled()
+        return caster.level() instanceof ServerLevel && CataclysmConfig.cooldownsEnabled() && ActiveCasts.cooldownsEnabled(caster)
                 && (!(caster instanceof Player player) || !player.isCreative() || CataclysmConfig.creativeCooldown());
     }
     public static long remaining(LivingEntity caster,Ability ability) {
         if(!applies(caster) || CataclysmConfig.cooldownTicks(ability)==0) return 0;
-        long time=caster.level().getServer().overworld().getGameTime();
-        return Math.max(0,caster.getPersistentData().getCompound(DEADLINES).getLong(ability.id)-time);
+        return STORE.remaining(caster, ability.id);
     }
     @Override public boolean supports(Spell spell) {return !collect(List.of(spell)).isEmpty();}
     @Override public boolean allowed(ActiveCastRequest request) { return rejection(request)==null; }
@@ -46,12 +46,9 @@ public final class CataclysmActiveCasts implements ActiveCastProvider {
     }
     @Override public void released(ActiveCastRequest request,List<Spell> recipes) {
         if(!applies(request.caster())) return;
-        var persistent=request.caster().getPersistentData();var deadlines=persistent.getCompound(DEADLINES);
-        long now=request.caster().level().getServer().overworld().getGameTime();
         for(var ability:collect(recipes)) {
             int duration=CataclysmConfig.cooldownTicks(ability);
-            if(duration>0) deadlines.putLong(ability.id,Math.max(deadlines.getLong(ability.id),now+duration));
+            STORE.extend(request.caster(), ability.id, duration);
         }
-        persistent.put(DEADLINES,deadlines);
     }
 }
