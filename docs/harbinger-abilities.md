@@ -118,3 +118,11 @@
 ## dev.18 调整
 
 激光弹默认冷却从 20 tick 改为 0。核对实际 3.33 发布版 Laser_Gatling：正常使用每 2 tick 发射一次；20 tick 的物品冷却只用于燃料装填。载荷费用仍为 40 Mana，其他能力保持本轮默认值。
+
+## dev.19 修正
+
+用户确认追踪导弹对生物目标能正常发射，保留需要目标的普通发射判定。
+
+烟雾报告：测试实例启用 Entity Culling 1.11.3 的 tickCulling，原生 Wither_Smoke_Effect_Entity 默认 noCulling=false，粒子只在客户端 tick 中生成。实际优化包 ClientWorldMixin 会跳过被裁剪或没有模型渲染来更新可见性的实体 tick；其 NMSCullingHelper 明确尊重 vanilla Entity.noCulling。联动烟云现在通过 SynchedEntityData 同步 managed 标记，并设置 noCulling=true。普通烟云保留默认值，继续使用原生粒子，不新增素材或强制依赖。此路径能解释当前现象；尚未人工复现并确认客户端最终画面。
+
+死亡激光默认费用降为每输出秒60 Mana，基础完整三秒180。百分比项封顶依然保留，但无敌帧限制实际输出，不按每tick请求次数估算总伤；增幅额外费和其他机制不变。

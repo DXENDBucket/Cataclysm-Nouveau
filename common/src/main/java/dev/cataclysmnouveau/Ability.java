@@ -34,7 +34,7 @@ public enum Ability {
     WITHER_MISSILE("wither_missile", "Wither Missile", 90),
     HOMING_MISSILE("homing_missile", "Homing Missile", 120),
     WITHER_HOWITZER("wither_howitzer", "Wither Howitzer", 200),
-    DEATH_LASER("death_laser", "Death Laser", 120);
+    DEATH_LASER("death_laser", "Death Laser", 60);
     public final String id, name;
     public final int mana;
     Ability(String id, String name, int mana) { this.id=id; this.name=name; this.mana=mana; }

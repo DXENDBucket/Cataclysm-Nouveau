@@ -1129,6 +1129,12 @@ public final class NativeAbilityTests {
             ((ProjectileHitAccess)shell).confluxCataclysm$nativeHit(block(enemy.position()));
             var clouds=h.getLevel().getEntitiesOfClass(com.github.L_Ender.cataclysm.entity.effect.Wither_Smoke_Effect_Entity.class,new AABB(a.center,a.center).inflate(10));
             h.assertTrue(clouds.size()==1,"One native smoke child");var cloud=clouds.getFirst();h.assertTrue(NativeSpellDamage.context(cloud).caster()==a.p && !cloud.shouldBeSaved(),"Child inherits caster context and transient lifecycle");
+            h.assertTrue(cloud.noCulling && ((HarbingerSmoke)cloud).confluxHarbinger$managedSmoke(),"Particle-only managed cloud must retain native client ticks");
+            var replica=new com.github.L_Ender.cataclysm.entity.effect.Wither_Smoke_Effect_Entity(h.getLevel(),cloud.getX(),cloud.getY(),cloud.getZ());
+            h.assertTrue(!replica.noCulling && !((HarbingerSmoke)replica).confluxHarbinger$managedSmoke(),"Ordinary native cloud retains its original culling behavior");
+            var packet=new net.minecraft.network.protocol.game.ClientboundSetEntityDataPacket(cloud.getId(),cloud.getEntityData().packDirty());
+            replica.getEntityData().assignValues(packet.packedItems());
+            h.assertTrue(replica.noCulling && ((HarbingerSmoke)replica).confluxHarbinger$managedSmoke(),"Spawn metadata installs the particle-tick protection on the receiving entity");
             enemy.setHealth(500);enemy.invulnerableTime=0;for(int tick=0;tick<12;tick++){++cloud.tickCount;cloud.tick();}
             close(h,500-enemy.getHealth(),3+Resources.damageBonus(1),"Smoke inherits Harm amplification");close(h,ally.getHealth(),500,"Smoke spares allies");
             h.assertTrue(enemy.hasEffect(MobEffects.WITHER),"Native smoke debuff retained");a.p.setHealth(0);cloud.tick();h.assertTrue(cloud.isRemoved(),"Root death cleans up cloud");h.succeed();

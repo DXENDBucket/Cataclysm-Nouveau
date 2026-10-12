@@ -121,6 +121,7 @@ public final class HarbingerCasting {
     }
     public static boolean smoke(ServerLevel world,Entity child,Entity parent,Supplier<Boolean> original) {
         var frame=NativeSpellDamage.context(parent);if(frame==null || !(child instanceof Wither_Smoke_Effect_Entity cloud))return original.get();
+        ((HarbingerSmoke)cloud).confluxHarbinger$managedSmoke(true);
         ((HarbingerSmoke)cloud).confluxHarbinger$bonus(((ManagedProjectile)parent).confluxCataclysm$bonus());NativeSpellDamage.bind(cloud,frame);
         return ExecutionSessions.start(new ExecutionSession<>(world,frame,cloud,cloud.getDuration()+30,new ExecutionDriver<Wither_Smoke_Effect_Entity>(){
             public boolean start(ExecutionSession<Wither_Smoke_Effect_Entity> s){return original.get();}
