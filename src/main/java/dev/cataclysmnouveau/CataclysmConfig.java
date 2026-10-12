@@ -112,7 +112,7 @@ public final class CataclysmConfig {
     public static float flareDirectDamage() {return SPEC.isLoaded()?FLARE_DIRECT_DAMAGE.get().floatValue():7;}
     public static float flareJetDamage() {return SPEC.isLoaded()?FLARE_JET_DAMAGE.get().floatValue():7;}
     private static int defaultCooldown(Ability ability) {
-        return switch(ability) {case LASER_BOLT->20;case WITHER_MISSILE->60;case HOMING_MISSILE->80;case WITHER_HOWITZER->160;case DEATH_LASER->200;case CERAUNUS->40;case WAVE->100;case FLARE_BOMB->160;case LAVA_BOMB->100;case EARTHQUAKE->160;case FISSURE->200;case FLAME_RING->200;case SHOULDER_CHECK->80;case LAVA_ABSORPTION->400;case MONSTROUS->350;case WATER_SPEAR->40;case LIGHTNING_SPEAR->60;case STORM_SERPENT->120;case LIGHTNING_STORM->80;case LIGHTNING_FIELD->100;case STORM_BURST->240;case SPARK->60;case THUNDER_CLOUD->400;case LIGHTNING_ROW->200;case THUNDER_COMBO->360;case ANCHOR_SPIN->240;case ANCHOR_LEAP->300;default->0;};
+        return switch(ability) {case LASER_BOLT->0;case WITHER_MISSILE->60;case HOMING_MISSILE->80;case WITHER_HOWITZER->160;case DEATH_LASER->200;case CERAUNUS->40;case WAVE->100;case FLARE_BOMB->160;case LAVA_BOMB->100;case EARTHQUAKE->160;case FISSURE->200;case FLAME_RING->200;case SHOULDER_CHECK->80;case LAVA_ABSORPTION->400;case MONSTROUS->350;case WATER_SPEAR->40;case LIGHTNING_SPEAR->60;case STORM_SERPENT->120;case LIGHTNING_STORM->80;case LIGHTNING_FIELD->100;case STORM_BURST->240;case SPARK->60;case THUNDER_CLOUD->400;case LIGHTNING_ROW->200;case THUNDER_COMBO->360;case ANCHOR_SPIN->240;case ANCHOR_LEAP->300;default->0;};
     }
     public static int cooldownTicks(Ability ability) {
         return SPEC.isLoaded()?COOLDOWN_TICKS.get(ability).get():defaultCooldown(ability);
