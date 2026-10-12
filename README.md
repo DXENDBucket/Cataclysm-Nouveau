@@ -4,6 +4,8 @@
 
 首版：Minecraft **1.21.1 NeoForge**，modid **`cataclysm_nouveau`**。必须安装灾变本体。
 
+客户端排障开关位于 `config/cataclysm_nouveau-client.toml` 的 `[diagnostics] vortex = false`，默认关闭。开启后，在当前客户端世界中最多记录八个虚空漩涡（包括原生 Boss 的漩涡）：实体寿命、同步裁剪标记、原生渲染调用、贴图及资源包来源。日志以 `[Vortex diagnostic]` 标识；不会改变漩涡或优化模组行为。重新进入世界可开始新一轮记录。
+
 法术书内保留 Ars 原有魔符类别，每类中按 Boss／来源系列相邻排列；弹射物替换增强位于其他增强之后。创造标签页采用相同的系列排序。
 
 ## 当前魔符

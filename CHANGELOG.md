@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.1.0-dev.25
+
+- Add default-off, bounded client Void Vortex diagnostics: actual client lifetime, managed culling metadata, native renderer/quad calls, selected textures and resource-pack provenance.
+- Record ordinary Boss vortices as well as glyph vortices for comparison. No rendering, lifetime or optimizer settings are changed.
+- The dev.24 culling protection did not resolve the player's disappearing-image report; the cause remains unconfirmed.
+
 ## 0.1.0-dev.24
 
 - Synchronize culling protection for managed Void Vortices, and describe their full native visual extent separately from the physical box. Keep the native renderer, particles, origin, lifespan and damage behavior.

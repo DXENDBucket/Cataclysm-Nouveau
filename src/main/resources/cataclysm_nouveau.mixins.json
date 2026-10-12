@@ -55,6 +55,9 @@
     "GuardianRuneStateMixin",
     "GuardianVortexMixin"
   ],
+  "client": [
+    "client.GuardianVortexRenderProbeMixin"
+  ],
   "injectors": {
     "defaultRequire": 1
   }
