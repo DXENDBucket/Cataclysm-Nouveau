@@ -117,3 +117,9 @@ CMAbstractHurtingProjectile是本体独立运动基类，Ars特殊轨迹也要�
 增加幻影并不等于原执行入口支持位置。dev.37遗漏位置执行后，用户指出与焰魔不一致：旧动作有的拒绝方块目标，有的把它转成施法者移动。修正应同时接入Core位置锚点、原生服务端攻击和客户端位置元数据，不能仅在客户端画一个模型。
 
 固定点没有实际执行者，不能用付款者补成executor，也不能取得其身体声明。原生移动/传送Goal可以生成冲量，但位置调用帧必须复位；跃落需明确固定点的准备/打击阶段，不能等待一个不存在的身体落地。测试应证明远处敌人实际受伤、保护友军且施法者运动/重力不变。详见[dev.38说明](position-body-actions-dev38.md)。
+
+## dev.39：执行身份不应成为两套方向实现
+
+友军增益/执行资格用Core的caster-based beneficial锚点，不能把未通过资格的敌方目标回退为施法者，也不能把damageOwner用于授权。共享ActionGeometry读取实际actor的视角/目标，自身/友军不分支。
+
+原生Goal.start/tick都可能覆盖姿态；第一次发包前也要校正，先驱者调用帧构造器默认读取caster方向，不能以为传入了actor位置就已得到actor朝向。纯垂直视角的水平fallback也必须是actor自己的yaw。数值角度比较允许浮点容差，不以Float.equals判断几何是否一致。详情见[dev.39](beneficial-steering-dev39.md)。

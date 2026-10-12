@@ -100,17 +100,14 @@ public final class IgnisCasting {
         return boss.spawnedFlames>0;
     }
     private static boolean blades(Ability a,ServerLevel world,CastContext cast,double amp) {
-        LivingEntity host=null,target=null;
-        if(cast.target() instanceof EntityHitResult hit && hit.getEntity() instanceof LivingEntity living) {
-            if(HarbingerCasting.allied(cast,living))host=living;else {host=cast.caster();target=living;}
-        }
-        Vec3 point=host==null?cast.origin():host.position();
-        Vec3 facing=host==null?MonstrosityCasting.direction(cast):host.getLookAngle();
+        var anchor=ExecutionAnchor.beneficial(cast,ExecutionAnchor.Basis.FEET,Vec3.ZERO);if(anchor==null || !anchor.valid(world,cast))return false;
+        LivingEntity host=anchor.entity(),target=null;
+        Vec3 point=anchor.sample().origin(),facing=anchor.sample().direction();
         if(!MonstrosityCasting.loadedArea(world,point,8))return false;
         if(target==null)target=HarbingerCasting.target(world,host==null?point:host.getEyePosition(),facing,cast);
         if(target==null)target=marker(world,point.add(facing.normalize().scale(16)).add(0,1,0));
         final LivingEntity emitter=host;
-        var frame=cast.withExecutor(host==null?cast.caster():host);
+        var frame=cast.withExecutor(host);
         var boss=new SpellIgnis(world,frame,a,point,facing,amp);boss.setTarget(target);
         if(a==Ability.IGNIS_FIREBALL_ARRAY)boss.setAnimation(Ignis_Entity.MAGIC_ATTACK);
         return ExecutionSessions.start(new ExecutionSession<>(world,frame,boss,58,new ExecutionDriver<SpellIgnis>() {

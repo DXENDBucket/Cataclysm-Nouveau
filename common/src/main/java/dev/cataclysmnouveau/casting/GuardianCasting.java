@@ -57,28 +57,27 @@ public final class GuardianCasting {
     private static boolean punch(ServerLevel world,CastContext cast,double amp) {
         if(cast.target() instanceof BlockHitResult && BodyPhantomAnimations.kind(Ability.GRAVITY_PUNCH)!=null)
             return PositionBodyActions.start(Ability.GRAVITY_PUNCH,world,cast,amp,0);
-        if(!(cast.target() instanceof EntityHitResult hit) || !(hit.getEntity() instanceof LivingEntity actor)
-                || !actor.isAlive() || actor.level()!=world || !HarbingerCasting.allied(cast,actor)
-                || actor.isPassenger() || !MonstrosityCasting.loadedArea(world,actor.position(),12))return false;
+        var geometry=ActionGeometry.entity(world,cast,12);if(geometry==null)return false;
+        var actor=geometry.actor;
         var frame=cast.withExecutor(actor);
         var boss=new SpellGuardian(world,frame,actor.position(),actor.getLookAngle(),amp);
         boss.setAnimation(Ender_Guardian_Entity.GUARDIAN_RIGHT_STRONG_ATTACK);
         return ExecutionSessions.startReplacing(new ExecutionSession<>(world,frame,boss,61,dev.cataclysmnouveau.network.BodyPhantomSync.wrap(Ability.GRAVITY_PUNCH,boss,new ExecutionDriver<SpellGuardian>() {
-            private int age;private boolean started;
+            private int age;private boolean started;private Vec3 heading=geometry.initialFacing;
             public boolean occupiesCaster(){return actor==cast.caster();}
             public java.util.List<ExecutionClaim> claims(ExecutionSession<SpellGuardian> s){return java.util.List.of(ExecutionClaim.action(actor));}
             public boolean start(ExecutionSession<SpellGuardian> s){started=true;PUNCHING.add(actor.getUUID());return true;}
             public boolean tick(ExecutionSession<SpellGuardian> s) {
-                if(!MonstrosityCasting.loadedArea(world,actor.position(),12))return true;
-                boss.pose(actor.position(),actor.getLookAngle());boss.setBoundingBox(actor.getBoundingBox());boss.setAnimationTick(++age);
+                if(!geometry.present(cast,12))return true;
+                ++age;heading=geometry.steer(heading,age<25);boss.pose(actor.position(),heading);boss.setBoundingBox(geometry.bounds());boss.setAnimationTick(age);
                 boss.aiStep();
-                var front=actor.position().add(actor.getLookAngle().multiply(1,0,1).normalize().scale(2.2));
+                var front=actor.position().add(heading.scale(2.2));
                 if(age<24 && age%3==0)world.sendParticles(ParticleTypes.PORTAL,front.x,front.y+.3,front.z,12,.8,.5,.8,.25);
                 if(age==29){actor.swing(net.minecraft.world.InteractionHand.MAIN_HAND);MonstrosityCasting.impactVisual(world,front,false,true);}
                 return age>=60;
             }
             public void close(ExecutionSession<SpellGuardian> s,ExecutionSession.EndReason reason){if(started)PUNCHING.remove(actor.getUUID());boss.discard();}
-        }),h->{},()->enabled(Ability.GRAVITY_PUNCH),ExecutionScope.DIRECT));
+        }),h->{},()->enabled(Ability.GRAVITY_PUNCH) && geometry.present(cast,12),ExecutionScope.DIRECT));
     }
     public static boolean cloud(ServerLevel world,Entity child,CastContext cast,double amp,Ability source) {
         NativeDamageContexts.bind(child,cast,amp);

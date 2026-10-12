@@ -23,7 +23,7 @@ final class IgnisActions {
     static boolean start(Ability ability,ServerLevel world,CastContext cast,double amp) {
         ExecutionAnchor anchor=ExecutionAnchor.beneficial(cast,ExecutionAnchor.Basis.FEET,Vec3.ZERO);
         if(anchor==null)return false;
-        var geometry=new IgnisActionGeometry(world,cast,anchor);
+        var geometry=new ActionGeometry(world,cast,anchor);
         int area=ability==Ability.IGNIS_ULTIMATE?40:20;
         if(!geometry.present(cast,area))return false;
         LivingEntity actor=geometry.actor;
@@ -64,7 +64,7 @@ final class IgnisActions {
                 if(!geometry.present(cast,area)){s.finish(ExecutionSession.EndReason.DENIED);return false;}
                 ++age;++phaseAge;
                 boolean landing=airborne && (animation==Ignis_Entity.SMASH || animation==Ignis_Entity.REINFORCED_SMASH || animation==Ignis_Entity.REINFORCED_SMASH_SOUL);
-                if(!landing && canTurn(ability,phaseAge))heading=IgnisActionGeometry.turn(heading,geometry.desired(heading));
+                if(!landing && canTurn(ability,phaseAge))heading=geometry.steer(heading,true);
                 pose();if(!landing)goal.tick();
                 // Native goal yaw cannot override the server heading used for damage and the phantom.
                 boss.pose(geometry.point(),heading);boss.setBoundingBox(geometry.bounds());

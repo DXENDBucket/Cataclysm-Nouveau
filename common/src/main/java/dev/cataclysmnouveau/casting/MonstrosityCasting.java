@@ -103,28 +103,24 @@ public final class MonstrosityCasting {
     private static boolean charge(ServerLevel world,CastContext cast,double amp,double duration) {
         if(cast.target() instanceof BlockHitResult && BodyPhantomAnimations.kind(Ability.SHOULDER_CHECK)!=null)
             return PositionBodyActions.start(Ability.SHOULDER_CHECK,world,cast,amp,duration);
-        // An allied entity can perform the dash. An enemy/block selects the caster's dash direction.
-        LivingEntity actor=cast.target() instanceof EntityHitResult hit && hit.getEntity() instanceof LivingEntity target
-                && Allies.areAllies(cast.caster(),target)?target:cast.caster();
-        if(actor.isPassenger() || !actor.isAlive() || actor.level()!=world || !world.hasChunkAt(actor.blockPosition())) return false;
-        Vec3 heading=actor==cast.caster()?direction(cast):actor.getLookAngle();
-        heading=heading.multiply(1,0,1).normalize();
-        if(heading.lengthSqr()<.01) return false;
-        final Vec3 forward=heading;int ticks=scaledTicks(30,duration);
+        var geometry=ActionGeometry.entity(world,cast,1);if(geometry==null)return false;
+        var actor=geometry.actor;
+        final Vec3 initial=geometry.initialFacing;int ticks=scaledTicks(30,duration);
         var frame=cast.withExecutor(actor);
-        var boss=new SpellMonstrosity(world,frame,actor.position(),forward,amp);
+        var boss=new SpellMonstrosity(world,frame,actor.position(),initial,amp);
         return scheduled(world,frame,Ability.SHOULDER_CHECK,ticks+2,new ExecutionDriver<SpellMonstrosity>() {
-            private int age;private boolean started;
-            public boolean occupiesCaster() {return true;}
+            private int age;private boolean started;private Vec3 forward=initial;
+            public boolean occupiesCaster() {return actor==cast.caster();}
             public java.util.List<ExecutionClaim> claims(ExecutionSession<SpellMonstrosity> s){return java.util.List.of(ExecutionClaim.action(actor));}
             public boolean start(ExecutionSession<SpellMonstrosity> s) {
                 started=true;boss.setAttackState(8);impactVisual(world,actor.position(),false,false);return true;
             }
             public boolean tick(ExecutionSession<SpellMonstrosity> s) {
-                if(age++>=ticks || actor.horizontalCollision || !world.hasChunkAt(actor.blockPosition())) return true;
+                if(age++>=ticks || actor.horizontalCollision || !geometry.present(cast,1)) return true;
+                forward=geometry.steer(forward,true);
                 actor.setDeltaMovement(forward.scale(CataclysmConfig.chargeSpeed()).add(0,actor.getDeltaMovement().y,0));
                 actor.hurtMarked=true;
-                boss.setPos(actor.position());boss.setBoundingBox(actor.getBoundingBox());
+                geometry.pose(boss,forward);
                 boss.attackTicks=20+(age-1)%29;
                 // Run only the native shoulder branch: the mixin suppresses superclass mob ticking.
                 boss.aiStep();
@@ -147,7 +143,7 @@ public final class MonstrosityCasting {
     public static int scaledTicks(int ticks,double duration) {return (int)Math.max(2,Math.min(1200,Math.round(ticks*Math.max(.1,1+.5*duration))));}
     private static boolean scheduled(ServerLevel world,CastContext cast,Ability ability,int ticks,ExecutionDriver<SpellMonstrosity> driver,SpellMonstrosity boss) {
         var session=new ExecutionSession<>(world,cast,boss,ticks,ability==Ability.SHOULDER_CHECK?dev.cataclysmnouveau.network.BodyPhantomSync.wrap(ability,boss,driver):driver,hit->{},
-                ()->GlyphCatalog.ALL.stream().filter(g->g instanceof dev.cataclysmnouveau.glyph.CataclysmEffectGlyph e && e.ability==ability).allMatch(g->g.isEnabled()),ExecutionScope.DIRECT);
+                ()->GlyphCatalog.ALL.stream().filter(g->g instanceof dev.cataclysmnouveau.glyph.CataclysmEffectGlyph e && e.ability==ability).allMatch(g->g.isEnabled()) && (ability!=Ability.SHOULDER_CHECK || ExecutionAnchor.mayExecute(cast,cast.executor())),ExecutionScope.DIRECT);
         return ability==Ability.SHOULDER_CHECK?ExecutionSessions.startReplacing(session):ExecutionSessions.start(session);
     }
     public static boolean loadedArea(ServerLevel world,Vec3 point,int radius) {

@@ -8,8 +8,8 @@ import net.minecraft.world.entity.*;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.phys.*;
 
-/** Ignis-specific horizontal aiming; Core owns anchor identity and authorization. */
-final class IgnisActionGeometry {
+/** Shared body-action aiming; Core owns anchor identity and authorization. */
+final class ActionGeometry {
     final ExecutionAnchor anchor;
     final LivingEntity actor;
     final Vec3 initialFacing;
@@ -17,9 +17,28 @@ final class IgnisActionGeometry {
     private final CastContext context;
     private LivingEntity enemy;
 
-    IgnisActionGeometry(ServerLevel world,CastContext cast,ExecutionAnchor anchor) {
+    ActionGeometry(ServerLevel world,CastContext cast,ExecutionAnchor anchor) {
         this.world=world;this.anchor=anchor;actor=anchor.entity();context=cast.withExecutor(actor);
-        initialFacing=horizontal(anchor.sample().direction(),cast.caster().getLookAngle());
+        initialFacing=horizontal(anchor.sample().direction(),yawDirection(actor==null?cast.caster():actor));
+    }
+    static ActionGeometry entity(ServerLevel world,CastContext cast,int area) {
+        var anchor=ExecutionAnchor.beneficial(cast,ExecutionAnchor.Basis.FEET,Vec3.ZERO);
+        if(anchor==null || anchor.entity()==null)return null;
+        var geometry=new ActionGeometry(world,cast,anchor);
+        return geometry.present(cast,area)?geometry:null;
+    }
+    Vec3 steer(Vec3 current,boolean permitted) {
+        return permitted?turn(current,desired(current)):current;
+    }
+    /** Preserve the actual executor's vertical aim while sharing bounded horizontal steering. */
+    Vec3 direction(Vec3 heading) {
+        Vec3 look=actor==null?anchor.sample().direction():actor.getLookAngle();
+        if(actor instanceof Mob && validEnemy(enemy))look=enemy.getEyePosition().subtract(actor.getEyePosition()).normalize();
+        return new Vec3(heading.x*look.horizontalDistance(),look.y,heading.z*look.horizontalDistance()).normalize();
+    }
+    void pose(LivingEntity frame,Vec3 heading) {
+        frame.setPos(point());frame.setYRot((float)Math.toDegrees(Math.atan2(-heading.x,heading.z)));
+        frame.yRotO=frame.yBodyRot=frame.yHeadRot=frame.getYRot();frame.setBoundingBox(bounds());
     }
     boolean present(CastContext cast,int area) {
         return anchor.valid(world,cast) && (actor==null || !actor.isPassenger())
@@ -37,10 +56,10 @@ final class IgnisActionGeometry {
     }
     Vec3 desired(Vec3 fallback) {
         if(actor==null)return initialFacing;
-        if(actor instanceof Player)return horizontal(actor.getLookAngle(),fallback);
+        if(actor instanceof Player)return horizontal(actor.getLookAngle(),yawDirection(actor));
         if(actor instanceof Mob mob && validEnemy(mob.getTarget()))enemy=mob.getTarget();
         if(!validEnemy(enemy))enemy=HarbingerCasting.target(world,actor.getEyePosition(),actor.getLookAngle(),context);
-        return horizontal(validEnemy(enemy)?enemy.position().subtract(point()):actor.getLookAngle(),fallback);
+        return horizontal(validEnemy(enemy)?enemy.position().subtract(point()):actor.getLookAngle(),yawDirection(actor));
     }
     Vec3 aimPoint(Vec3 heading) {
         return actor!=null && !(actor instanceof Player) && validEnemy(enemy)
@@ -49,6 +68,9 @@ final class IgnisActionGeometry {
     LivingEntity projectileTarget(Vec3 heading) {
         if(actor instanceof Mob && validEnemy(enemy))return enemy;
         return HarbingerCasting.target(world,point().add(0,actor==null?1.62:actor.getEyeHeight(),0),heading,context);
+    }
+    private static Vec3 yawDirection(LivingEntity entity) {
+        double yaw=Math.toRadians(entity.getYRot());return new Vec3(-Math.sin(yaw),0,Math.cos(yaw));
     }
     static Vec3 horizontal(Vec3 direction,Vec3 fallback) {
         var flat=direction.multiply(1,0,1);if(flat.lengthSqr()>1e-8)return flat.normalize();

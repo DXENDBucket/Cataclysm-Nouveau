@@ -30,15 +30,19 @@ public final class ScyllaActions {
     public static boolean effect(Ability ability,ServerLevel world,CastContext cast,double amp,double duration) {
         if(cast.target() instanceof BlockHitResult && BodyPhantomAnimations.kind(ability)!=null)
             return PositionBodyActions.start(ability,world,cast,amp,duration);
-        if(!(cast.target() instanceof EntityHitResult hit) || !(hit.getEntity() instanceof LivingEntity actor)
-                || !actor.isAlive() || actor.level()!=world || !Allies.areAllies(cast.caster(),actor)) return false;
-        if(ability==Ability.WATER_WALKING) return actor.addEffect(new MobEffectInstance(CataclysmEffects.WATER_WALKING,
+        if(ability==Ability.WATER_WALKING) {
+            var source=ExecutionAnchor.beneficial(cast,ExecutionAnchor.Basis.FEET,Vec3.ZERO);
+            if(source==null || source.entity()==null || !source.valid(world,cast))return false;
+            return source.entity().addEffect(new MobEffectInstance(CataclysmEffects.WATER_WALKING,
                 MonstrosityCasting.scaledTicks(CataclysmConfig.waterWalkingDuration(),duration),0,false,true),cast.caster());
+        }
+        var geometry=ActionGeometry.entity(world,cast,ability==Ability.ANCHOR_LEAP?14:12);if(geometry==null)return false;
+        var actor=geometry.actor;
         if(actor.isPassenger() || !MonstrosityCasting.loadedArea(world,actor.position(),ability==Ability.ANCHOR_LEAP?14:12)) return false;
         var frame=cast.withExecutor(actor);
         var boss=new SpellScylla(world,frame,actor.position(),Resources.amplification(amp));
-        Vec3 forward=actor.getLookAngle();heading(boss,forward);
-        if(ability==Ability.ANCHOR_LEAP) return leap(world,frame,actor,boss,forward);
+        Vec3 forward=geometry.direction(geometry.initialFacing);heading(boss,forward);
+        if(ability==Ability.ANCHOR_LEAP) return leap(world,frame,actor,boss,forward,geometry);
         var aim=world.clip(new ClipContext(actor.getEyePosition(),actor.getEyePosition().add(forward.scale(32)),ClipContext.Block.COLLIDER,ClipContext.Fluid.NONE,actor));
         var marker=new ArmorStand(world,aim.getLocation().x,aim.getLocation().y,aim.getLocation().z);
         var entityHit=net.minecraft.world.entity.projectile.ProjectileUtil.getEntityHitResult(world,actor,
@@ -48,18 +52,22 @@ public final class ScyllaActions {
         boolean combo=ability==Ability.THUNDER_COMBO;
         Goal goal=combo?boss.nativeGoal("WhipAndSpearGoal"):null;
         return start(world,frame,ability,boss,combo?108:55,new ExecutionDriver<SpellScylla>() {
-            private int age;private boolean started;
+            private int age;private boolean started;private Vec3 facing=geometry.initialFacing;
             public boolean occupiesCaster() {return actor==cast.caster();}
             public java.util.List<ExecutionClaim> claims(ExecutionSession<SpellScylla> s){return java.util.List.of(ExecutionClaim.action(actor));}
             public boolean start(ExecutionSession<SpellScylla> session) {
-                started=true;ACTORS.add(actor.getUUID());if(goal!=null) goal.start();else boss.setAttackState(7);return true;
+                started=true;ACTORS.add(actor.getUUID());if(goal!=null) goal.start();else boss.setAttackState(7);geometry.pose(boss,facing);return true;
             }
             public boolean tick(ExecutionSession<SpellScylla> session) {
-                if(!MonstrosityCasting.loadedArea(world,actor.position(),12)) return true;
-                boss.setPos(actor.position());boss.setBoundingBox(actor.getBoundingBox());
-                boss.yRotO=boss.getYRot();boss.attackTicks=++age;
+                if(!geometry.present(cast,12)) return true;
+                ++age;facing=geometry.steer(facing,!combo || age<21 || age>32 && age<104);
+                marker.setPos(geometry.aimPoint(facing));
+                if(!combo || age<21 || age>32 && age<104) {
+                    var aimed=geometry.projectileTarget(facing);boss.setTarget(aimed==null?marker:aimed);
+                }
+                geometry.pose(boss,facing);boss.attackTicks=age;
                 if(combo) {
-                    goal.tick();boss.yBodyRot=boss.getYRot();
+                    goal.tick();geometry.pose(boss,facing);
                     if(age==21 || age==104) {boss.aiStep();strikeVisual(world,boss,actor,false);}
                     if(age==68) actor.swing(InteractionHand.MAIN_HAND);
                     return age>=105;
@@ -75,7 +83,7 @@ public final class ScyllaActions {
             }
         });
     }
-    private static boolean leap(ServerLevel world,CastContext cast,LivingEntity actor,SpellScylla boss,Vec3 forward) {
+    private static boolean leap(ServerLevel world,CastContext cast,LivingEntity actor,SpellScylla boss,Vec3 forward,ActionGeometry geometry) {
         var selection=anchorAim(world,actor,forward);
         if(selection==null) return false;
         Vec3 target=selection.getLocation();
@@ -84,15 +92,17 @@ public final class ScyllaActions {
         var anchor=new Player_Ceraunus_Entity(world,actor);anchor.setBaseDamage(0);
         return start(world,cast,Ability.ANCHOR_LEAP,boss,160,new ExecutionDriver<SpellScylla>() {
             private int age;private boolean thrown,latched,released,started,hadNoGravity;
+            private Vec3 facing=geometry.initialFacing;
             public boolean occupiesCaster() {return actor==cast.caster();}
             public java.util.List<ExecutionClaim> claims(ExecutionSession<SpellScylla> s){return java.util.List.of(ExecutionClaim.action(actor));}
             public boolean start(ExecutionSession<SpellScylla> session) {
-                hadNoGravity=actor.isNoGravity();started=true;ACTORS.add(actor.getUUID());LEAPING.add(actor.getUUID());actor.setNoGravity(false);jump.start();boss.attackTicks=9;jump.tick();
+                hadNoGravity=actor.isNoGravity();started=true;ACTORS.add(actor.getUUID());LEAPING.add(actor.getUUID());actor.setNoGravity(false);jump.start();boss.attackTicks=9;jump.tick();geometry.pose(boss,facing);
                 actor.setDeltaMovement(boss.getDeltaMovement());actor.setOnGround(false);actor.hurtMarked=true;return true;
             }
             public boolean tick(ExecutionSession<SpellScylla> session) {
-                if(!world.hasChunkAt(actor.blockPosition()) || actor.isPassenger()) return true;
-                age++;actor.fallDistance=0;
+                if(!geometry.present(cast,1)) return true;
+                age++;actor.fallDistance=0;facing=geometry.steer(facing,!thrown);
+                geometry.pose(boss,facing);
                 // FlyingMob.travel has no gravity even when noGravity=false. Its native travel still moves the body.
                 if(actor instanceof FlyingMob && !latched) actor.setDeltaMovement(actor.getDeltaMovement().add(0,-.08,0));
                 if(age==8) {
@@ -103,7 +113,7 @@ public final class ScyllaActions {
                         state.confluxCataclysm$mode(1);state.confluxCataclysm$repeated(true);latched=true;
                         world.broadcastEntityEvent(anchor,(byte)73);
                     });
-                    var launch=anchorAim(world,actor,actor.getLookAngle());
+                    var launch=anchorAim(world,actor,geometry.direction(facing));
                     if(launch==null || actor.getEyePosition().distanceToSqr(launch.getLocation())<4) return true;
                     anchor.setPos(actor.getEyePosition());Vec3 aim=launch.getLocation().subtract(anchor.position());
                     // Re-sample after the jump. A straight hook cannot fall short and attach to incidental floor blocks.
@@ -162,7 +172,7 @@ public final class ScyllaActions {
     private static boolean start(ServerLevel world,CastContext cast,Ability ability,SpellScylla boss,int ticks,ExecutionDriver<SpellScylla> driver) {
         return ExecutionSessions.startReplacing(new ExecutionSession<>(world,cast,boss,ticks,dev.cataclysmnouveau.network.BodyPhantomSync.wrap(ability,boss,driver),hit->{},
                 ()->GlyphCatalog.ALL.stream().filter(g->g instanceof dev.cataclysmnouveau.glyph.CataclysmEffectGlyph e
-                        && e.ability==ability).allMatch(g->g.isEnabled()),ExecutionScope.DIRECT));
+                        && e.ability==ability).allMatch(g->g.isEnabled()) && (cast.executor()==null || ExecutionAnchor.mayExecute(cast,cast.executor())),ExecutionScope.DIRECT));
     }
     private static void heading(SpellScylla boss,Vec3 direction) {
         boss.setYRot((float)Math.toDegrees(Math.atan2(-direction.x,direction.z)));boss.yBodyRot=boss.getYRot();boss.yRotO=boss.getYRot();

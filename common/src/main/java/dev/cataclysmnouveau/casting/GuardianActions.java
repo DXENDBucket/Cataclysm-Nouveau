@@ -40,15 +40,12 @@ public final class GuardianActions {
         if (!supports(ability) || cast.target() == null || cast.target().getType() == HitResult.Type.MISS) return false;
         if(cast.target() instanceof BlockHitResult && BodyPhantomAnimations.kind(ability)!=null)
             return PositionBodyActions.start(ability,world,cast,amplify,0);
-        LivingEntity actor = cast.caster(), target = null;
-        if (cast.target() instanceof EntityHitResult hit) {
-            if (!(hit.getEntity() instanceof LivingEntity selected)) return false;
-            if (HarbingerCasting.allied(cast, selected)) actor = selected;
-            else target = selected;
-        }
-        if (actor == null || !actor.isAlive() || actor.level() != world || actor.isPassenger()) return false;
-        var frame = cast.withExecutor(actor);
-        if (target == null) target = HarbingerCasting.target(world, actor.getEyePosition(), actor.getLookAngle(), frame);
+        final int footprint = ability == Ability.GUARDIAN_UPPERCUT || ability == Ability.GUARDIAN_AIR_STRIKE ? 18 : 12;
+        var geometry=ActionGeometry.entity(world,cast,footprint);if(geometry==null)return false;
+        LivingEntity actor=geometry.actor;
+        var frame=cast.withExecutor(actor);
+        Vec3 initialFacing=geometry.desired(geometry.initialFacing);
+        LivingEntity target=geometry.projectileTarget(initialFacing);
         boolean needsEnemy = ability == Ability.GUARDIAN_BLINK || ability == Ability.GUARDIAN_AIR_STRIKE;
         if (target == null) {
             if (needsEnemy) return false;
@@ -56,9 +53,8 @@ public final class GuardianActions {
                 : actor.position().add(horizontal(actor.getLookAngle()).scale(7));
             target = new ArmorStand(world, aim.x, aim.y, aim.z);
         }
-        final int footprint = ability == Ability.GUARDIAN_UPPERCUT || ability == Ability.GUARDIAN_AIR_STRIKE ? 18 : 12;
         if (!validTarget(world, actor, target) || !MonstrosityCasting.loadedArea(world, actor.position(), footprint)) return false;
-        var boss = new SpellGuardian(world, frame, actor.position(), target.position().subtract(actor.position()), amplify, ability);
+        var boss = new SpellGuardian(world, frame, actor.position(), initialFacing, amplify, ability);
         boss.setTarget(target);
         if (ability == Ability.GUARDIAN_BLINK && groundDestination(world, actor, target.position()) == null) return false;
         if (ability == Ability.GUARDIAN_AIR_STRIKE
@@ -80,19 +76,18 @@ public final class GuardianActions {
         int end = ability == Ability.GUARDIAN_AIR_STRIKE ? 200 : animation.getDuration();
         return ExecutionSessions.startReplacing(new ExecutionSession<>(world, frame, boss, end + 5, dev.cataclysmnouveau.network.BodyPhantomSync.wrap(ability,boss,new ExecutionDriver<SpellGuardian>() {
             private int age, phaseAge;private boolean started,hadNoGravity;
-            private Vec3 facing = horizontal(boss.getLookAngle());
+            private Vec3 facing = initialFacing;
             public boolean occupiesCaster() { return executionActor == cast.caster(); }
             public java.util.List<ExecutionClaim> claims(ExecutionSession<SpellGuardian> s){return java.util.List.of(ExecutionClaim.action(executionActor));}
             public boolean start(ExecutionSession<SpellGuardian> session) {
                 hadNoGravity=executionActor.isNoGravity();started=true;ACTORS.add(executionActor.getUUID());
                 if (executionActor instanceof Mob mob) mob.getNavigation().stop();
                 if (ability == Ability.GUARDIAN_AIR_STRIKE) executionActor.setNoGravity(false);
-                goal.start();
+                goal.start();geometry.pose(boss,facing);
                 return true;
             }
             public boolean tick(ExecutionSession<SpellGuardian> session) {
-                if (!executionActor.isAlive() || executionActor.isRemoved() || executionActor.level() != world
-                        || executionActor.isPassenger() || !MonstrosityCasting.loadedArea(world, executionActor.position(), footprint)) return true;
+                if(!geometry.present(cast,footprint))return true;
                 ++age;
                 ++phaseAge;
                 boolean landing = boss.getAnimation() == Ender_Guardian_Entity.GUARDIAN_AIR_STRIKE2;
@@ -100,7 +95,15 @@ public final class GuardianActions {
                 if (!landing && !validTarget(world, executionActor, enemy)) return true;
                 boolean tracking = ability == Ability.GUARDIAN_UPPERCUT ? phaseAge < 29 || phaseAge > 54 && phaseAge < 84
                     : ability == Ability.GUARDIAN_ROCKET_PUNCH ? phaseAge < 24 : phaseAge < 40;
-                if (!landing && tracking) facing = horizontal(enemy.position().subtract(executionActor.position()));
+                facing=geometry.steer(facing,!landing && tracking);
+                if(!landing && tracking) {
+                    var aimed=geometry.projectileTarget(facing);
+                    if(aimed!=null)boss.setTarget(aimed);
+                    else if(!needsEnemy) {
+                        if(boss.getTarget() instanceof ArmorStand marker)marker.setPos(geometry.aimPoint(facing));
+                        else {var p=geometry.aimPoint(facing);boss.setTarget(new ArmorStand(world,p.x,p.y,p.z));}
+                    }
+                }
                 boss.pose(executionActor.position(), facing);
                 boss.setBoundingBox(executionActor.getBoundingBox());
                 boss.setOnGround(executionActor.onGround());
@@ -114,9 +117,8 @@ public final class GuardianActions {
                     phaseAge = 0;
                     return false;
                 }
-                boss.yBodyRot = boss.getYRot();
-                boss.yHeadRot = boss.getYRot();
-                boss.setBoundingBox(executionActor.getBoundingBox());
+                // Native goals may steer independently; attacks and the phantom use the same shared heading.
+                boss.pose(executionActor.position(),facing);boss.setBoundingBox(geometry.bounds());
                 boss.aiStep();
                 if (!landing && (ability == Ability.GUARDIAN_UPPERCUT || ability == Ability.GUARDIAN_ROCKET_PUNCH)) {
                     var motion = boss.getDeltaMovement();
@@ -159,7 +161,7 @@ public final class GuardianActions {
                     executionActor.hurtMarked = true;
                 }
             }
-        }), hit -> {}, () -> enabled(ability), ExecutionScope.DIRECT));
+        }), hit -> {}, () -> enabled(ability) && geometry.present(cast,footprint), ExecutionScope.DIRECT));
     }
 
     private static Vec3 horizontal(Vec3 direction) {

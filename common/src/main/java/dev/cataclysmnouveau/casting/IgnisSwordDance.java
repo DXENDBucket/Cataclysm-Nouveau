@@ -23,7 +23,7 @@ final class IgnisSwordDance {
     static boolean start(ServerLevel world,CastContext cast,double amp) {
         ExecutionAnchor anchor=ExecutionAnchor.beneficial(cast,ExecutionAnchor.Basis.FEET,Vec3.ZERO);
         if(anchor==null)return false;
-        var geometry=new IgnisActionGeometry(world,cast,anchor);
+        var geometry=new ActionGeometry(world,cast,anchor);
         if(!geometry.present(cast,20))return false;
         LivingEntity actor=anchor.entity();
         var context=cast.withExecutor(actor);
@@ -57,7 +57,7 @@ final class IgnisSwordDance {
             public boolean tick(ExecutionSession<SpellIgnis> s) {
                 if(!geometry.present(cast,20)){s.finish(ExecutionSession.EndReason.DENIED);return false;}
                 ++age;++phaseAge;
-                if(actor!=null && canTurn(animation,phaseAge))heading=IgnisActionGeometry.turn(heading,geometry.desired(heading));
+                if(actor!=null && canTurn(animation,phaseAge))heading=geometry.steer(heading,true);
                 aim();goal.tick();
                 // Native Goals can change yaw themselves. Damage and the visual must use the same
                 // bounded/locked heading, even when their native target prediction changes.

@@ -1744,6 +1744,113 @@ public final class NativeAbilityTests {
             close(h,500-enemy.getHealth(),15,"Unbound native player field retains its original radius one explosion");h.succeed();
         }
     }
+    private record ActionView(UUID token,UUID actor,float yaw,boolean closed) {}
+    private static void captureActionView(net.minecraft.network.protocol.Packet<?> packet,List<ActionView> views) {
+        if(packet instanceof net.minecraft.network.protocol.common.ClientboundCustomPayloadPacket wrapper) {
+            if(wrapper.payload() instanceof dev.cataclysmnouveau.network.BodyPhantomPayload p)views.add(new ActionView(p.token(),p.actorUuid(),p.yaw(),p.closed()));
+            if(wrapper.payload() instanceof dev.cataclysmnouveau.network.IgnisPhantomPayload p)views.add(new ActionView(p.token(),p.actorUuid(),p.yaw(),p.closed()));
+        }
+    }
+    static void sharedBodySteeringUsesSelfAndAllyIdentically(GameTestHelper h,Ability ability) {
+        var views=new ArrayList<ActionView>();
+        try(var a=new Arena(h,packet->captureActionView(packet,views))) {
+            var buddy=player(h,packet->captureActionView(packet,views));
+            buddy.getAttribute(Attributes.MAX_HEALTH).setBaseValue(500);buddy.setHealth(500);buddy.setNoGravity(true);
+            a.p.getAttribute(Attributes.MAX_HEALTH).setBaseValue(500);a.p.setHealth(500);
+            h.getLevel().getScoreboard().addPlayerToTeam(buddy.getScoreboardName(),a.team);
+            a.target(a.center.add(0,0,6),false);a.target(a.center.add(-6,0,0),false);
+            if(ability==Ability.ANCHOR_LEAP)for(int d=-2;d<=2;d++)for(int y=1;y<=7;y++) {
+                h.getLevel().setBlockAndUpdate(a.base.offset(d,y,8),Blocks.STONE.defaultBlockState());
+                h.getLevel().setBlockAndUpdate(a.base.offset(-8,y,d),Blocks.STONE.defaultBlockState());
+            }
+            var traces=new ArrayList<List<Float>>();
+            var glyph=GlyphCatalog.ALL.stream().filter(g->g instanceof dev.cataclysmnouveau.glyph.CataclysmEffectGlyph e && e.ability==ability).map(g->(dev.cataclysmnouveau.glyph.CataclysmEffectGlyph)g).findFirst().orElseThrow();
+            try {
+                for(boolean allied:List.of(false,true)) {
+                    views.clear();a.p.setHealth(500);CapabilityRegistry.getMana(a.p).setMana(10000);
+                    var actor=allied?buddy:a.p;
+                    a.p.setPos(allied?a.center.add(-22,2,0):a.center);buddy.setPos(allied?a.center:a.center.add(22,2,0));
+                    a.p.setYRot(180);actor.setYRot(0);actor.setXRot(0);actor.setDeltaMovement(Vec3.ZERO);actor.setNoGravity(true);
+                    double before=CapabilityRegistry.getMana(a.p).getCurrentMana();
+                    a.cast(glyph,new EntityHitResult(actor),false);
+                    h.assertTrue(!views.isEmpty() && views.getFirst().actor().equals(actor.getUUID()),"Visual starts on actual self/ally actor: "+ability);
+                    var token=views.getFirst().token();close(h,views.getFirst().yaw(),0,"Same initial executor view for both paths");
+                    actor.setYRot(90); // Payer keeps facing south in the ally case.
+                    for(int t=0;t<8;t++)ExecutionSessions.tick();
+                    var trace=views.stream().filter(v->v.token().equals(token) && !v.closed()).map(ActionView::yaw).toList();traces.add(trace);
+                    close(h,trace.getLast(),90,"Preparation follows the executor view, not payer or stale enemy");
+                    close(h,before-CapabilityRegistry.getMana(a.p).getCurrentMana(),CataclysmConfig.cost(ability),"Both paths charge the same root account once");
+                    a.p.setHealth(0);ExecutionSessions.tick();
+                    h.assertTrue(views.stream().anyMatch(v->v.token().equals(token) && v.closed()),"Root cancellation closes selected actor's action");
+                }
+                h.assertTrue(traces.getFirst().size()==traces.getLast().size(),"Same update schedule: "+traces);
+                for(int i=0;i<traces.getFirst().size();i++)close(h,traces.getFirst().get(i),traces.getLast().get(i),"Self and ally use the identical yaw trajectory: "+traces);
+                h.succeed();
+            }finally {
+                clean(h,buddy);
+                if(ability==Ability.ANCHOR_LEAP)for(int d=-2;d<=2;d++)for(int y=1;y<=7;y++) {
+                    h.getLevel().setBlockAndUpdate(a.base.offset(d,y,8),Blocks.AIR.defaultBlockState());
+                    h.getLevel().setBlockAndUpdate(a.base.offset(-8,y,d),Blocks.AIR.defaultBlockState());
+                }
+            }
+        }
+    }
+    static void beneficialHostileHitsRefundAndRetainExistingAction(GameTestHelper h) {
+        var views=new ArrayList<ActionView>();
+        try(var a=new Arena(h,packet->captureActionView(packet,views))) {
+            a.p.setPos(a.center);a.p.setYRot(0);var enemy=a.target(a.center.add(0,0,5),false);
+            var decoration=new net.minecraft.world.entity.item.ItemEntity(h.getLevel(),a.center.x,a.center.y,a.center.z,net.minecraft.world.item.Items.STICK.getDefaultInstance());
+            a.cast(GlyphCatalog.GRAVITY_PUNCH,new EntityHitResult(a.p),false);var old=views.getFirst().token();
+            var abilities=List.of(Ability.THUNDER_COMBO,Ability.ANCHOR_SPIN,Ability.ANCHOR_LEAP,Ability.HARBINGER_CHARGE,
+                Ability.GRAVITY_PUNCH,Ability.GUARDIAN_UPPERCUT,Ability.GUARDIAN_BLINK,Ability.GUARDIAN_AIR_STRIKE,Ability.GUARDIAN_ROCKET_PUNCH,Ability.SHOULDER_CHECK,
+                Ability.IGNIS_AIR_SMASH,Ability.IGNIS_SWORD_COMBO,Ability.IGNIS_EARTH_SHUDDERS,Ability.IGNIS_REINFORCED_SMASH,Ability.IGNIS_ULTIMATE,
+                Ability.MONSTROUS,Ability.LAVA_WALKING,Ability.WATER_WALKING,Ability.IGNIS_BLADE_FIREBALLS,Ability.IGNIS_FIREBALL_ARRAY,
+                Ability.HOWITZER_VOLLEY,Ability.MISSILE_SALVO,Ability.DEATH_LASER);
+            for(var ability:abilities) {
+                var glyph=GlyphCatalog.ALL.stream().filter(g->g instanceof dev.cataclysmnouveau.glyph.CataclysmEffectGlyph e && e.ability==ability).map(g->(dev.cataclysmnouveau.glyph.CataclysmEffectGlyph)g).findFirst().orElseThrow();
+                for(var target:List.of(enemy,decoration)) {
+                    double mana=CapabilityRegistry.getMana(a.p).getCurrentMana();int count=views.size();
+                    a.cast(glyph,new EntityHitResult(target),false);
+                    close(h,CapabilityRegistry.getMana(a.p).getCurrentMana(),mana,"Invalid recipient refunds: "+ability);
+                    h.assertTrue(views.size()==count && GuardianCasting.isPunching(a.p),"Invalid recipient starts no action and does not replace the live one");
+                }
+            }
+            // Damage credit is not an authority to operate an enemy body.
+            var forged=CastContext.detached(a.p,new EntityHitResult(enemy),null).withDamageOwner(enemy);
+            h.assertTrue(!GuardianActions.effect(Ability.GUARDIAN_ROCKET_PUNCH,h.getLevel(),forged,0),"Damage owner does not grant beneficial actor permission");
+            h.assertTrue(views.stream().noneMatch(v->v.token().equals(old) && v.closed()),"Original action remains alive");
+            decoration.discard();a.p.setHealth(0);ExecutionSessions.tick();h.succeed();
+        }
+    }
+    static void verticalViewUsesActualActorYaw(GameTestHelper h) {
+        var views=new ArrayList<ActionView>();
+        try(var a=new Arena(h,packet->captureActionView(packet,views))) {
+            var buddy=player(h,packet->captureActionView(packet,views));buddy.setPos(a.center);buddy.setYRot(90);buddy.setXRot(90);
+            h.getLevel().getScoreboard().addPlayerToTeam(buddy.getScoreboardName(),a.team);a.p.setYRot(0);
+            try {
+                a.cast(GlyphCatalog.GRAVITY_PUNCH,new EntityHitResult(buddy),false);
+                h.assertTrue(!views.isEmpty() && views.getFirst().actor().equals(buddy.getUUID()),"Vertical aim still belongs to allied executor");
+                close(h,views.getFirst().yaw(),90,"Vertical view preserves executor yaw instead of falling back to payer");
+                buddy.setYRot(180);for(int t=0;t<8;t++)ExecutionSessions.tick();
+                close(h,views.stream().filter(v->!v.closed()).toList().getLast().yaw(),180,"Vertical view also follows later executor yaw");
+                a.p.setHealth(0);ExecutionSessions.tick();h.succeed();
+            }finally{clean(h,buddy);}
+        }
+    }
+    static void sharedSteeringLocksDamageAndVisualAtStrike(GameTestHelper h) {
+        var views=new ArrayList<ActionView>();
+        try(var a=new Arena(h,packet->captureActionView(packet,views))) {
+            a.p.setPos(a.center);a.p.setYRot(0);
+            var west=a.target(a.center.add(-2,0,0),false);var north=a.target(a.center.add(0,0,2),false);
+            a.cast(GlyphCatalog.GRAVITY_PUNCH,new EntityHitResult(a.p),false);a.p.setYRot(90);
+            for(int t=1;t<=24;t++)ExecutionSessions.tick();a.p.setYRot(180);
+            for(int t=25;t<=29;t++)ExecutionSessions.tick();
+            close(h,views.stream().filter(v->!v.closed()).toList().getLast().yaw(),90,"Strike pose retains the locked heading");
+            h.assertTrue(west.getHealth()<500 && north.getHealth()==500,"Native hit agrees with locked visual heading");
+            a.p.setHealth(0);ExecutionSessions.tick();h.succeed();
+        }
+    }
+
     static void positionBodyKeepsPoseDamageSourcePaymentAndCasterIndependent(GameTestHelper h,Ability ability) {
         var frames=new ArrayList<dev.cataclysmnouveau.network.BodyPhantomPayload>();
         try(var a=new Arena(h,packet->{if(packet instanceof net.minecraft.network.protocol.common.ClientboundCustomPayloadPacket p

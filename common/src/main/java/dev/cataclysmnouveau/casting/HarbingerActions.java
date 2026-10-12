@@ -49,21 +49,17 @@ public final class HarbingerActions {
     }
     private static ArmorStand marker(ServerLevel world,Vec3 point){return new ArmorStand(world,point.x,point.y,point.z);}
     private static boolean volley(Ability a,ServerLevel world,CastContext cast,double amp) {
-        LivingEntity host=null,target=null;
-        if(cast.target() instanceof EntityHitResult hit && hit.getEntity() instanceof LivingEntity living) {
-            if(HarbingerCasting.allied(cast,living))host=living;
-            else {host=cast.caster();target=living;}
-        }
+        var anchor=ExecutionAnchor.beneficial(cast,ExecutionAnchor.Basis.EYES,Vec3.ZERO);if(anchor==null || !anchor.valid(world,cast))return false;
+        LivingEntity host=anchor.entity(),target=null;
         final LivingEntity emitter=host;
-        Vec3 point=host==null?cast.origin():host.getEyePosition();
+        Vec3 point=anchor.sample().origin(),forward=anchor.sample().direction();
         if(cast.target() instanceof BlockHitResult block)point=point.add(Vec3.atLowerCornerOf(block.getDirection().getNormal()).scale(.02));
-        Vec3 forward=host==null?MonstrosityCasting.direction(cast):host.getLookAngle();
         if(!world.hasChunkAt(BlockPos.containing(point)))return false;
         if(target==null)target=HarbingerCasting.target(world,point,forward,cast);
         if(a==Ability.MISSILE_SALVO && target==null)return false;
         if(target==null)target=marker(world,loadedAim(world,cast.caster(),point,forward));
         if(!target.isAlive() || target.level()!=world || !world.hasChunkAt(target.blockPosition()))return false;
-        var frame=cast.withExecutor(host==null?cast.caster():host);
+        var frame=cast.withExecutor(host);
         var boss=new SpellHarbinger(world,frame,a,point,a==Ability.HOWITZER_VOLLEY?2.6:3.8,amp);boss.setTarget(target);boss.pose(point,forward);
         var goal=boss.nativeGoal(a==Ability.HOWITZER_VOLLEY?"LaunchGoal":boss.isPowered()?"MissileLaunchGoal2":"MissileLaunchGoal");
         boss.setAnimation(a==Ability.HOWITZER_VOLLEY?The_Harbinger_Entity.LAUNCH_ANIAMATION:boss.isPowered()?The_Harbinger_Entity.MISSILE_FIRE_FAST_ANIAMATION:The_Harbinger_Entity.MISSILE_FIRE_ANIAMATION);
@@ -97,32 +93,32 @@ public final class HarbingerActions {
     private static boolean charge(ServerLevel world,CastContext cast,double amp) {
         if(cast.target() instanceof BlockHitResult && BodyPhantomAnimations.kind(Ability.HARBINGER_CHARGE)!=null)
             return PositionBodyActions.start(Ability.HARBINGER_CHARGE,world,cast,amp,0);
-        if(!(cast.target() instanceof EntityHitResult hit) || !(hit.getEntity() instanceof LivingEntity actor)
-                || !actor.isAlive() || actor.level()!=world || !Allies.areAllies(cast.caster(),actor) || actor.isPassenger()
-                || !world.hasChunkAt(actor.blockPosition()))return false;
-        Vec3 forward=actor.getLookAngle();var frame=cast.withExecutor(actor);
+        var geometry=ActionGeometry.entity(world,cast,1);if(geometry==null)return false;
+        var actor=geometry.actor;Vec3 forward=geometry.direction(geometry.initialFacing);var frame=cast.withExecutor(actor);
         var boss=new SpellHarbinger(world,frame,Ability.HARBINGER_CHARGE,actor.position(),0,amp);
         var target=marker(world,loadedAim(world,actor,actor.getEyePosition(),forward).add(0,2-actor.getEyeHeight(),0));
         boss.setTarget(target);boss.setAnimation(The_Harbinger_Entity.CHARGE_ANIMATION);
         var goal=boss.nativeGoal("ChargeGoal");
         return ExecutionSessions.startReplacing(new ExecutionSession<>(world,frame,boss,138,dev.cataclysmnouveau.network.BodyPhantomSync.wrap(Ability.HARBINGER_CHARGE,boss,new ExecutionDriver<SpellHarbinger>() {
             private int age;private Vec3 impulse=Vec3.ZERO;private boolean stopped,started;
+            private Vec3 heading=geometry.initialFacing,direction=forward;
             public boolean occupiesCaster(){return actor==cast.caster();}
             public java.util.List<ExecutionClaim> claims(ExecutionSession<SpellHarbinger> s){return java.util.List.of(ExecutionClaim.action(actor));}
-            public boolean start(ExecutionSession<SpellHarbinger> s){started=true;CHARGING.add(actor.getUUID());goal.start();return true;}
+            public boolean start(ExecutionSession<SpellHarbinger> s){started=true;CHARGING.add(actor.getUUID());boss.pose(actor.position(),direction);goal.start();boss.pose(actor.position(),direction);boss.setBoundingBox(geometry.bounds());return true;}
             public boolean tick(ExecutionSession<SpellHarbinger> s) {
-                if(!world.hasChunkAt(actor.blockPosition()))return true;
+                if(!geometry.present(cast,1))return true;
                 if(++age>=45) {
                     boss.repeatRequested=false;boss.acceptingRepeat=true;try{goal.stop();}finally{boss.acceptingRepeat=false;}stopped=true;
                     if(!boss.repeatRequested)return true;
                     age=0;impulse=Vec3.ZERO;boss.setAnimationTick(0);boss.setIsCharge(false);goal.start();stopped=false;return false;
                 }
                 if(age<24) {
-                    Vec3 aim=loadedAim(world,actor,actor.getEyePosition(),actor.getLookAngle());
+                    heading=geometry.steer(heading,true);direction=geometry.direction(heading);
+                    Vec3 aim=loadedAim(world,actor,actor.getEyePosition(),direction);
                     target.setPos(aim.add(0,2-actor.getEyeHeight(),0));
                 }
-                boss.pose(actor.position(),actor.getLookAngle());boss.setBoundingBox(actor.getBoundingBox());boss.setAnimationTick(age);boss.tickCount=age;
-                goal.tick();
+                boss.pose(actor.position(),direction);boss.setBoundingBox(geometry.bounds());boss.setAnimationTick(age);boss.tickCount=age;
+                goal.tick();boss.pose(actor.position(),direction);boss.setBoundingBox(geometry.bounds());
                 if(age==24)impulse=boss.getDeltaMovement();
                 if(boss.getIsCharge()) {
                     if(actor.horizontalCollision || !world.hasChunkAt(BlockPos.containing(actor.position().add(impulse))))return true;
@@ -138,7 +134,7 @@ public final class HarbingerActions {
                 if(started){CHARGING.remove(actor.getUUID());boss.setIsCharge(false);if(!stopped)goal.stop();}target.discard();boss.discard();
                 if(started && actor.level()==world && !actor.isRemoved()){actor.setDeltaMovement(actor.getDeltaMovement().multiply(.2,1,.2));actor.hurtMarked=true;}
             }
-        }),impact->{},()->enabled(Ability.HARBINGER_CHARGE),ExecutionScope.DIRECT));
+        }),impact->{},()->enabled(Ability.HARBINGER_CHARGE) && geometry.present(cast,1),ExecutionScope.DIRECT));
     }
     private HarbingerActions() {}
 }
