@@ -33,7 +33,13 @@ public abstract class GuardianVortexMixin extends Entity implements GuardianChil
     }
     @Override public boolean shouldBeSaved(){return !confluxGuardian$managed() && super.shouldBeSaved();}
     @Inject(method="tick",at=@At("HEAD"),cancellable=true)
-    private void guardian$rootAlive(CallbackInfo ci){var cast=NativeSpellDamage.context(this);if(confluxGuardian$managed() && cast!=null && (cast.caster()==null || !cast.caster().isAlive() || cast.caster().level()!=level())){discard();ci.cancel();}}
+    private void guardian$rootAlive(CallbackInfo ci) {
+        // Root lifetime is server-authoritative. Integrated-server entity IDs are shared
+        // by their client replicas; a server attachment must never discard the replica.
+        if(level().isClientSide)return;
+        var cast=NativeSpellDamage.context(this);
+        if(confluxGuardian$managed() && cast!=null && (cast.caster()==null || !cast.caster().isAlive() || cast.caster().level()!=level())){discard();ci.cancel();}
+    }
     @WrapOperation(method="tick",at=@At(value="INVOKE",target="Lnet/minecraft/world/level/Level;getEntitiesOfClass(Ljava/lang/Class;Lnet/minecraft/world/phys/AABB;)Ljava/util/List;",remap=true))
     private List<LivingEntity> guardian$pullTargets(Level world,Class<LivingEntity> type,AABB box,Operation<List<LivingEntity>> original) {
         if(!confluxGuardian$managed())return original.call(world,type,box);

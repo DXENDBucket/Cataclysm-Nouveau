@@ -14,5 +14,9 @@ public abstract class GuardianRuneStateMixin extends Entity implements GuardianC
     public void confluxGuardian$managed(boolean value){guardian$managed=value;}
     @Override public boolean shouldBeSaved(){return !guardian$managed && super.shouldBeSaved();}
     @Inject(method="tick",at=@At("HEAD"),cancellable=true)
-    private void guardian$rootAlive(CallbackInfo ci){var cast=dev.arsconflux.api.damage.NativeSpellDamage.context(this);if(guardian$managed && cast!=null && (cast.caster()==null || !cast.caster().isAlive() || cast.caster().level()!=level())){discard();ci.cancel();}}
+    private void guardian$rootAlive(CallbackInfo ci) {
+        if(level().isClientSide)return;
+        var cast=dev.arsconflux.api.damage.NativeSpellDamage.context(this);
+        if(guardian$managed && cast!=null && (cast.caster()==null || !cast.caster().isAlive() || cast.caster().level()!=level())){discard();ci.cancel();}
+    }
 }

@@ -1,4 +1,5 @@
 {
+  "item.cataclysm_nouveau.guardian_void_fragment": "Void Gauntlet Fragment",
   "itemGroup.cataclysm_nouveau": "Cataclysm & Nouveau",
   "item.cataclysm_nouveau.glyph_amethyst_cluster": "Amethyst Cluster",
   "cataclysm_nouveau.glyph_desc.glyph_amethyst_cluster": "Replaces a projectile with a native amethyst cluster. Retains native impact particles and sounds. Amplify changes damage as for Harm.",

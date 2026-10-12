@@ -1,0 +1,11 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "misc",
+  "ingredients": [
+    { "item": "cataclysm:gauntlet_of_guard" }
+  ],
+  "result": {
+    "id": "cataclysm_nouveau:guardian_void_fragment",
+    "count": 4
+  }
+}

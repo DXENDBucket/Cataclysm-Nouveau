@@ -85,4 +85,6 @@ dev.10 巨兽示例：两种犄角配方、一种锻锤配方、七种电池配�
 
 后续用户确认 dev.24 仍然闪现后消失，不能将此保护认定为问题修复。原生 Boss 漩涡尚未对照测试。
 
+dev.25实际客户端诊断进一步确认：三次施放在elapsed=1/age=1、life=300时DISCARDED，managed/noCulling=true、EntityCulling两个标志false、资源来自mod/cataclysm、只调用1–2次renderer。dev.26修复root存活检查缺少服务端边界：仅服务端读取施法上下文并判断施法者死亡/换维度；同样补HarbingerSmokeMixin及GuardianRuneStateMixin。不要用服务器metadata副本测试代替真正客户端tick。固定Core的NativeSpellDamage为WeakHashMap<Entity,CastContext>，Entity按id相等，单人游戏同id客户端副本会读到服务器绑定；已记录供后续独立Core任务审计，本附属任务未更改固定Core。
+
 用户反馈只闪现黑色图像，但之后仍有牵引/结束爆炸，排除服务器实体立即失效。实际本体Renderer绘制6×6贴地平面及上方下降粒子，而EntityType物理框2.5×0.5；测试包启用EntityCulling。补联动标记的接收同步回调，令vanilla noCulling=true；可见边界独立覆盖6格宽的图像和上方粒子，不移动实体也不扩大物理框/牵引区域。普通本体不改。服务器metadata测试通过不等于用户端最终画面已确认；首次旧环形焰柱自然到期测试遇到区块激活延迟，未改业务或旧断言，复跑56项全部通过。

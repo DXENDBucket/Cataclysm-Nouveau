@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.1.0-dev.26
+
+- Fix managed Void Vortex client replicas being discarded on their first tick in integrated-server games. Check caster death/world changes only on the server.
+- Apply the same server boundary to Wither Smoke and Guardian Rune root cleanup. Native client visuals and server expiry/root-loss cleanup remain in place.
+- Disassemble one Gauntlet of Guard into four Void Gauntlet Fragments. Vortex and Gravity Punch each consume one fragment, instead of a whole gauntlet; keep their glyph icons and Void Core recipes.
+- The dev.25 client capture showed three first-tick removals with 300 ticks remaining and normal culling metadata; this was a lifecycle error, rather than evidence of optimizer culling.
+
 ## 0.1.0-dev.25
 
 - Add default-off, bounded client Void Vortex diagnostics: actual client lifetime, managed culling metadata, native renderer/quad calls, selected textures and resource-pack provenance.

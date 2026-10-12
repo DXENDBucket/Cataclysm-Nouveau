@@ -29,7 +29,11 @@ public abstract class HarbingerSmokeMixin extends Entity implements HarbingerSmo
     public void confluxHarbinger$amplification(float v){harbinger$amplification=v;}
     @Override public boolean shouldBeSaved(){return !confluxHarbinger$managedSmoke() && NativeSpellDamage.context(this)==null && super.shouldBeSaved();}
     @Inject(method="tick",at=@At("HEAD"),cancellable=true)
-    private void harbinger$alive(CallbackInfo ci){var c=NativeSpellDamage.context(this);if(c!=null && (c.caster()==null || !c.caster().isAlive() || c.caster().level()!=level())){discard();ci.cancel();}}
+    private void harbinger$alive(CallbackInfo ci) {
+        if(level().isClientSide)return;
+        var c=NativeSpellDamage.context(this);
+        if(c!=null && (c.caster()==null || !c.caster().isAlive() || c.caster().level()!=level())){discard();ci.cancel();}
+    }
     @Inject(method="tick",at=@At("RETURN"))
     private void harbinger$broadcastSmoke(CallbackInfo ci){HarbingerSmokeParticles.send((Wither_Smoke_Effect_Entity)(Object)this);}
     @WrapOperation(method="tick",at=@At(value="INVOKE",target="Lnet/minecraft/world/level/Level;addAlwaysVisibleParticle(Lnet/minecraft/core/particles/ParticleOptions;DDDDDD)V",remap=true))

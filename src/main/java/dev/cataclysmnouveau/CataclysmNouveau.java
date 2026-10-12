@@ -14,12 +14,16 @@ public final class CataclysmNouveau {
         container.registerConfig(ModConfig.Type.SERVER,CataclysmConfig.SPEC);
         container.registerConfig(ModConfig.Type.CLIENT,CataclysmClientConfig.SPEC);
         CataclysmEffects.register(bus);
+        CataclysmItems.register(bus);
         GlyphCatalog.register();
         bus.addListener((FMLCommonSetupEvent event)->event.enqueueWork(GlyphCatalog::configureCarriers));
         var tabs=DeferredRegister.create(Registries.CREATIVE_MODE_TAB,"cataclysm_nouveau");
         tabs.register("glyphs",()->CreativeModeTab.builder().title(Component.translatable("itemGroup.cataclysm_nouveau"))
             .icon(()->GlyphCatalog.AMETHYST.getGlyph().getDefaultInstance())
-            .displayItems((params,output)->GlyphCatalog.ALL.forEach(g->output.accept(g.getGlyph()))).build());
+            .displayItems((params,output)->{
+                output.accept(CataclysmItems.GUARDIAN_VOID_FRAGMENT.get());
+                GlyphCatalog.ALL.forEach(g->output.accept(g.getGlyph()));
+            }).build());
         tabs.register(bus);
     }
 }
