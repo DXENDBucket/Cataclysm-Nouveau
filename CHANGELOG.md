@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.1.0-dev.21
+
+- Send managed Wither Smoke visuals through vanilla server particle packets, covering both Howitzer impacts and the standalone glyph. Lift particle origins slightly above the impact plane; keep native cloud damage, shrinking and expiry.
+- Suppress the managed cloud's local particle emitter to avoid duplicate smoke. Ordinary Cataclysm clouds retain their original behavior. Particle settings remain respected.
+- The dev.19 tick-culling guard did not resolve the player's visual report; it is not a confirmed root-cause fix.
+
 ## 0.1.0-dev.10
 
 - Craft Monstrous Quake from Infernal Forge plus Source Gem (27 experience), giving the native hammer a glyph use. Keep Boss damage behavior unchanged.

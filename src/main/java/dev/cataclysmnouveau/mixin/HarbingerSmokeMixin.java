@@ -2,6 +2,9 @@ package dev.cataclysmnouveau.mixin;
 import com.github.L_Ender.cataclysm.entity.effect.Wither_Smoke_Effect_Entity;
 import dev.arsconflux.api.damage.NativeSpellDamage;
 import dev.cataclysmnouveau.casting.HarbingerSmoke;
+import dev.cataclysmnouveau.casting.HarbingerSmokeParticles;
+import com.llamalad7.mixinextras.injector.wrapoperation.*;
+import net.minecraft.core.particles.ParticleOptions;
 import net.minecraft.world.entity.*;
 import net.minecraft.network.syncher.*;
 import net.minecraft.world.level.Level;
@@ -27,4 +30,12 @@ public abstract class HarbingerSmokeMixin extends Entity implements HarbingerSmo
     @Override public boolean shouldBeSaved(){return !confluxHarbinger$managedSmoke() && NativeSpellDamage.context(this)==null && super.shouldBeSaved();}
     @Inject(method="tick",at=@At("HEAD"),cancellable=true)
     private void harbinger$alive(CallbackInfo ci){var c=NativeSpellDamage.context(this);if(c!=null && (c.caster()==null || !c.caster().isAlive() || c.caster().level()!=level())){discard();ci.cancel();}}
+    @Inject(method="tick",at=@At("RETURN"))
+    private void harbinger$broadcastSmoke(CallbackInfo ci){HarbingerSmokeParticles.send((Wither_Smoke_Effect_Entity)(Object)this);}
+    @WrapOperation(method="tick",at=@At(value="INVOKE",target="Lnet/minecraft/world/level/Level;addAlwaysVisibleParticle(Lnet/minecraft/core/particles/ParticleOptions;DDDDDD)V",remap=true))
+    private void harbinger$singleVisualSource(Level world,ParticleOptions particle,double x,double y,double z,double dx,double dy,double dz,Operation<Void> original){
+        // Managed smoke arrives through vanilla particle packets, independently of client
+        // entity tick culling. Ordinary Cataclysm clouds retain their native emission.
+        if(!confluxHarbinger$managedSmoke())original.call(world,particle,x,y,z,dx,dy,dz);
+    }
 }

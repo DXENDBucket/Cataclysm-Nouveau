@@ -39,13 +39,16 @@ public final class NativeAbilityTests {
         return new Vec3(origin.x,h.getLevel().getMaxBuildHeight()-48,origin.z);
     }
     private static ServerPlayer player(GameTestHelper h) {
+        return player(h,packet->{});
+    }
+    private static ServerPlayer player(GameTestHelper h,java.util.function.Consumer<net.minecraft.network.protocol.Packet<?>> packets) {
         var cookie=net.minecraft.server.network.CommonListenerCookie.createInitial(new com.mojang.authlib.GameProfile(UUID.randomUUID(),"CatStudent"),false);
         var p=new ServerPlayer(h.getLevel().getServer(),h.getLevel(),cookie.gameProfile(),cookie.clientInformation());
         var connection=new net.minecraft.network.Connection(net.minecraft.network.protocol.PacketFlow.SERVERBOUND);
         new io.netty.channel.embedded.EmbeddedChannel(connection);
         p.connection=new net.minecraft.server.network.ServerGamePacketListenerImpl(h.getLevel().getServer(),connection,p,cookie) {
-            @Override public void send(net.minecraft.network.protocol.Packet<?> packet) {}
-            @Override public void send(net.minecraft.network.protocol.Packet<?> packet,net.minecraft.network.PacketSendListener listener) {}
+            @Override public void send(net.minecraft.network.protocol.Packet<?> packet) {packets.accept(packet);}
+            @Override public void send(net.minecraft.network.protocol.Packet<?> packet,net.minecraft.network.PacketSendListener listener) {packets.accept(packet);}
         };
         p.setGameMode(GameType.SURVIVAL);p.setPos(scene(h).add(-10,0,0));h.getLevel().addNewPlayer(p);
         var mana=CapabilityRegistry.getMana(p);mana.setMaxMana(10000);mana.setMana(10000);return p;
@@ -1139,6 +1142,38 @@ public final class NativeAbilityTests {
             close(h,500-enemy.getHealth(),Resources.augmentedDamage(3,1),"Smoke inherits Harm amplification");close(h,ally.getHealth(),500,"Smoke spares allies");
             h.assertTrue(enemy.hasEffect(MobEffects.WITHER),"Native smoke debuff retained");a.p.setHealth(0);cloud.tick();h.assertTrue(cloud.isRemoved(),"Root death cleans up cloud");h.succeed();
         }
+    }
+
+    @GameTest(template="empty",batch="cat_harbinger_smoke_packets",timeoutTicks=100)
+    public static void managedSmokeSendsParticlePacketsWithoutClientEntityTicks(GameTestHelper h) {
+        var packets=new ArrayList<net.minecraft.network.protocol.game.ClientboundLevelParticlesPacket>();
+        var p=player(h,packet->{if(packet instanceof net.minecraft.network.protocol.game.ClientboundLevelParticlesPacket smoke && smoke.getParticle()==net.minecraft.core.particles.ParticleTypes.SMOKE)packets.add(smoke);});
+        try {
+            for(boolean shellChild:List.of(true,false)) {
+                var point=scene(h);packets.clear();
+                if(shellChild) {
+                    var r=resolver(h,p,new Spell(MethodTouch.INSTANCE,GlyphCatalog.HOWITZER));
+                    var shell=HarbingerCasting.create(Ability.WITHER_HOWITZER,h.getLevel(),CastContext.of(r.spellContext,block(point),null),new Vec3(0,0,1),null,0);
+                    shell.setPos(point);((ManagedProjectile)shell).confluxCataclysm$mode(2);
+                    ((ProjectileHitAccess)shell).confluxCataclysm$nativeHit(block(point));
+                } else resolver(h,p,new Spell(MethodTouch.INSTANCE,GlyphCatalog.SMOKE)).onResolveEffect(h.getLevel(),block(point));
+                var clouds=h.getLevel().getEntitiesOfClass(com.github.L_Ender.cataclysm.entity.effect.Wither_Smoke_Effect_Entity.class,new AABB(point,point).inflate(4));
+                h.assertTrue(clouds.size()==1,"Both entry points create one native cloud");var cloud=clouds.getFirst();
+                packets.clear();
+                for(int tick=1;tick<=6;tick++){cloud.tickCount=tick;cloud.tick();}
+                h.assertTrue(packets.size()==1,"Native server tick sends one visual batch after the waiting period");
+                var first=packets.getFirst();h.assertTrue(first.getCount()==20 && !first.isOverrideLimiter(),"Bounded batch uses vanilla smoke and respects client particle settings");
+                close(h,first.getY(),cloud.getY()+.2,"Particle origin clears the impact plane without moving the damage cloud");
+                close(h,first.getXDist(),cloud.getRadius()*.45,"Visual spread follows the native radius");
+                cloud.tickCount=7;cloud.tick();h.assertTrue(packets.size()==1,"No duplicate packet on intervening ticks");
+                cloud.tickCount=8;cloud.tick();h.assertTrue(packets.size()==2 && packets.getLast().getXDist()<first.getXDist(),"Subsequent particle batches shrink with the cloud");
+                cloud.discard();cloud.tickCount=10;HarbingerSmokeParticles.send(cloud);h.assertTrue(packets.size()==2,"Removed clouds cannot emit ghost particles");ExecutionSessions.tick();
+            }
+            packets.clear();
+            var ordinary=new com.github.L_Ender.cataclysm.entity.effect.Wither_Smoke_Effect_Entity(h.getLevel(),scene(h).x,scene(h).y,scene(h).z);
+            ordinary.tickCount=24;ordinary.tick();h.assertTrue(packets.isEmpty(),"Ordinary native smoke is not given a second particle source");
+            h.succeed();
+        } finally {clean(h,p);}
     }
 
     @GameTest(template="empty",batch="cat_bounded_augments",timeoutTicks=100)
