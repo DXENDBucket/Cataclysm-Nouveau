@@ -90,16 +90,17 @@ final class PositionBodyActions {
                         b.attackTicks=age;
                         if(ability==Ability.THUNDER_COMBO) {
                             nativeGoal.tick();pose();
-                            if(age==21 || age==104){b.aiStep();MonstrosityCasting.impactVisual(world,point.add(heading.scale(6)),false,true);}
+                            if(age==21 || age==104)b.aiStep();
+                            ScyllaActionVisuals.tick(world,b,null,false,age);
                         } else if(ability==Ability.ANCHOR_SPIN) {
                             if(age>=12 && age<=52)b.aiStep();
-                            if(age==29 || age==40 || age==51)MonstrosityCasting.impactVisual(world,point,false,true);
+                            ScyllaActionVisuals.tick(world,b,null,true,age);
                         } else {
                             // A fixed origin has no body to hook/pull. Finish the native preparation, then strike here.
                             b.attackTicks=9+age;
                             if(age>=70 && !landing) {
                                 landing=true;b.setAttackState(17);b.attackTicks=1;b.aiStep();
-                                MonstrosityCasting.impactVisual(world,point,false,true);
+                                ScyllaActionVisuals.landing(world,point);
                             } else if(landing)b.attackTicks=age-69;
                         }
                     }

@@ -1867,6 +1867,35 @@ public final class NativeAbilityTests {
         }
     }
 
+    static void scyllaVisualPacketsUseActorOrFixedOrigin(GameTestHelper h,boolean fixed,boolean spin) {
+        var packets=new ArrayList<net.minecraft.network.protocol.game.ClientboundLevelParticlesPacket>();
+        try(var a=new Arena(h,packet->{if(packet instanceof net.minecraft.network.protocol.game.ClientboundLevelParticlesPacket data)packets.add(data);})) {
+            var actor=fixed?null:a.target(a.center,true);
+            if(actor!=null)actor.setYRot(90);
+            var victim=a.target(a.center.add(-3,0,0),false);
+            Vec3 payerPosition=a.p.position();var payerMotion=new Vec3(.2,.1,.3);a.p.setDeltaMovement(payerMotion);
+            var ability=spin?Ability.ANCHOR_SPIN:Ability.THUNDER_COMBO;
+            dev.arsconflux.api.context.TriggerGeometry.scoped(new Vec3(-1,0,0),()->
+                a.cast(spin?GlyphCatalog.SPIN:GlyphCatalog.COMBO,fixed?block(a.center):new EntityHitResult(actor),false));
+            for(int t=0;t<(spin?60:110);t++){victim.invulnerableTime=0;ExecutionSessions.tick();}
+            var swings=packets.stream().filter(p->p.getParticle() instanceof com.github.L_Ender.cataclysm.client.particle.Options.ScyllaSwingParticleOptions).toList();
+            h.assertTrue(swings.size()==(spin?3:2),"Native swing arc timing is identical for actor and position actions");
+            for(var packet:swings) {
+                var arc=(com.github.L_Ender.cataclysm.client.particle.Options.ScyllaSwingParticleOptions)packet.getParticle();
+                close(h,packet.getX(),a.center.x-(spin?0:6),"Arc uses invocation origin and heading");close(h,packet.getZ(),a.center.z,"Arc never moves to payer");
+                close(h,arc.yaw(),-Math.PI/2,"Arc uses action heading");
+            }
+            if(spin) {
+                var trails=packets.stream().filter(p->fixed?p.getParticle().getType()==CataclysmParticles.POSITION_STORM.get():p.getParticle() instanceof com.github.L_Ender.cataclysm.client.particle.Options.StormParticleOptions).toList();
+                h.assertTrue(trails.size()==9,"Complete native storm trail cadence");
+                for(var packet:trails) {close(h,packet.getX(),a.center.x,"Storm is anchored at action origin");close(h,packet.getY(),a.center.y,"Storm retains native feet origin");close(h,packet.getZ(),a.center.z,"Storm retains origin Z");}
+            }
+            // Attack volumes and damage are covered by the existing actor and fixed-action regressions.
+            close(h,CapabilityRegistry.getMana(a.p).getCurrentMana(),10000-CataclysmConfig.cost(ability),"One action quote");
+            h.assertTrue(a.p.position().equals(payerPosition) && a.p.getDeltaMovement().equals(payerMotion),"Visuals do not borrow or move the payer body");
+            h.succeed();
+        }
+    }
     static void positionBodyKeepsPoseDamageSourcePaymentAndCasterIndependent(GameTestHelper h,Ability ability) {
         var frames=new ArrayList<dev.cataclysmnouveau.network.BodyPhantomPayload>();
         try(var a=new Arena(h,packet->{if(packet instanceof net.minecraft.network.protocol.common.ClientboundCustomPayloadPacket p

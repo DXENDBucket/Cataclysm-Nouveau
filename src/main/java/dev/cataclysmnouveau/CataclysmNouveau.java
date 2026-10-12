@@ -14,6 +14,7 @@ public final class CataclysmNouveau {
         container.registerConfig(ModConfig.Type.SERVER,CataclysmConfig.SPEC);
         container.registerConfig(ModConfig.Type.CLIENT,CataclysmClientConfig.SPEC);
         CataclysmEffects.register(bus);
+        CataclysmParticles.register(bus);
         CataclysmItems.register(bus);
         GlyphCatalog.register();
         bus.addListener(dev.cataclysmnouveau.network.IgnisPhantomPayload::register);

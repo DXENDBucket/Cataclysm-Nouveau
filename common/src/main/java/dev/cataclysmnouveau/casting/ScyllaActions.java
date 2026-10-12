@@ -1,8 +1,6 @@
 package dev.cataclysmnouveau.casting;
 
-import com.github.L_Ender.cataclysm.client.particle.Options.*;
 import com.github.L_Ender.cataclysm.entity.projectile.Player_Ceraunus_Entity;
-import com.github.L_Ender.cataclysm.init.ModParticle;
 import dev.arsconflux.api.context.CastContext;
 import dev.arsconflux.api.execution.*;
 import dev.arsconflux.api.targeting.Allies;
@@ -68,14 +66,13 @@ public final class ScyllaActions {
                 geometry.pose(boss,facing);boss.attackTicks=age;
                 if(combo) {
                     goal.tick();geometry.pose(boss,facing);
-                    if(age==21 || age==104) {boss.aiStep();strikeVisual(world,boss,actor,false);}
+                    if(age==21 || age==104)boss.aiStep();
+                    ScyllaActionVisuals.tick(world,boss,actor,false,age);
                     if(age==68) actor.swing(InteractionHand.MAIN_HAND);
                     return age>=105;
                 }
                 if(age>=12 && age<=52) boss.aiStep();
-                if(age==29 || age==40 || age==51) strikeVisual(world,boss,actor,true);
-                else if(age>=12 && age<=51 && age%4==0) world.sendParticles(new StormParticleOptions(.388F,.76F,.88F,5.5F,.7F,actor.getId()),
-                        actor.getX(),actor.getY(),actor.getZ(),1,0,0,0,0);
+                ScyllaActionVisuals.tick(world,boss,actor,true,age);
                 return age>=52;
             }
             public void close(ExecutionSession<SpellScylla> session,ExecutionSession.EndReason reason) {
@@ -145,7 +142,7 @@ public final class ScyllaActions {
                     if(!MonstrosityCasting.loadedArea(world,actor.position(),14)) return true;
                     boss.setPos(actor.position());boss.setBoundingBox(actor.getBoundingBox());
                     boss.setAttackState(17);boss.attackTicks=1;boss.aiStep();
-                    world.sendParticles(ModParticle.LIGHTNING_EXPLODE.get(),actor.getX(),actor.getY()+.03,actor.getZ(),1,0,0,0,0);
+                    ScyllaActionVisuals.landing(world,actor.position());
                     return true;
                 }
                 return age>=155;
@@ -176,19 +173,6 @@ public final class ScyllaActions {
     }
     private static void heading(SpellScylla boss,Vec3 direction) {
         boss.setYRot((float)Math.toDegrees(Math.atan2(-direction.x,direction.z)));boss.yBodyRot=boss.getYRot();boss.yRotO=boss.getYRot();
-    }
-    private static void strikeVisual(ServerLevel world,SpellScylla boss,LivingEntity actor,boolean spin) {
-        actor.swing(InteractionHand.MAIN_HAND);
-        Vec3 point=spin?actor.position():actor.position().add(boss.getLookAngle().multiply(1,0,1).normalize().scale(6));
-        world.sendParticles(new ScyllaSwingParticleOptions(spin?2:1.2F,(float)Math.toRadians(-boss.yBodyRot),spin?-1.3F:0),
-                point.x,point.y+actor.getBbHeight()*.5,point.z,1,0,0,0,0);
-        if(!spin) {
-            world.sendParticles(ModParticle.LIGHTNING_EXPLODE.get(),point.x,point.y+.03,point.z,1,0,0,0,0);
-            world.sendParticles(new RingParticleOptions(0,(float)Math.PI/2,30,143,241,215,1,30,false,0),point.x,point.y+.02,point.z,1,0,0,0,0);
-            var below=BlockPos.containing(point).below();
-            if(world.hasChunkAt(below)) world.sendParticles(new net.minecraft.core.particles.BlockParticleOption(net.minecraft.core.particles.ParticleTypes.DUST_PILLAR,world.getBlockState(below)),
-                    point.x,point.y+.2,point.z,40,1.5,.2,1.5,.07);
-        }
     }
     private ScyllaActions() {}
 }

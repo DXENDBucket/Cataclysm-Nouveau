@@ -123,3 +123,7 @@ CMAbstractHurtingProjectile是本体独立运动基类，Ars特殊轨迹也要�
 友军增益/执行资格用Core的caster-based beneficial锚点，不能把未通过资格的敌方目标回退为施法者，也不能把damageOwner用于授权。共享ActionGeometry读取实际actor的视角/目标，自身/友军不分支。
 
 原生Goal.start/tick都可能覆盖姿态；第一次发包前也要校正，先驱者调用帧构造器默认读取caster方向，不能以为传入了actor位置就已得到actor朝向。纯垂直视角的水平fallback也必须是actor自己的yaw。数值角度比较允许浮点容差，不以Float.equals判断几何是否一致。详情见[dev.39](beneficial-steering-dev39.md)。
+
+## dev.43：位置动作的粒子并不自动来自幻影
+
+用户发现固定位置旋转挥锚缺少特效。位置分支原先只有通用冲击粒子，漏了 ScyllaSwingParticleOptions 和 StormParticleOptions；两种动作路径现共用原生弧光／连段／落地发送逻辑。实装 3.33 StormParticle.tick 在 getFromEntity 为 null 时会 remove，传 -1 不能直接实现固定点旋风；附属仅扩展原生粒子的位置采样，用从不加入世界、不 tick／渲染的客户端视觉锚点保持原生拖尾、材质、旋转、淡出与到期。它不承担执行、伤害、收费或友军身份。服务端粒子包检查不等于客户端画面已验收。
