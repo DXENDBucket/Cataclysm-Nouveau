@@ -55,6 +55,8 @@ public final class GuardianCasting {
         },h->{},()->enabled(a),ExecutionScope.DIRECT));
     }
     private static boolean punch(ServerLevel world,CastContext cast,double amp) {
+        if(cast.target() instanceof BlockHitResult && BodyPhantomAnimations.kind(Ability.GRAVITY_PUNCH)!=null)
+            return PositionBodyActions.start(Ability.GRAVITY_PUNCH,world,cast,amp,0);
         if(!(cast.target() instanceof EntityHitResult hit) || !(hit.getEntity() instanceof LivingEntity actor)
                 || !actor.isAlive() || actor.level()!=world || !HarbingerCasting.allied(cast,actor)
                 || actor.isPassenger() || !MonstrosityCasting.loadedArea(world,actor.position(),12))return false;

@@ -95,6 +95,8 @@ public final class HarbingerActions {
         },hit->{},()->enabled(boss.ability),ExecutionScope.DIRECT));
     }
     private static boolean charge(ServerLevel world,CastContext cast,double amp) {
+        if(cast.target() instanceof BlockHitResult && BodyPhantomAnimations.kind(Ability.HARBINGER_CHARGE)!=null)
+            return PositionBodyActions.start(Ability.HARBINGER_CHARGE,world,cast,amp,0);
         if(!(cast.target() instanceof EntityHitResult hit) || !(hit.getEntity() instanceof LivingEntity actor)
                 || !actor.isAlive() || actor.level()!=world || !Allies.areAllies(cast.caster(),actor) || actor.isPassenger()
                 || !world.hasChunkAt(actor.blockPosition()))return false;

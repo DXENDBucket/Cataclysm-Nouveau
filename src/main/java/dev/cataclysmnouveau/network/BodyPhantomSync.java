@@ -31,8 +31,8 @@ public final class BodyPhantomSync {
             case SpellMonstrosity boss -> { state=boss.getAttackState();age=Math.max(20,boss.attackTicks);flags=boss.getIsBerserk()?1:0; }
             default -> throw new IllegalArgumentException("Unsupported phantom frame "+frame.getClass().getName());
         }
-        return new BodyPhantomPayload(token,frame.level().dimension().location(),actor.getId(),actor.getUUID(),
-            actor.level()==frame.level() && !actor.isRemoved()?actor.position():frame.position(),
+        return new BodyPhantomPayload(token,frame.level().dimension().location(),actor==null?-1:actor.getId(),actor==null?new UUID(0,0):actor.getUUID(),actor==null,
+            actor!=null && actor.level()==frame.level() && !actor.isRemoved()?actor.position():frame.position(),
             frame.getYRot(),frame.getXRot(),ability.id,state,age,flags,closed);
     }
     public static <P extends LivingEntity> ExecutionDriver<P> wrap(Ability ability,P frame,ExecutionDriver<P> original) {
@@ -42,19 +42,19 @@ public final class BodyPhantomSync {
             private int elapsed;
             private BodyPhantomPayload last;
             private void send(ExecutionSession<P> s,boolean closed) {
-                var actor=s.context().executor();if(actor==null)actor=s.caster();
+                var actor=s.context().executor();
                 var data=snapshot(s.id(),ability,actor,frame,elapsed,closed);
                 if(!data.valid()) {
                     if(!closed || last==null)return;
-                    data=new BodyPhantomPayload(last.token(),last.dimension(),last.actorId(),last.actorUuid(),
+                    data=new BodyPhantomPayload(last.token(),last.dimension(),last.actorId(),last.actorUuid(),last.positionAnchored(),
                         last.position(),last.yaw(),last.pitch(),last.ability(),last.animation(),last.age(),last.flags(),true);
                 }
                 boolean changed=last==null || data.animation()!=last.animation() || data.flags()!=last.flags()
                     || data.age()<last.age();
                 if(!closed && elapsed%4!=0 && !changed)return;
-                if(closed) {
+                if(closed || actor==null) {
                     // Actor removal/transfer can remove the tracking entry before cancellation.
-                    ServerPlayer self=actor instanceof ServerPlayer p && p.level()==s.world()?p:null;
+                    ServerPlayer self=actor instanceof ServerPlayer p && p.level()==s.world()?p:actor==null && s.caster() instanceof ServerPlayer p?p:null;
                     var point=last==null?data.position():last.position();
                     PacketDistributor.sendToPlayersNear(s.world(),self,point.x,point.y,point.z,96,data);
                     if(self!=null)PacketDistributor.sendToPlayer(self,data);

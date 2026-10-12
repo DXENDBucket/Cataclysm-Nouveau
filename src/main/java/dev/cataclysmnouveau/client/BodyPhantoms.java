@@ -65,7 +65,7 @@ public final class BodyPhantoms {
         for(var view:ACTIVE.values()){
             var data=view.data;long now=level.getGameTime();if(now>=view.expires || !CataclysmClientConfig.bodyPhantom(view.kind))continue;
             LivingEntity actor=null;
-            if(!data.closed()) {
+            if(!data.closed() && !data.positionAnchored()) {
                 var entity=level.getEntity(data.actorId());
                 if(!(entity instanceof LivingEntity living) || !living.getUUID().equals(data.actorUuid()) || !living.isAlive())continue;
                 actor=living;

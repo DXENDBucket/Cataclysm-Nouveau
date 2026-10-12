@@ -101,6 +101,8 @@ public final class MonstrosityCasting {
         };
     }
     private static boolean charge(ServerLevel world,CastContext cast,double amp,double duration) {
+        if(cast.target() instanceof BlockHitResult && BodyPhantomAnimations.kind(Ability.SHOULDER_CHECK)!=null)
+            return PositionBodyActions.start(Ability.SHOULDER_CHECK,world,cast,amp,duration);
         // An allied entity can perform the dash. An enemy/block selects the caster's dash direction.
         LivingEntity actor=cast.target() instanceof EntityHitResult hit && hit.getEntity() instanceof LivingEntity target
                 && Allies.areAllies(cast.caster(),target)?target:cast.caster();

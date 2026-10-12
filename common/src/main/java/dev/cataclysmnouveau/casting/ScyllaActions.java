@@ -28,6 +28,8 @@ public final class ScyllaActions {
         return switch(ability) {case THUNDER_COMBO,ANCHOR_SPIN,ANCHOR_LEAP,WATER_WALKING->true;default->false;};
     }
     public static boolean effect(Ability ability,ServerLevel world,CastContext cast,double amp,double duration) {
+        if(cast.target() instanceof BlockHitResult && BodyPhantomAnimations.kind(ability)!=null)
+            return PositionBodyActions.start(ability,world,cast,amp,duration);
         if(!(cast.target() instanceof EntityHitResult hit) || !(hit.getEntity() instanceof LivingEntity actor)
                 || !actor.isAlive() || actor.level()!=world || !Allies.areAllies(cast.caster(),actor)) return false;
         if(ability==Ability.WATER_WALKING) return actor.addEffect(new MobEffectInstance(CataclysmEffects.WATER_WALKING,

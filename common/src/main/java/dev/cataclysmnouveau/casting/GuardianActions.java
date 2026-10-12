@@ -38,6 +38,8 @@ public final class GuardianActions {
 
     public static boolean effect(Ability ability, ServerLevel world, CastContext cast, double amplify) {
         if (!supports(ability) || cast.target() == null || cast.target().getType() == HitResult.Type.MISS) return false;
+        if(cast.target() instanceof BlockHitResult && BodyPhantomAnimations.kind(ability)!=null)
+            return PositionBodyActions.start(ability,world,cast,amplify,0);
         LivingEntity actor = cast.caster(), target = null;
         if (cast.target() instanceof EntityHitResult hit) {
             if (!(hit.getEntity() instanceof LivingEntity selected)) return false;
@@ -197,7 +199,8 @@ public final class GuardianActions {
     public static boolean teleport(SpellGuardian boss, Vec3 requested, boolean ground) {
         if (!(boss.level() instanceof ServerLevel world)) return false;
         var actor = boss.cast.executor();
-        if (actor == null || !actor.isAlive() || actor.level() != world || actor.isPassenger()) return false;
+        if(actor==null)return PositionBodyActions.fixed(boss.cast) && world.hasChunkAt(boss.blockPosition());
+        if (!actor.isAlive() || actor.level() != world || actor.isPassenger()) return false;
         var event = EventHooks.onEnderTeleport(actor, requested.x, requested.y, requested.z);
         if (event.isCanceled()) return false;
         Vec3 point = new Vec3(event.getTargetX(), event.getTargetY(), event.getTargetZ());

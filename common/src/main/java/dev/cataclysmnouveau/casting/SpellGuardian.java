@@ -31,6 +31,7 @@ public final class SpellGuardian extends Ender_Guardian_Entity {
                 .orElseThrow(()->new IllegalStateException("Missing native Guardian goal: "+name));
     }
     @Override public void teleportTo(double x,double y,double z) {
+        if(cast!=null && PositionBodyActions.fixed(cast)) return;
         if(ability==Ability.GUARDIAN_AIR_STRIKE && cast!=null) {
             teleportFailed=!GuardianActions.teleport(this,new Vec3(x,y,z),false);
         } else super.teleportTo(x,y,z);

@@ -1744,6 +1744,59 @@ public final class NativeAbilityTests {
             close(h,500-enemy.getHealth(),15,"Unbound native player field retains its original radius one explosion");h.succeed();
         }
     }
+    static void positionBodyKeepsPoseDamageSourcePaymentAndCasterIndependent(GameTestHelper h,Ability ability) {
+        var frames=new ArrayList<dev.cataclysmnouveau.network.BodyPhantomPayload>();
+        try(var a=new Arena(h,packet->{if(packet instanceof net.minecraft.network.protocol.common.ClientboundCustomPayloadPacket p
+                && p.payload() instanceof dev.cataclysmnouveau.network.BodyPhantomPayload data)frames.add(data);})) {
+            var enemies=new ArrayList<LivingEntity>();
+            for(double reach:List.of(1.0,3.0,6.0))enemies.add(a.target(a.center.add(-reach,0,0),false));
+            var friend=a.target(a.center.add(-1,0,0),true);
+            var original=a.p.position();var motion=new Vec3(.2,.1,.3);a.p.setDeltaMovement(motion);a.p.setYRot(-90);
+            var glyph=GlyphCatalog.ALL.stream().filter(g->g instanceof dev.cataclysmnouveau.glyph.CataclysmEffectGlyph e && e.ability==ability).map(g->(dev.cataclysmnouveau.glyph.CataclysmEffectGlyph)g).findFirst().orElseThrow();
+            double before=CapabilityRegistry.getMana(a.p).getCurrentMana();
+            dev.arsconflux.api.context.TriggerGeometry.scoped(new Vec3(-1,0,0),()->a.cast(glyph,block(a.center),false));
+            h.assertTrue(!frames.isEmpty() && frames.getFirst().valid() && frames.getFirst().positionAnchored(),"Block trigger starts a position action: "+ability);
+            var token=frames.getFirst().token();
+            h.assertTrue(frames.getFirst().actorId()==-1 && frames.getFirst().actorUuid().equals(new UUID(0,0)),"Fixed origin does not fake a caster/executor entity");
+            close(h,frames.getFirst().yaw(),90,"Incoming direction wins over the caster camera");
+            close(h,before-CapabilityRegistry.getMana(a.p).getCurrentMana(),CataclysmConfig.cost(ability),"Action pays once");
+            h.assertTrue(!ExecutionSessions.isCasting(a.p),"Position action claims no body");
+            a.p.setYRot(0);
+            for(int t=0;t<140;t++){enemies.forEach(e->e.invulnerableTime=0);ExecutionSessions.tick();}
+            var own=frames.stream().filter(f->f.token().equals(token)).toList();
+            h.assertTrue(own.getLast().closed() && own.stream().allMatch(f->f.positionAnchored() && f.position().distanceToSqr(a.center)<.0001 && Math.abs(f.yaw()-90)<.001),"Native phases and ending preserve frozen origin and direction");
+            h.assertTrue(enemies.stream().anyMatch(e->e.getHealth()<500),"Native action really damages at the remote origin: "+ability);
+            h.assertTrue(enemies.stream().filter(e->e.getHealth()<500).allMatch(e->e.getLastDamageSource().getEntity()==a.p),"Damage belongs to the root caster");
+            close(h,friend.getHealth(),500,"Allied entities remain protected");
+            h.assertTrue(a.p.position().equals(original) && a.p.getDeltaMovement().equals(motion) && a.p.isNoGravity(),"Remote body cannot move, teleport or change caster gravity");
+            if(ability==Ability.ANCHOR_LEAP)h.assertTrue(own.stream().anyMatch(f->f.animation()==17),"Position leap reaches landing strike without a real falling actor");
+            if(ability==Ability.GUARDIAN_AIR_STRIKE)h.assertTrue(own.stream().anyMatch(f->f.animation()==6),"Position air strike reaches native landing phase");
+            var buffer=new net.minecraft.network.RegistryFriendlyByteBuf(io.netty.buffer.Unpooled.buffer(),h.getLevel().registryAccess());
+            try{for(var f:own){dev.cataclysmnouveau.network.BodyPhantomPayload.CODEC.encode(buffer,f);h.assertTrue(f.equals(dev.cataclysmnouveau.network.BodyPhantomPayload.CODEC.decode(buffer)),"Position protocol roundtrips");}}finally{buffer.release();}
+            h.succeed();
+        }
+    }
+    static void positionActionsCoexistAndInvalidOriginKeepsLiveBody(GameTestHelper h) {
+        var frames=new ArrayList<dev.cataclysmnouveau.network.BodyPhantomPayload>();
+        try(var a=new Arena(h,packet->{if(packet instanceof net.minecraft.network.protocol.common.ClientboundCustomPayloadPacket p
+                && p.payload() instanceof dev.cataclysmnouveau.network.BodyPhantomPayload data)frames.add(data);})) {
+            a.p.setPos(a.center);a.p.setYRot(0);a.target(a.center.add(0,0,3),false);
+            a.cast(GlyphCatalog.GRAVITY_PUNCH,new EntityHitResult(a.p),false);
+            var body=frames.getFirst().token();
+            a.cast(GlyphCatalog.COMBO,block(a.center.add(5,0,0)),false);
+            a.cast(GlyphCatalog.GRAVITY_PUNCH,block(a.center.add(-5,0,0)),false);
+            var positions=frames.stream().filter(f->f.positionAnchored()).map(f->f.token()).distinct().toList();
+            h.assertTrue(positions.size()==2 && ExecutionSessions.isCasting(a.p) && frames.stream().noneMatch(f->f.token().equals(body) && f.closed()),"Distinct positions coexist with a real body action");
+            double mana=CapabilityRegistry.getMana(a.p).getCurrentMana();
+            a.cast(GlyphCatalog.COMBO,block(new Vec3(20000000,a.center.y,20000000)),false);
+            close(h,CapabilityRegistry.getMana(a.p).getCurrentMana(),mana,"Unloaded origin fails without payment or loading chunks");
+            h.assertTrue(frames.stream().noneMatch(f->f.token().equals(body) && f.closed()),"Invalid position does not replace the body action");
+            a.p.setHealth(0);ExecutionSessions.tick();
+            for(var token:positions)h.assertTrue(frames.stream().anyMatch(f->f.token().equals(token) && f.closed()),"Owner loss closes each independent fixed phantom");
+            h.assertTrue(frames.stream().anyMatch(f->f.token().equals(body) && f.closed()),"Owner loss also closes the real body");h.succeed();
+        }
+    }
+
     @GameTest(template="empty",batch="cat_body_phantom_protocol",timeoutTicks=100)
     public static void bodyPhantomProtocolTracksNativeStatesAndActualExecutor(GameTestHelper h) {
         try(var a=new Arena(h)) {
