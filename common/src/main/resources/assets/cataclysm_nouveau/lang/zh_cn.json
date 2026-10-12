@@ -121,5 +121,13 @@
   "cataclysm_nouveau.glyph_name.glyph_missile_salvo": "追踪导弹连射",
   "cataclysm_nouveau.glyph_desc.glyph_missile_salvo": "锁定可见敌人，分批发射6枚原生追踪导弹。施法时半血则采用更紧凑的双侧同步连射。",
   "cataclysm_nouveau.glyph_name.glyph_wither_smoke": "凋灵烟云",
-  "cataclysm_nouveau.glyph_desc.glyph_wither_smoke": "在触发位置生成逐渐收缩的原生凋灵烟云。时效增强改变持续时间。"
+  "cataclysm_nouveau.glyph_desc.glyph_wither_smoke": "在触发位置生成逐渐收缩的原生凋灵烟云。时效增强改变持续时间。",
+  "cataclysm_nouveau.glyph_name.glyph_guardian_bullet": "守卫炮弹",
+  "cataclysm_nouveau.glyph_desc.glyph_guardian_bullet": "将弹射物替换为先布阵、后加速发射的守卫炮弹。命中造成伤害和5秒漂浮；特殊形态保留自身轨迹。",
+  "cataclysm_nouveau.glyph_name.glyph_void_vortex": "虚空漩涡",
+  "cataclysm_nouveau.glyph_desc.glyph_void_vortex": "在落点地面生成虚空漩涡，将上方敌人向中心和下方牵引，结束时爆炸。基础持续15秒，时效增强可改变持续时间。",
+  "cataclysm_nouveau.glyph_name.glyph_guardian_stomp": "守卫践踏",
+  "cataclysm_nouveau.glyph_desc.glyph_guardian_stomp": "短暂蓄势后生成三圈虚空符文，以及沿触发方向展开的一至三排符文。施法时生命不高于一半，连续施展三次。",
+  "cataclysm_nouveau.glyph_name.glyph_gravity_punch": "引力重拳",
+  "cataclysm_nouveau.glyph_desc.glyph_gravity_punch": "自身或选中的友军先牵引附近敌人到前方，再挥出具有禁盾能力的原生重拳。增幅提升伤害。"
 }

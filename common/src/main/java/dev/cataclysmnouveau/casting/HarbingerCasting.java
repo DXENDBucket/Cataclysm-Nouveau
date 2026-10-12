@@ -25,8 +25,8 @@ import java.util.function.Supplier;
 /** Native payloads own visuals/hit bodies; a single trajectory owns motion and collision. */
 public final class HarbingerCasting {
     private static final ThreadLocal<Entity> DECORATING=new ThreadLocal<>();
-    public static boolean supports(Ability a) {return switch(a){case LASER_BOLT,WITHER_MISSILE,HOMING_MISSILE,WITHER_HOWITZER->true;default->false;};}
-    public static boolean nativePayload(Entity e) {return e instanceof Laser_Beam_Entity || e instanceof Wither_Missile_Entity || e instanceof Wither_Homing_Missile_Entity || e instanceof Wither_Howitzer_Entity;}
+    public static boolean supports(Ability a) {return switch(a){case LASER_BOLT,WITHER_MISSILE,HOMING_MISSILE,WITHER_HOWITZER,GUARDIAN_BULLET->true;default->false;};}
+    public static boolean nativePayload(Entity e) {return e instanceof Laser_Beam_Entity || e instanceof Wither_Missile_Entity || e instanceof Wither_Homing_Missile_Entity || e instanceof Wither_Howitzer_Entity || e instanceof Ender_Guardian_Bullet_Entity;}
     public static boolean decorating(Entity e) {return DECORATING.get()==e && e instanceof ManagedProjectile s && s.confluxCataclysm$mode()==1;}
     public static void decorate(Entity e,Runnable tick) {
         var old=DECORATING.get();DECORATING.set(e);
@@ -57,6 +57,7 @@ public final class HarbingerCasting {
     public static Projectile create(Ability a,ServerLevel world,CastContext c,Vec3 direction,LivingEntity target,double amplify) {
         var owner=c.damageOwner()==null?c.caster():c.damageOwner();float bonus=Resources.amplification(amplify);
         Projectile p=switch(a) {
+            case GUARDIAN_BULLET->new Ender_Guardian_Bullet_Entity(world,owner,direction);
             case LASER_BOLT->new Laser_Beam_Entity(owner,direction,world,Math.max(0,(float)CMCommonConfig.Harbinger.Laserdamage));
             case WITHER_MISSILE->new Wither_Missile_Entity(owner,direction,world,Math.max(0,(float)CMCommonConfig.Harbinger.WitherMissiledamage));
             case HOMING_MISSILE->new Wither_Homing_Missile_Entity(owner,direction,world,Math.max(0,(float)CMCommonConfig.Harbinger.WitherMissiledamage),target);
@@ -89,6 +90,10 @@ public final class HarbingerCasting {
         public boolean start(ExecutionSession<Projectile> s) {
             if(payload instanceof Laser_Beam_Entity)s.world().playSound(null,carrier.blockPosition(),com.github.L_Ender.cataclysm.init.ModSounds.HARBINGER_LASER.get(),net.minecraft.sounds.SoundSource.PLAYERS,1,1);
             var state=(ManagedProjectile)payload;state.confluxCataclysm$mode(trajectory==null?2:1);state.confluxCataclysm$carrier(carrier);state.confluxCataclysm$repeated(repeated);state.confluxCataclysm$impact(h->impact(s,h));
+            if(payload instanceof Ender_Guardian_Bullet_Entity bullet) {
+                Vec3 staging=carrier.position().add(direction.scale(3));
+                bullet.setUp(CataclysmConfig.guardianBulletDelay(),direction.x*acceleration,direction.y*acceleration,direction.z*acceleration,staging.x,staging.y,staging.z);
+            }
             if(trajectory!=null)return trajectory.start(s.world(),()->{},h->impact(s,h));
             payload.setPos(carrier.position());
             if(payload instanceof Wither_Howitzer_Entity shell)shell.shoot(direction.x,direction.y,direction.z,(float)(.6*acceleration),0);
@@ -98,6 +103,7 @@ public final class HarbingerCasting {
         }
         void impact(ExecutionSession<Projectile> s,HitResult hit) {
             var state=(ManagedProjectile)payload;if(state.confluxCataclysm$resolving() || hit.getType()==HitResult.Type.MISS)return;
+            if(payload instanceof GuardianBullet bullet && !bullet.confluxGuardian$fired())return;
             if(hit instanceof EntityHitResult e && allied(s.context(),e.getEntity()))return;
             direction=trajectory==null?payload.getDeltaMovement().normalize():trajectory.incomingDirection();state.confluxCataclysm$resolving(true);
             try{if(!s.activate(()->{payload.setPos(hit.getLocation());((ProjectileHitAccess)payload).confluxCataclysm$nativeHit(hit);s.impact(hit);return true;}))s.finish(ExecutionSession.EndReason.DENIED);}

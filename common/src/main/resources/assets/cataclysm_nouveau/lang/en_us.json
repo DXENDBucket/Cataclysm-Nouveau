@@ -121,5 +121,13 @@
   "cataclysm_nouveau.glyph_name.glyph_missile_salvo": "Missile Salvo",
   "cataclysm_nouveau.glyph_desc.glyph_missile_salvo": "Lock a visible enemy and fire six native homing missiles. At half health, the launchers fire together in a faster sequence.",
   "cataclysm_nouveau.glyph_name.glyph_wither_smoke": "Wither Smoke",
-  "cataclysm_nouveau.glyph_desc.glyph_wither_smoke": "Create a shrinking cloud of native wither smoke at the trigger position. Duration augments change its lifetime."
+  "cataclysm_nouveau.glyph_desc.glyph_wither_smoke": "Create a shrinking cloud of native wither smoke at the trigger position. Duration augments change its lifetime.",
+  "cataclysm_nouveau.glyph_name.glyph_guardian_bullet": "Guardian Bullet",
+  "cataclysm_nouveau.glyph_desc.glyph_guardian_bullet": "Replace a projectile with a Guardian bullet that prepares before accelerating along a fixed direction. Hits deal damage and 5 seconds of Levitation; special forms retain their own trajectory.",
+  "cataclysm_nouveau.glyph_name.glyph_void_vortex": "Void Vortex",
+  "cataclysm_nouveau.glyph_desc.glyph_void_vortex": "Create a grounded vortex that pulls enemies above it inward and downward, then explodes on collapse. Base duration is 15 seconds; duration augments change its lifetime.",
+  "cataclysm_nouveau.glyph_name.glyph_guardian_stomp": "Guardian Stomp",
+  "cataclysm_nouveau.glyph_desc.glyph_guardian_stomp": "After a short windup, form three rings of Void Runes and one to three rows along the trigger direction. At or below half health when cast, perform three consecutive stomps.",
+  "cataclysm_nouveau.glyph_name.glyph_gravity_punch": "Gravity Punch",
+  "cataclysm_nouveau.glyph_desc.glyph_gravity_punch": "The caster or a selected ally pulls nearby enemies in front before delivering a native shield-disabling heavy punch. Amplify increases damage."
 }

@@ -16,7 +16,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import java.util.function.Predicate;
 
 /** Run native visual/trail ticks while the Ars carrier exclusively owns movement and hits. */
-@Mixin(value={Laser_Beam_Entity.class,Wither_Missile_Entity.class,Wither_Homing_Missile_Entity.class,Wither_Howitzer_Entity.class},remap=false)
+@Mixin(value={Laser_Beam_Entity.class,Wither_Missile_Entity.class,Wither_Homing_Missile_Entity.class,Wither_Howitzer_Entity.class,Ender_Guardian_Bullet_Entity.class},remap=false)
 public abstract class HarbingerNativeMixin {
     @WrapMethod(method="tick")
     private void harbinger$visualTick(Operation<Void> original) {

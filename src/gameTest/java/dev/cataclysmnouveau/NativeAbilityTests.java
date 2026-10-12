@@ -1245,6 +1245,91 @@ public final class NativeAbilityTests {
             frame.nativeGoal("ChargeGoal").stop();h.assertTrue(frame.isPowered() && frame.repeatRequested,"Native half-health repeat chance uses root health and is captured without broadcasting a detached Boss");h.succeed();
         }finally{net.neoforged.neoforge.common.NeoForge.EVENT_BUS.unregister(post);a.close();}});
     }
+    @GameTest(template="empty",batch="cat_guardian_bullet",timeoutTicks=100)
+    public static void guardianBulletPreparationDamageContinuationAndOrdinaryIsolation(GameTestHelper h) {
+        try(var a=new Arena(h)) {
+            var marker=new Marker();var r=resolver(h,a.p,new Spell(MethodProjectile.INSTANCE,GlyphCatalog.GUARDIAN_BULLET,AugmentAmplify.INSTANCE,marker));r.spellContext.nextPart();
+            var carrier=new EntityProjectileSpell(h.getLevel(),r);carrier.setPos(a.center.add(0,2,0));carrier.setDeltaMovement(0,0,.75);
+            var mana=CapabilityRegistry.getMana(a.p);double before=mana.getCurrentMana();ProjectileDispatch.convert(carrier);
+            var bullet=(Ender_Guardian_Bullet_Entity)harbingerPayloads(h).getFirst();var state=(ManagedProjectile)bullet;
+            h.assertTrue(state.confluxCataclysm$mode()==2 && !bullet.shouldBeSaved(),"Normal Guardian bullet uses transient native flight");
+            close(h,before-mana.getCurrentMana(),CataclysmConfig.cost(Ability.GUARDIAN_BULLET)+CataclysmConfig.amplifyCost(),"Bullet pays once at launch");
+            var enemy=a.target(a.center.add(0,2,15),false);
+            ((ProjectileHitAccess)bullet).confluxCataclysm$nativeHit(new EntityHitResult(enemy));
+            h.assertTrue(!bullet.isRemoved() && marker.hits==0 && enemy.getHealth()==500,"Preparation phase cannot deal damage or fire the continuation");
+            for(int tick=0;tick<CataclysmConfig.guardianBulletDelay();tick++)bullet.tick();
+            h.assertTrue(((GuardianBullet)bullet).confluxGuardian$fired() && bullet.position().distanceTo(carrier.position())>2,"Native bullet moves to its staging point before firing");
+            ((ProjectileHitAccess)bullet).confluxCataclysm$nativeHit(new EntityHitResult(enemy));
+            close(h,500-enemy.getHealth(),Resources.augmentedDamage(6,1),"Native six-point hit receives bounded amplification");
+            h.assertTrue(enemy.hasEffect(MobEffects.LEVITATION) && enemy.getEffect(MobEffects.LEVITATION).getDuration()==100,"Native five-second levitation retained");
+            h.assertTrue(marker.hits==1 && bullet.isRemoved() && enemy.getLastDamageSource().getEntity()==a.p,"Native hit, true owner, and Ars continuation each run once");
+            close(h,before-mana.getCurrentMana(),CataclysmConfig.cost(Ability.GUARDIAN_BULLET)+CataclysmConfig.amplifyCost(),"Impact does not pay twice");
+            var ordinary=new Ender_Guardian_Bullet_Entity(h.getLevel(),a.p,new Vec3(0,0,1));ordinary.setPos(a.center.add(0,2,0));ordinary.setUp(1,0,0,1,ordinary.getX(),ordinary.getY(),ordinary.getZ());ordinary.tick();enemy.invulnerableTime=0;enemy.setHealth(500);
+            a.p.getAttribute(com.hollingsworth.arsnouveau.api.perk.PerkAttributes.SPELL_DAMAGE_BONUS).setBaseValue(100);
+            ((ProjectileHitAccess)ordinary).confluxCataclysm$nativeHit(new EntityHitResult(enemy));close(h,500-enemy.getHealth(),6,"Unmanaged native bullets do not gain Ars damage");
+            h.succeed();
+        }
+    }
+    @GameTest(template="empty",batch="cat_guardian_orbit",timeoutTicks=100)
+    public static void guardianBulletOrbitHasOneMotionDriverAndRepeatedBilling(GameTestHelper h) {
+        try(var a=new Arena(h)) {
+            var marker=new Marker();var r=resolver(h,a.p,new Spell(MethodProjectile.INSTANCE,GlyphCatalog.GUARDIAN_BULLET,marker));r.spellContext.nextPart();
+            var carrier=new EntityOrbitProjectile(h.getLevel(),r,a.p);carrier.setPos(a.center.add(0,2,0));ProjectileDispatch.convert(carrier);
+            var bullet=(Ender_Guardian_Bullet_Entity)harbingerPayloads(h).getFirst();var state=(ManagedProjectile)bullet;var before=bullet.position();
+            for(int tick=0;tick<80;tick++)bullet.tick();
+            close(h,bullet.position().distanceTo(before),0,"Native preparation and acceleration cannot move the Ars-driven carrier");
+            h.assertTrue(!bullet.isRemoved() && ((GuardianBullet)bullet).confluxGuardian$fired(),"Native firing timer cannot expire an orbiting carrier");
+            var enemy=a.target(a.center.add(0,2,10),false);var ally=a.target(enemy.position(),true);var mana=CapabilityRegistry.getMana(a.p);double funds=mana.getCurrentMana();
+            state.confluxCataclysm$impact().accept(new EntityHitResult(ally));close(h,mana.getCurrentMana(),funds,"Allied repeated contact is free and ignored");
+            state.confluxCataclysm$impact().accept(new EntityHitResult(enemy));enemy.invulnerableTime=0;
+            state.confluxCataclysm$impact().accept(new EntityHitResult(enemy));
+            h.assertTrue(marker.hits==2 && !bullet.isRemoved(),"Repeated impact resumes twice without destroying the carrier");
+            close(h,funds-mana.getCurrentMana(),2*CataclysmConfig.cost(Ability.GUARDIAN_BULLET),"Each repeated impact pays once");
+            mana.setMana(0);state.confluxCataclysm$impact().accept(new EntityHitResult(enemy));h.assertTrue(bullet.isRemoved() && marker.hits==2,"Empty mana stops later repeated impacts");h.succeed();
+        }
+    }
+    @GameTest(template="empty",batch="cat_guardian_vortex",timeoutTicks=100)
+    public static void guardianVortexNativePullCollapseAlliesAndRootCleanup(GameTestHelper h) {
+        try(var a=new Arena(h)) {
+            a.cast(GlyphCatalog.VORTEX,block(a.center),true);
+            var clouds=h.getLevel().getEntitiesOfClass(com.github.L_Ender.cataclysm.entity.effect.Void_Vortex_Entity.class,new AABB(a.center,a.center).inflate(4));
+            h.assertTrue(clouds.size()==1,"One native vortex");var vortex=clouds.getFirst();
+            h.assertTrue(!vortex.shouldBeSaved() && ((GuardianChild)vortex).confluxGuardian$managed(),"Vortex is opt-in and transient");
+            var enemy=a.target(a.center.add(1,2,0),false);var ally=a.target(enemy.position(),true);
+            vortex.tickCount=16;vortex.tick();h.assertTrue(enemy.getDeltaMovement().y< -1.9 && enemy.hurtMarked,"Native downward pull is synchronized from server");close(h,ally.getDeltaMovement().length(),0,"Core allies are not pulled");
+            close(h,enemy.getHealth(),500,"Pull is not a fabricated periodic damage field");enemy.setPos(a.center.add(.5,0,0));ally.setPos(enemy.position());vortex.setLifespan(1);vortex.tick();
+            h.assertTrue(vortex.isRemoved() && enemy.getHealth()<500 && enemy.getLastDamageSource().getEntity()==a.p,"Native collapse explodes with the real damage owner");close(h,ally.getHealth(),500,"Collapse spares allied targets");h.assertTrue(h.getLevel().getBlockState(a.base).is(Blocks.STONE),"Collapse does not destroy terrain");
+            a.cast(GlyphCatalog.VORTEX,block(a.center),false);var next=h.getLevel().getEntitiesOfClass(com.github.L_Ender.cataclysm.entity.effect.Void_Vortex_Entity.class,new AABB(a.center,a.center).inflate(4)).getFirst();a.p.setHealth(0);next.tick();h.assertTrue(next.isRemoved(),"Root death discards the vortex without a collapse attack");h.succeed();
+        }
+    }
+    @GameTest(template="empty",batch="cat_guardian_stomp",timeoutTicks=100)
+    public static void guardianStompNativePatternHalfHealthAndChildContext(GameTestHelper h) {
+        try(var a=new Arena(h)) {
+            var mana=CapabilityRegistry.getMana(a.p);double before=mana.getCurrentMana();a.cast(GlyphCatalog.GUARDIAN_STOMP,block(a.center),true);
+            for(int tick=0;tick<32;tick++)ExecutionSessions.tick();
+            var area=new AABB(a.center,a.center).inflate(20);var runes=h.getLevel().getEntitiesOfClass(Void_Rune_Entity.class,area);
+            h.assertTrue(Set.of(44,57,70).contains(runes.size()),"Healthy stomp uses 31 ring runes plus 13/26/39 frontal runes");
+            for(var rune:runes){h.assertTrue(rune.getCaster()==a.p && !rune.shouldBeSaved(),"Native rune has true owner and transient lifecycle");close(h,rune.getDamage(),com.github.L_Ender.cataclysm.config.CMCommonConfig.EnderGuardian.VoidRuneDamage,"Guardian-specific native rune damage stays unaugmented");close(h,NativeDamageContexts.amplification(rune),1,"Children inherit augmentation once");}
+            close(h,before-mana.getCurrentMana(),CataclysmConfig.cost(Ability.GUARDIAN_STOMP)+CataclysmConfig.amplifyCost(),"One payment for the entire array");runes.forEach(Entity::discard);ExecutionSessions.tick();
+            a.p.setHealth(5);a.cast(GlyphCatalog.GUARDIAN_STOMP,block(a.center),false);for(int tick=0;tick<63;tick++)ExecutionSessions.tick();
+            runes=h.getLevel().getEntitiesOfClass(Void_Rune_Entity.class,area);h.assertTrue(runes.size()>=132 && runes.size()<=210,"Half-health cast invokes three complete native arrays");
+            a.p.discard();ExecutionSessions.tick();h.assertTrue(runes.stream().allMatch(Entity::isRemoved),"Root removal cleans up every rune in all waves");h.succeed();
+        }
+    }
+    @GameTest(template="empty",batch="cat_guardian_punch",timeoutTicks=100)
+    public static void gravityPunchAlliedExecutorNativeDamageAndCancellation(GameTestHelper h) {
+        try(var a=new Arena(h)) {
+            var host=a.target(a.center,true);host.setYRot(0);var enemy=a.target(a.center.add(0,0,3),false);var ally=a.target(enemy.position(),true);
+            var mana=CapabilityRegistry.getMana(a.p);double before=mana.getCurrentMana();a.cast(GlyphCatalog.GRAVITY_PUNCH,new EntityHitResult(host),true);
+            ExecutionSessions.tick();h.assertTrue(GuardianCasting.isPunching(host) && enemy.getDeltaMovement().z<0,"Ally performs native preparation, pulling the enemy toward its front");close(h,ally.getDeltaMovement().length(),0,"Friendly entities are excluded from pull");
+            for(int tick=1;tick<29;tick++)ExecutionSessions.tick();
+            double attack=16*com.github.L_Ender.cataclysm.config.CMCommonConfig.EnderGuardian.attackMultiplier;double raw=attack+Math.min(attack,500*com.github.L_Ender.cataclysm.config.CMCommonConfig.EnderGuardian.GravityPunchHpdamage);
+            close(h,500-enemy.getHealth(),Resources.augmentedDamage(raw,1),"Native punch preserves capped health damage before Ars enhancement");
+            h.assertTrue(enemy.getLastDamageSource().getEntity()==a.p,"Executor does not replace the root damage owner");close(h,ally.getHealth(),500,"Friend is not punched");close(h,host.getHealth(),500,"Executor is not punched");close(h,before-mana.getCurrentMana(),CataclysmConfig.cost(Ability.GRAVITY_PUNCH)+CataclysmConfig.amplifyCost(),"Root pays the entire action once");
+            a.p.setHealth(0);ExecutionSessions.tick();h.assertTrue(!GuardianCasting.isPunching(host),"Cancellation releases allied movement control");h.succeed();
+        }
+    }
+
     @GameTest(template="empty",batch="cat_harbinger_standalone_smoke",timeoutTicks=100)
     public static void standaloneSmokeDurationDamageFeeAndRootCleanup(GameTestHelper h) {
         try(var a=new Arena(h)) {

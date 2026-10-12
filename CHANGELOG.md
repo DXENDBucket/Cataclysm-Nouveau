@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.1.0-dev.23
+
+- Add Guardian Bullet, Void Vortex, Guardian Stomp, and Gravity Punch with native preparation, control, rune patterns and attack bodies. Include the half-health triple stomp.
+- Reuse native-projectile adaptation for ordinary and Ars-driven trajectories. Preserve real damage ownership, ally filtering, trigger billing, cleanup and bounded damage augments.
+- Add real Scribe recipes, bilingual descriptions, runtime-reference icons, configurations and Guardian-series ordering. Two gauntlets plus two golem Void Cores cover the four recipes.
+- All 56 server GameTests and binary/source distribution checks pass. Client visuals have not been manually verified.
+
 ## 0.1.0-dev.22
 
 - Remove the 0.2-block visual height offset from Wither Smoke. Keep the server particle transport confirmed visible by the player in dev.21.

@@ -7,6 +7,7 @@ public final class CataclysmConfig {
     private static final ModConfigSpec.IntValue ANCHOR_RANGE;
     private static final ModConfigSpec.BooleanValue HARBINGER_FIRE;
     private static final ModConfigSpec.IntValue HARBINGER_RANGE;
+    private static final ModConfigSpec.IntValue GUARDIAN_BULLET_DELAY,GUARDIAN_VORTEX_LIFETIME;
     private static final ModConfigSpec.DoubleValue AUGMENT_FRACTION,AUGMENT_MIN,AUGMENT_MAX;
     private static final ModConfigSpec.IntValue AMPLIFY_COST, BOLT_WARMUP;
     private static final ModConfigSpec.DoubleValue BOLT_DAMAGE;
@@ -77,6 +78,9 @@ public final class CataclysmConfig {
         b.push("harbinger");
         HARBINGER_FIRE=b.comment("Allow managed laser impacts to place fire; entity ignition still follows native behavior. No glass destruction or EMP reset.").define("terrain_fire",false);
         HARBINGER_RANGE=b.comment("Loaded, visible target ray for native homing launches.").defineInRange("homing_range",48,4,128);b.pop();
+        b.push("ender_guardian");
+        GUARDIAN_BULLET_DELAY=b.comment("Preparation ticks before the bullet leaves its staging position. Special Ars trajectories keep their own motion.").defineInRange("bullet_preparation_ticks",30,1,200);
+        GUARDIAN_VORTEX_LIFETIME=b.comment("Native vortex lifespan before duration augments; collapse explodes without terrain damage.").defineInRange("vortex_lifetime_ticks",300,40,1200);b.pop();
         b.push("cooldowns");
         COOLDOWNS=b.comment("Gate new active uses through Conflux; existing trajectories keep running.").define("enabled",true);
         CREATIVE_COOLDOWN=b.define("creative_cooldown",false);
@@ -117,7 +121,7 @@ public final class CataclysmConfig {
     public static float flareDirectDamage() {return SPEC.isLoaded()?FLARE_DIRECT_DAMAGE.get().floatValue():7;}
     public static float flareJetDamage() {return SPEC.isLoaded()?FLARE_JET_DAMAGE.get().floatValue():7;}
     private static int defaultCooldown(Ability ability) {
-        return switch(ability) {case HARBINGER_CHARGE->80;case HOWITZER_VOLLEY->80;case MISSILE_SALVO->60;case WITHER_SMOKE->20;case LASER_BOLT->0;case WITHER_MISSILE->60;case HOMING_MISSILE->80;case WITHER_HOWITZER->160;case DEATH_LASER->200;case CERAUNUS->40;case WAVE->100;case FLARE_BOMB->160;case LAVA_BOMB->100;case EARTHQUAKE->160;case FISSURE->200;case FLAME_RING->200;case SHOULDER_CHECK->80;case LAVA_ABSORPTION->400;case MONSTROUS->350;case WATER_SPEAR->40;case LIGHTNING_SPEAR->60;case STORM_SERPENT->120;case LIGHTNING_STORM->80;case LIGHTNING_FIELD->100;case STORM_BURST->240;case SPARK->60;case THUNDER_CLOUD->400;case LIGHTNING_ROW->200;case THUNDER_COMBO->360;case ANCHOR_SPIN->240;case ANCHOR_LEAP->300;default->0;};
+        return switch(ability) {case GUARDIAN_BULLET->0;case VOID_VORTEX->300;case GUARDIAN_STOMP->200;case GRAVITY_PUNCH->80;case HARBINGER_CHARGE->80;case HOWITZER_VOLLEY->80;case MISSILE_SALVO->60;case WITHER_SMOKE->20;case LASER_BOLT->0;case WITHER_MISSILE->60;case HOMING_MISSILE->80;case WITHER_HOWITZER->160;case DEATH_LASER->200;case CERAUNUS->40;case WAVE->100;case FLARE_BOMB->160;case LAVA_BOMB->100;case EARTHQUAKE->160;case FISSURE->200;case FLAME_RING->200;case SHOULDER_CHECK->80;case LAVA_ABSORPTION->400;case MONSTROUS->350;case WATER_SPEAR->40;case LIGHTNING_SPEAR->60;case STORM_SERPENT->120;case LIGHTNING_STORM->80;case LIGHTNING_FIELD->100;case STORM_BURST->240;case SPARK->60;case THUNDER_CLOUD->400;case LIGHTNING_ROW->200;case THUNDER_COMBO->360;case ANCHOR_SPIN->240;case ANCHOR_LEAP->300;default->0;};
     }
     public static int cooldownTicks(Ability ability) {
         return SPEC.isLoaded()?COOLDOWN_TICKS.get(ability).get():defaultCooldown(ability);
@@ -146,6 +150,8 @@ public final class CataclysmConfig {
     public static double anchorPullSpeed() {return SPEC.isLoaded()?ANCHOR_PULL_SPEED.get():2;}
     public static boolean harbingerTerrainFire() {return SPEC.isLoaded() && HARBINGER_FIRE.get();}
     public static int harbingerRange() {return SPEC.isLoaded()?HARBINGER_RANGE.get():48;}
+    public static int guardianBulletDelay(){return SPEC.isLoaded()?GUARDIAN_BULLET_DELAY.get():30;}
+    public static int guardianVortexLifetime(){return SPEC.isLoaded()?GUARDIAN_VORTEX_LIFETIME.get():300;}
     public static double damageAugmentFraction(){return SPEC.isLoaded()?AUGMENT_FRACTION.get():.20;}
     public static double damageAugmentMin(){return SPEC.isLoaded()?AUGMENT_MIN.get():2;}
     public static double damageAugmentMax(){return SPEC.isLoaded()?AUGMENT_MAX.get():10;}

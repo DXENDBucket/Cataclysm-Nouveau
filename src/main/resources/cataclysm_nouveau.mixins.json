@@ -48,7 +48,12 @@
     "HarbingerAttackMixin",
     "HarbingerVolleyGoalMixin",
     "HarbingerAnimationMixin",
-    "DamageAugmentationStateMixin"
+    "DamageAugmentationStateMixin",
+    "GuardianBulletStateMixin",
+    "GuardianAttackAccess",
+    "GuardianAdapterMixin",
+    "GuardianRuneStateMixin",
+    "GuardianVortexMixin"
   ],
   "injectors": {
     "defaultRequire": 1
