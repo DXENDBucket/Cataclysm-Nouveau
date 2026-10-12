@@ -61,7 +61,7 @@ public final class GuardianCasting {
         var frame=cast.withExecutor(actor);
         var boss=new SpellGuardian(world,frame,actor.position(),actor.getLookAngle(),amp);
         boss.setAnimation(Ender_Guardian_Entity.GUARDIAN_RIGHT_STRONG_ATTACK);
-        return ExecutionSessions.startReplacing(new ExecutionSession<>(world,frame,boss,61,new ExecutionDriver<SpellGuardian>() {
+        return ExecutionSessions.startReplacing(new ExecutionSession<>(world,frame,boss,61,dev.cataclysmnouveau.network.BodyPhantomSync.wrap(Ability.GRAVITY_PUNCH,boss,new ExecutionDriver<SpellGuardian>() {
             private int age;private boolean started;
             public boolean occupiesCaster(){return actor==cast.caster();}
             public java.util.List<ExecutionClaim> claims(ExecutionSession<SpellGuardian> s){return java.util.List.of(ExecutionClaim.action(actor));}
@@ -76,7 +76,7 @@ public final class GuardianCasting {
                 return age>=60;
             }
             public void close(ExecutionSession<SpellGuardian> s,ExecutionSession.EndReason reason){if(started)PUNCHING.remove(actor.getUUID());boss.discard();}
-        },h->{},()->enabled(Ability.GRAVITY_PUNCH),ExecutionScope.DIRECT));
+        }),h->{},()->enabled(Ability.GRAVITY_PUNCH),ExecutionScope.DIRECT));
     }
     public static boolean cloud(ServerLevel world,Entity child,CastContext cast,double amp,Ability source) {
         NativeDamageContexts.bind(child,cast,amp);

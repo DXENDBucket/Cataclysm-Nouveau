@@ -144,7 +144,7 @@ public final class MonstrosityCasting {
     }
     public static int scaledTicks(int ticks,double duration) {return (int)Math.max(2,Math.min(1200,Math.round(ticks*Math.max(.1,1+.5*duration))));}
     private static boolean scheduled(ServerLevel world,CastContext cast,Ability ability,int ticks,ExecutionDriver<SpellMonstrosity> driver,SpellMonstrosity boss) {
-        var session=new ExecutionSession<>(world,cast,boss,ticks,driver,hit->{},
+        var session=new ExecutionSession<>(world,cast,boss,ticks,ability==Ability.SHOULDER_CHECK?dev.cataclysmnouveau.network.BodyPhantomSync.wrap(ability,boss,driver):driver,hit->{},
                 ()->GlyphCatalog.ALL.stream().filter(g->g instanceof dev.cataclysmnouveau.glyph.CataclysmEffectGlyph e && e.ability==ability).allMatch(g->g.isEnabled()),ExecutionScope.DIRECT);
         return ability==Ability.SHOULDER_CHECK?ExecutionSessions.startReplacing(session):ExecutionSessions.start(session);
     }

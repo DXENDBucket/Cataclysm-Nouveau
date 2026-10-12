@@ -1744,6 +1744,108 @@ public final class NativeAbilityTests {
             close(h,500-enemy.getHealth(),15,"Unbound native player field retains its original radius one explosion");h.succeed();
         }
     }
+    @GameTest(template="empty",batch="cat_body_phantom_protocol",timeoutTicks=100)
+    public static void bodyPhantomProtocolTracksNativeStatesAndActualExecutor(GameTestHelper h) {
+        try(var a=new Arena(h)) {
+            var actor=a.target(a.center,true);a.p.setHealth(5);
+            var cast=CastContext.detached(a.p,new EntityHitResult(actor),null).withExecutor(actor);
+            var token=UUID.randomUUID();
+            var buffer=new net.minecraft.network.RegistryFriendlyByteBuf(io.netty.buffer.Unpooled.buffer(),h.getLevel().registryAccess());
+            for(var ability:Ability.values()) {
+                var kind=BodyPhantomAnimations.kind(ability);if(kind==null)continue;
+                LivingEntity boss=switch(kind) {
+                    case SCYLLA -> new SpellScylla(h.getLevel(),cast,a.center,0);
+                    case GUARDIAN -> new SpellGuardian(h.getLevel(),cast,a.center,new Vec3(-1,0,0),0,ability);
+                    case HARBINGER -> new SpellHarbinger(h.getLevel(),cast,ability,a.center,0,0);
+                    case MONSTROSITY -> new SpellMonstrosity(h.getLevel(),cast,a.center,new Vec3(-1,0,0),0);
+                };
+                int[] states=switch(ability) {
+                    case THUNDER_COMBO -> new int[]{25};case ANCHOR_SPIN -> new int[]{7};case ANCHOR_LEAP -> new int[]{15,17};
+                    case HARBINGER_CHARGE,GRAVITY_PUNCH -> new int[]{1};case GUARDIAN_UPPERCUT -> new int[]{2,3};
+                    case GUARDIAN_BLINK -> new int[]{4};case GUARDIAN_AIR_STRIKE -> new int[]{5,6};
+                    case GUARDIAN_ROCKET_PUNCH -> new int[]{7};default -> new int[]{8};
+                };
+                for(int state:states) {
+                    switch(boss) {
+                        case SpellScylla b -> {b.setAttackState(state);b.attackTicks=9;b.setEye(true);}
+                        case SpellGuardian b -> {b.setAnimation(BodyPhantomAnimations.animation(kind,state));b.setAnimationTick(37);}
+                        case SpellHarbinger b -> {b.setAnimation(BodyPhantomAnimations.animation(kind,state));b.setAnimationTick(26);b.setIsCharge(true);}
+                        case SpellMonstrosity b -> {b.setAttackState(state);b.attackTicks=35;}
+                        default -> throw new AssertionError();
+                    }
+                    var data=dev.cataclysmnouveau.network.BodyPhantomSync.snapshot(token,ability,actor,boss,12,false);
+                    h.assertTrue(data.valid() && data.animation()==state && data.ability().equals(ability.id),"Supported native pose is valid: "+ability+" / "+state);
+                    h.assertTrue(data.actorId()==actor.getId() && data.actorUuid().equals(actor.getUUID()) && data.position().equals(actor.position()),"Visual anchor follows actual executor, not payer");
+                    if(kind==BodyPhantomAnimations.Kind.HARBINGER)h.assertTrue(data.flags()==3,"Powered root phase and charge state are retained");
+                    if(kind==BodyPhantomAnimations.Kind.GUARDIAN || kind==BodyPhantomAnimations.Kind.MONSTROSITY)h.assertTrue(data.flags()==1,"Half-health root phase retained");
+                    dev.cataclysmnouveau.network.BodyPhantomPayload.CODEC.encode(buffer,data);
+                    h.assertTrue(data.equals(dev.cataclysmnouveau.network.BodyPhantomPayload.CODEC.decode(buffer)),"Every supported pose roundtrips on a dedicated server");
+                    h.assertTrue(dev.cataclysmnouveau.network.BodyPhantomSync.snapshot(token,ability,actor,boss,12,true).closed(),"Explicit close for every state");
+                }
+                boss.discard();
+            }
+            buffer.release();
+            h.assertTrue(!BodyPhantomAnimations.valid(Ability.ANCHOR_SPIN,24,1,0)
+                && !BodyPhantomAnimations.valid(Ability.GUARDIAN_BLINK,4,-1,0)
+                && !BodyPhantomAnimations.valid(Ability.HARBINGER_CHARGE,1,1201,0)
+                && !BodyPhantomAnimations.valid(Ability.WITHER_SMOKE,1,0,0),"Reject foreign, incompatible and unbounded animation input");
+            h.succeed();
+        }
+    }
+    static void bodyPhantomCloseSurvivesClearedAnimationAndRemovedOwner(GameTestHelper h) {
+        var frames=new ArrayList<dev.cataclysmnouveau.network.BodyPhantomPayload>();
+        try(var a=new Arena(h,packet->{if(packet instanceof net.minecraft.network.protocol.common.ClientboundCustomPayloadPacket p
+                && p.payload() instanceof dev.cataclysmnouveau.network.BodyPhantomPayload data)frames.add(data);})) {
+            a.p.setPos(a.center);
+            for(boolean removed:List.of(false,true)) {
+                var cast=CastContext.detached(a.p,new EntityHitResult(a.p),null).withExecutor(a.p);
+                var boss=new SpellHarbinger(h.getLevel(),cast,Ability.HARBINGER_CHARGE,a.center,0,0);
+                boss.setAnimation(com.github.L_Ender.cataclysm.entity.AnimationMonster.BossMonsters.The_Harbinger_Entity.CHARGE_ANIMATION);
+                int[] closes={0};
+                var driver=new dev.arsconflux.api.execution.ExecutionDriver<SpellHarbinger>() {
+                    public boolean start(dev.arsconflux.api.execution.ExecutionSession<SpellHarbinger> session){return true;}
+                    public boolean tick(dev.arsconflux.api.execution.ExecutionSession<SpellHarbinger> session){boss.setAnimation(com.github.L_Ender.lionfishapi.server.animation.IAnimatedEntity.NO_ANIMATION);return true;}
+                    public void close(dev.arsconflux.api.execution.ExecutionSession<SpellHarbinger> session,dev.arsconflux.api.execution.ExecutionSession.EndReason reason){closes[0]++;boss.discard();}
+                };
+                var session=new dev.arsconflux.api.execution.ExecutionSession<>(h.getLevel(),cast,boss,20,
+                    dev.cataclysmnouveau.network.BodyPhantomSync.wrap(Ability.HARBINGER_CHARGE,boss,driver),hit->{},()->true,dev.arsconflux.api.execution.ExecutionScope.DIRECT);
+                h.assertTrue(ExecutionSessions.start(session),"Synthetic native lifecycle starts");
+                if(removed)a.p.discard();
+                ExecutionSessions.tick();
+                h.assertTrue(frames.getLast().closed() && frames.getLast().valid() && frames.getLast().token().equals(session.id()),"Explicit close survives cleared animation or actor tracking removal");
+                h.assertTrue(closes[0]==1 && boss.isRemoved(),"Original driver cleanup runs exactly once");
+            }
+            h.succeed();
+        }
+    }
+    static void bodyVisualLifecycle(GameTestHelper h,Ability ability) {
+        var frames=new ArrayList<dev.cataclysmnouveau.network.BodyPhantomPayload>();
+        try(var a=new Arena(h,packet->{if(packet instanceof net.minecraft.network.protocol.common.ClientboundCustomPayloadPacket p
+                && p.payload() instanceof dev.cataclysmnouveau.network.BodyPhantomPayload data)frames.add(data);})) {
+            a.p.setPos(a.center);a.p.setYRot(0);a.p.setXRot(0);
+            var enemy=a.target(a.center.add(0,0,6),false);
+            if(ability==Ability.ANCHOR_LEAP)for(int x=-2;x<=2;x++)for(int y=1;y<=6;y++)h.getLevel().setBlockAndUpdate(a.base.offset(x,y,8),Blocks.STONE.defaultBlockState());
+            try {
+                var glyph=GlyphCatalog.ALL.stream().filter(g->g instanceof dev.cataclysmnouveau.glyph.CataclysmEffectGlyph e && e.ability==ability).map(g->(dev.cataclysmnouveau.glyph.CataclysmEffectGlyph)g).findFirst().orElseThrow();
+                double before=CapabilityRegistry.getMana(a.p).getCurrentMana();a.cast(glyph,new EntityHitResult(a.p),false);
+                h.assertTrue(!frames.isEmpty() && !frames.getFirst().closed() && frames.getFirst().valid(),"Real native action sends start: "+ability);
+                var token=frames.getFirst().token();
+                for(int t=0;t<8;t++)ExecutionSessions.tick();
+                h.assertTrue(frames.size()>=3 && frames.size()<=6 && frames.stream().allMatch(f->f.token().equals(token) && f.valid()),"Native poses update under one bounded token");
+                close(h,before-CapabilityRegistry.getMana(a.p).getCurrentMana(),CataclysmConfig.cost(ability),"Visuals add no mana charges");
+                h.assertTrue(ExecutionSessions.isCasting(a.p),"Wrapper preserves the actor claim");
+                // A new body action must close the previous visual immediately, before its native cleanup.
+                a.cast(GlyphCatalog.IGNIS_SWORD_COMBO,new EntityHitResult(a.p),false);
+                h.assertTrue(frames.getLast().closed() && frames.getLast().token().equals(token),"Cross-series interruption closes old phantom");
+                int count=frames.size();for(int t=0;t<5;t++)ExecutionSessions.tick();
+                h.assertTrue(frames.size()==count,"Cancelled body never refreshes its render lease");
+                a.p.setHealth(0);ExecutionSessions.tick();h.succeed();
+            } finally {
+                if(ability==Ability.ANCHOR_LEAP)for(int x=-2;x<=2;x++)for(int y=1;y<=6;y++)h.getLevel().setBlockAndUpdate(a.base.offset(x,y,8),Blocks.AIR.defaultBlockState());
+            }
+        }
+    }
+
     @GameTest(template="empty",batch="cat_ignis_phantom_protocol",timeoutTicks=100)
     public static void ignisPhantomPayloadKeepsRolesDimensionPoseAndStages(GameTestHelper h) {
         try(var a=new Arena(h)) {

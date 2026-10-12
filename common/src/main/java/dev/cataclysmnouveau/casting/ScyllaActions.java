@@ -158,7 +158,7 @@ public final class ScyllaActions {
         return null;
     }
     private static boolean start(ServerLevel world,CastContext cast,Ability ability,SpellScylla boss,int ticks,ExecutionDriver<SpellScylla> driver) {
-        return ExecutionSessions.startReplacing(new ExecutionSession<>(world,cast,boss,ticks,driver,hit->{},
+        return ExecutionSessions.startReplacing(new ExecutionSession<>(world,cast,boss,ticks,dev.cataclysmnouveau.network.BodyPhantomSync.wrap(ability,boss,driver),hit->{},
                 ()->GlyphCatalog.ALL.stream().filter(g->g instanceof dev.cataclysmnouveau.glyph.CataclysmEffectGlyph e
                         && e.ability==ability).allMatch(g->g.isEnabled()),ExecutionScope.DIRECT));
     }

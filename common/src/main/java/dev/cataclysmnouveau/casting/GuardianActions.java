@@ -76,7 +76,7 @@ public final class GuardianActions {
         });
         final LivingEntity executionActor = actor;
         int end = ability == Ability.GUARDIAN_AIR_STRIKE ? 200 : animation.getDuration();
-        return ExecutionSessions.startReplacing(new ExecutionSession<>(world, frame, boss, end + 5, new ExecutionDriver<SpellGuardian>() {
+        return ExecutionSessions.startReplacing(new ExecutionSession<>(world, frame, boss, end + 5, dev.cataclysmnouveau.network.BodyPhantomSync.wrap(ability,boss,new ExecutionDriver<SpellGuardian>() {
             private int age, phaseAge;private boolean started,hadNoGravity;
             private Vec3 facing = horizontal(boss.getLookAngle());
             public boolean occupiesCaster() { return executionActor == cast.caster(); }
@@ -157,7 +157,7 @@ public final class GuardianActions {
                     executionActor.hurtMarked = true;
                 }
             }
-        }, hit -> {}, () -> enabled(ability), ExecutionScope.DIRECT));
+        }), hit -> {}, () -> enabled(ability), ExecutionScope.DIRECT));
     }
 
     private static Vec3 horizontal(Vec3 direction) {
