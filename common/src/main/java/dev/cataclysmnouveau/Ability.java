@@ -3,7 +3,7 @@ public enum Ability {
     AMETHYST_CLUSTER("amethyst_cluster", "Amethyst Cluster", 60),
     LIONFISH_SPIKE("lionfish_spike", "Lionfish Spike", 25),
     BOLT_STRIKE("bolt_strike", "Bolt Strike", 80),
-    VOID_RUNE("void_rune", "Void Rune", 60),
+    VOID_RUNE("void_rune", "Void Rune", 30),
     FLAME_JET("flame_jet", "Flame Jet", 50),
     CERAUNUS("ceraunus", "Ceraunus", 60),
     WAVE("wave", "Wave", 90),
@@ -58,7 +58,7 @@ public enum Ability {
     IGNIS_ULTIMATE("ignis_ultimate", "Ignis Ultimate Flame Slash", 900),
     IGNIS_FLAME_STRIKE("ignis_flame_strike", "Ignis Flame Strike", 280),
     PHANTOM_ARROW("phantom_arrow", "Phantom Arrow", 45),
-    PHANTOM_HALBERD("phantom_halberd", "Phantom Halberd", 120),
+    PHANTOM_HALBERD("phantom_halberd", "Phantom Halberd", 60),
     CURSED_RAGE("cursed_rage", "Cursed Rage", 30);
     public final String id, name;
     public final int mana;
