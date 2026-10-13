@@ -57,3 +57,8 @@ Java21、NeoForge21.1.250、MC1.21.1、Ars5.13.1、Cataclysm3.33。最终8项req
 
 - `cataclysm-nouveau-0.1.0-dev.47-mc1.21.1-neoforge.jar`：`849a2780efbcb98dc43644672221cb353ce3f0a05dfb953ff62f2ed3a2b45c8d`
 - `cataclysm-nouveau-0.1.0-dev.47-sources.jar`：`7cd24b500e3696de5472c70c06b5eacdcc8443692b523526d5aaafdbdcd6f002`
+
+
+## 本地交付
+
+实现提交`a7cca3bdc973a0597cc31f0036ca3314e95d439d`，快进合入main并标记`v0.1.0-dev.47`，未推送。已在无运行客户端时串行部署万法归一，仅替换本附属并补齐新四项费用／冷却配置；旧单戟30Mana、符文20Mana及两个零冷却核对保留，mods中只有dev.47一个版本，复制后哈希一致。旧dev.46和原配置备份于实例`codex-backups/cataclysm-dev47`。Core和其他附属未更换，GameTest进程已结束，已有Gradle守护进程未停止。客户端画面未人工验收。
