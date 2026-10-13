@@ -28,8 +28,8 @@ public final class CataclysmEffectGlyph extends AbstractEffect implements Trigge
             augmentDescriptions.put(AugmentExtendTime.INSTANCE, Component.translatable("cataclysm_nouveau.augment.duration_up"));
             augmentDescriptions.put(AugmentDurationDown.INSTANCE, Component.translatable("cataclysm_nouveau.augment.duration_down"));
         }
-        augmentDescriptions.put(AugmentAmplify.INSTANCE, Component.translatable(ability == Ability.LAVA_ABSORPTION ? "cataclysm_nouveau.augment.healing_up" : (ability == Ability.MONSTROUS || ability == Ability.BONE_FRACTURE) ? "cataclysm_nouveau.augment.effect_up" : "cataclysm_nouveau.augment.increase_damage"));
-        augmentDescriptions.put(AugmentDampen.INSTANCE, Component.translatable(ability == Ability.LAVA_ABSORPTION ? "cataclysm_nouveau.augment.healing_down" : (ability == Ability.MONSTROUS || ability == Ability.BONE_FRACTURE) ? "cataclysm_nouveau.augment.effect_down" : "cataclysm_nouveau.augment.decrease_damage"));
+        augmentDescriptions.put(AugmentAmplify.INSTANCE, Component.translatable(ability == Ability.LAVA_ABSORPTION ? "cataclysm_nouveau.augment.healing_up" : (ability == Ability.MONSTROUS || ability == Ability.BONE_FRACTURE || ability == Ability.CURSED_RAGE) ? "cataclysm_nouveau.augment.effect_up" : "cataclysm_nouveau.augment.increase_damage"));
+        augmentDescriptions.put(AugmentDampen.INSTANCE, Component.translatable(ability == Ability.LAVA_ABSORPTION ? "cataclysm_nouveau.augment.healing_down" : (ability == Ability.MONSTROUS || ability == Ability.BONE_FRACTURE || ability == Ability.CURSED_RAGE) ? "cataclysm_nouveau.augment.effect_down" : "cataclysm_nouveau.augment.decrease_damage"));
         if (ability == Ability.LAVA_WALKING || ability == Ability.WATER_WALKING) {
             compatibleAugments.remove(AugmentAmplify.INSTANCE);
             compatibleAugments.remove(AugmentDampen.INSTANCE);
@@ -57,6 +57,8 @@ public final class CataclysmEffectGlyph extends AbstractEffect implements Trigge
                 ? MonstrosityCasting.effect(ability, world, frame, stats.getAmpMultiplier(), stats.getDurationMultiplier())
                 : ScyllaCasting.supports(ability)
                 ? ScyllaCasting.effect(ability, world, frame, stats.getAmpMultiplier(), stats.getDurationMultiplier())
+                : MaledictusCasting.supports(ability)
+                ? MaledictusCasting.effect(ability, world, frame, stats.getAmpMultiplier())
                 : NativePayloads.effect(ability, world, frame, stats.getAmpMultiplier()));
     }
 

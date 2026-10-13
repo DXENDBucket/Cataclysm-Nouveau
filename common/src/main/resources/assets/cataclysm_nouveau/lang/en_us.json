@@ -159,5 +159,15 @@
   "cataclysm_nouveau.glyph_desc.glyph_ignis_ultimate": "The caster, an ally or a fixed point prepares a heavy forward slash, ground shockwaves and eight flame fields. Entity actions can turn during preparation and lock heading for the slash. Retains the native opening ring, lingering flames, Blazing Brand and ending explosions.",
   "cataclysm_nouveau.glyph_name.glyph_ignis_flame_strike": "Flame Strike",
   "cataclysm_nouveau.glyph_desc.glyph_ignis_flame_strike": "Raise a grounded flame field that periodically damages enemies and stacks Blazing Brand. Base duration is 3 seconds before time augments; normal flame explodes on expiry, soul flame does not.",
-  "item.cataclysm_nouveau.ignitium_fragment": "Ignitium Fragment"
+  "item.cataclysm_nouveau.ignitium_fragment": "Ignitium Fragment",
+  "cataclysm_nouveau.glyph_name.glyph_phantom_arrow": "Phantom Arrow",
+  "cataclysm_nouveau.glyph_desc.glyph_phantom_arrow": "Replaces the projectile with a native seeking phantom arrow. Cursed Rage adds 5% base damage per level, up to five. Preserves native trails and impact effects.",
+  "item.cataclysm_nouveau.glyph_phantom_arrow": "Phantom Arrow",
+  "cataclysm_nouveau.glyph_name.glyph_phantom_halberd": "Phantom Halberd",
+  "cataclysm_nouveau.glyph_desc.glyph_phantom_halberd": "Raises a native phantom halberd at nearby ground. Preserves its delayed multi-hit window, armor and shield bypass. Cursed Rage adds 10% base damage per level, up to five.",
+  "item.cataclysm_nouveau.glyph_phantom_halberd": "Phantom Halberd",
+  "cataclysm_nouveau.glyph_name.glyph_cursed_rage": "Cursed Rage",
+  "cataclysm_nouveau.glyph_desc.glyph_cursed_rage": "Adds one level of rage to yourself or an ally, up to five. Amplify adds levels. Each level decays after ten seconds without refreshing. Only Maledictus abilities benefit.",
+  "item.cataclysm_nouveau.glyph_cursed_rage": "Cursed Rage",
+  "effect.cataclysm_nouveau.cursed_rage": "Cursed Rage"
 }

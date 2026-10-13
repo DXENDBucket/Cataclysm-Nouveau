@@ -33,7 +33,9 @@ public final class GlyphClientExtensions {
                 graphics.blit(x+3,y+3,(int)z,18,18,statusIcon(instance),1,1,1,alpha);
                 return true;
             }
-        },dev.cataclysmnouveau.CataclysmEffects.LAVA_WALKING,dev.cataclysmnouveau.CataclysmEffects.WATER_WALKING);
+        },dev.cataclysmnouveau.CataclysmEffects.LAVA_WALKING,dev.cataclysmnouveau.CataclysmEffects.WATER_WALKING,dev.cataclysmnouveau.CataclysmEffects.CURSED_RAGE);
+        event.registerItem(nativeItem(() -> ModItems.CURSED_BOW.get()),GlyphCatalog.PHANTOM_ARROW.getGlyph());
+        event.registerItem(nativeItem(() -> ModItems.SOUL_RENDER.get()),GlyphCatalog.PHANTOM_HALBERD.getGlyph());
         event.registerItem(nativeItem(() -> ModItems.CERAUNUS.get()),GlyphCatalog.ANCHOR.getGlyph(),GlyphCatalog.WAVE.getGlyph(),GlyphCatalog.SPIN.getGlyph(),GlyphCatalog.LEAP.getGlyph());
         event.registerItem(nativeItem(() -> ModItems.LASER_GATLING.get()),GlyphCatalog.LASER_BOLT.getGlyph(),GlyphCatalog.DEATH_LASER.getGlyph());
         event.registerItem(nativeItem(() -> ModItems.WITHER_ASSULT_SHOULDER_WEAPON.get()),GlyphCatalog.MISSILE.getGlyph(),GlyphCatalog.HOMING.getGlyph(),GlyphCatalog.HOWITZER.getGlyph(),GlyphCatalog.HOWITZER_VOLLEY.getGlyph(),GlyphCatalog.MISSILE_SALVO.getGlyph());
@@ -44,6 +46,8 @@ public final class GlyphClientExtensions {
             GlyphCatalog.GUARDIAN_UPPERCUT.getGlyph(),GlyphCatalog.GUARDIAN_ROCKET_PUNCH.getGlyph());
     }
     private static net.minecraft.client.renderer.texture.TextureAtlasSprite statusIcon(net.minecraft.world.effect.MobEffectInstance instance) {
+        if(instance.getEffect().value()==dev.cataclysmnouveau.CataclysmEffects.CURSED_RAGE.value())
+            return Minecraft.getInstance().getMobEffectTextures().get(net.minecraft.world.effect.MobEffects.DAMAGE_BOOST);
         return Minecraft.getInstance().getMobEffectTextures().get(instance.getEffect().value()==dev.cataclysmnouveau.CataclysmEffects.WATER_WALKING.value()
                 ?net.minecraft.world.effect.MobEffects.DOLPHINS_GRACE:net.minecraft.world.effect.MobEffects.FIRE_RESISTANCE);
     }

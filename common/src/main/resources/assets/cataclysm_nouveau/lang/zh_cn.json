@@ -159,5 +159,15 @@
   "cataclysm_nouveau.glyph_desc.glyph_ignis_ultimate": "自身、友军或固定落点蓄势后向前重斩，释放宽广地面冲击和八道烈焰打击。准备时可转向，重斩时锁向；保留原生预备火环、持续火焰、烙印和消退爆炸。",
   "cataclysm_nouveau.glyph_name.glyph_ignis_flame_strike": "烈焰打击",
   "cataclysm_nouveau.glyph_desc.glyph_ignis_flame_strike": "在选定地面升起烈焰区域，周期伤害叠加炽焰烙印。基础持续3秒，时效增强改变持续时间；普通火焰消退后爆炸，灵魂火焰不会。",
-  "item.cataclysm_nouveau.ignitium_fragment": "焰锭碎片"
+  "item.cataclysm_nouveau.ignitium_fragment": "焰锭碎片",
+  "cataclysm_nouveau.glyph_name.glyph_phantom_arrow": "幽灵之箭",
+  "cataclysm_nouveau.glyph_desc.glyph_phantom_arrow": "将弹射物替换为原生追踪幽灵箭，保留拖尾与命中特效。怒气每层提升5%基础伤害，最多五层。",
+  "item.cataclysm_nouveau.glyph_phantom_arrow": "幽灵之箭",
+  "cataclysm_nouveau.glyph_name.glyph_phantom_halberd": "幻影戟",
+  "cataclysm_nouveau.glyph_desc.glyph_phantom_halberd": "在附近地面升起原生幻影戟，保留延迟多次攻击、穿透护甲与盾牌。怒气每层提升10%基础伤害，最多五层。",
+  "item.cataclysm_nouveau.glyph_phantom_halberd": "幻影戟",
+  "cataclysm_nouveau.glyph_name.glyph_cursed_rage": "咒翼怒气",
+  "cataclysm_nouveau.glyph_desc.glyph_cursed_rage": "为自身或友军叠加一层怒气，最多五层；强化增加叠层数。未刷新时每十秒衰减一层。只强化咒翼灵骸的能力。",
+  "item.cataclysm_nouveau.glyph_cursed_rage": "咒翼怒气",
+  "effect.cataclysm_nouveau.cursed_rage": "咒翼怒气"
 }

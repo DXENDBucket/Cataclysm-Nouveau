@@ -50,6 +50,129 @@ public final class NativeAbilityTests {
             h.succeed();
         } finally {clean(h,p);}
     }
+    public static void maledictusRageState(GameTestHelper h) {
+        var a=new Arena(h);var ally=a.target(a.center,true);var enemy=a.target(a.center.add(4,0,0),false);
+        try {
+            var mana=CapabilityRegistry.getMana(a.p);
+            a.cast(GlyphCatalog.RAGE,new EntityHitResult(enemy),false);
+            close(h,mana.getCurrentMana(),10000,"Hostile rage target refunds payment");
+            h.assertTrue(MaledictusRage.stacks(enemy)==0 && MaledictusRage.stacks(a.p)==0,"No fallback to caster");
+            a.cast(GlyphCatalog.RAGE,block(a.center),false);
+            close(h,mana.getCurrentMana(),10000,"A position cannot carry a living rage effect");
+            a.cast(GlyphCatalog.RAGE,new EntityHitResult(a.p),false);
+            a.cast(GlyphCatalog.RAGE,new EntityHitResult(a.p),true);
+            h.assertTrue(MaledictusRage.stacks(a.p)==3,"Active casts share state and Amplify adds one level");
+            close(h,10000-mana.getCurrentMana(),2*CataclysmConfig.cost(Ability.CURSED_RAGE)+10,"Only successful grants pay");
+            a.cast(GlyphCatalog.RAGE,new EntityHitResult(ally),false);
+            h.assertTrue(MaledictusRage.stacks(ally)==1,"Allied mobs carry the same effect");
+            // Same gain entry point will be used by accepted native melee hits.
+            MaledictusRage.gain(ally,9);h.assertTrue(MaledictusRage.stacks(ally)==5,"Five-level cap");
+            h.assertTrue(MaledictusRage.consume(ally,2)==2 && MaledictusRage.stacks(ally)==3,"Explicit consumption is shared");
+            MaledictusRage.clear(ally);h.assertTrue(!ally.hasEffect(CataclysmEffects.CURSED_RAGE),"Clearing removes the entire decay chain");
+            MaledictusRage.gain(ally,3);
+            h.runAfterDelay(CataclysmConfig.rageDecay()+2,()->{
+                try{h.assertTrue(MaledictusRage.stacks(ally)==2,"Real living effect ticking decays exactly one level: "+MaledictusRage.stacks(ally));
+                    MaledictusRage.gain(ally,1);h.assertTrue(ally.getEffect(CataclysmEffects.CURSED_RAGE).getDuration()==CataclysmConfig.rageDecay(),"Gain resets the decay timer");h.succeed();
+                }finally{a.close();}
+            });
+        }catch(Throwable failure){a.close();throw failure;}
+    }
+    public static void maledictusRageSaveAndCompleteDecay(GameTestHelper h) {
+        try(var a=new Arena(h)) {
+            var actor=a.target(a.center,true);MaledictusRage.gain(actor,5);
+            var tag=new net.minecraft.nbt.CompoundTag();actor.saveWithoutId(tag);
+            var restored=EntityType.COW.create(h.getLevel());restored.load(tag);restored.setPos(a.center.add(3,0,0));
+            h.assertTrue(MaledictusRage.stacks(restored)==5,"Rage survives a native entity save/load");
+            var effect=restored.getEffect(CataclysmEffects.CURSED_RAGE);
+            for(int remaining=5;remaining>0;remaining--) {
+                h.assertTrue(MaledictusRage.stacks(restored)==remaining,"Saved hidden effects retain each level");
+                boolean alive=true;for(int tick=0;tick<CataclysmConfig.rageDecay();tick++)alive=effect.tick(restored,()->{});
+                h.assertTrue(alive==(remaining>1),"Only the final level expires");
+            }
+            // Removing the expired instance is LivingEntity's responsibility, as for vanilla effects.
+            MaledictusRage.clear(restored);h.assertTrue(MaledictusRage.stacks(restored)==0,"Complete decay ends at zero");restored.discard();h.succeed();
+        }
+    }
+    public static void maledictusArrowNativeLaunch(GameTestHelper h) {
+        try(var a=new Arena(h)) {
+            var mana=CapabilityRegistry.getMana(a.p);MaledictusRage.gain(a.p,5);
+            var marker=new Marker();var cast=resolver(h,a.p,new Spell(MethodProjectile.INSTANCE,GlyphCatalog.PHANTOM_ARROW,marker));cast.spellContext.nextPart();
+            var carrier=new EntityProjectileSpell(h.getLevel(),cast);carrier.setPos(a.center.add(0,2,0));carrier.setDeltaMovement(new Vec3(0,0,.75));
+            h.assertTrue(ProjectileDispatch.convert(carrier),"Core converts native arrow payload");
+            var arrow=(Phantom_Arrow_Entity)harbingerPayloads(h).getFirst();var state=(ManagedProjectile)arrow;
+            close(h,arrow.getDeltaMovement().length(),1.8,"Native Boss launch speed");
+            close(h,arrow.getBaseDamage(),com.github.L_Ender.cataclysm.config.CMCommonConfig.Maledictus.PhantomArrowDamage*1.25,"Five rage levels increase the native arrow base");
+            h.assertTrue(arrow.pickup==net.minecraft.world.entity.projectile.AbstractArrow.Pickup.DISALLOWED && !arrow.shouldBeSaved(),"No free arrow pickups or transient save");
+            var target=a.target(a.center.add(0,2,4),false);
+            ((ProjectileHitAccess)arrow).confluxCataclysm$nativeHit(new EntityHitResult(target));
+            close(h,500-target.getHealth(),arrow.getBaseDamage(),"Native direct damage, not velocity-scaled vanilla damage");
+            h.assertTrue(marker.hits==1 && target.getLastDamageSource().getEntity()==a.p,"Accepted damage continues with original credit");
+            close(h,mana.getCurrentMana(),10000-CataclysmConfig.cost(Ability.PHANTOM_ARROW),"Launch charged once");
+            a.p.discard();ExecutionSessions.tick();h.assertTrue(arrow.isRemoved() && carrier.isRemoved(),"Root death closes both trajectories");
+            mana.setMana(0);h.succeed();
+        }
+    }
+    public static void maledictusArrowRepeating(GameTestHelper h) {
+        try(var a=new Arena(h)) {
+            var mana=CapabilityRegistry.getMana(a.p);var marker=new Marker();
+            var cast=resolver(h,a.p,new Spell(MethodProjectile.INSTANCE,GlyphCatalog.PHANTOM_ARROW,marker));cast.spellContext.nextPart();
+            var carrier=new EntityOrbitProjectile(h.getLevel(),cast,a.p);carrier.setPos(a.center.add(0,2,0));
+            h.assertTrue(ProjectileDispatch.convert(carrier),"Orbit uses shared trajectory");
+            var arrow=(Phantom_Arrow_Entity)harbingerPayloads(h).getFirst();var before=arrow.position();arrow.tick();
+            close(h,arrow.position().distanceTo(before),0,"Native tail tick cannot add a second server movement");
+            var enemy=a.target(a.center.add(0,2,4),false);var ally=a.target(a.center.add(0,2,6),true);
+            var callback=ArsSpellAccess.resolver(carrier);callback.onResolveEffect(h.getLevel(),new EntityHitResult(ally));
+            close(h,mana.getCurrentMana(),10000,"Friendly impacts never charge");h.assertTrue(marker.hits==0,"Friendly impacts do not continue");
+            for(int i=1;i<=2;i++)callback.onResolveEffect(h.getLevel(),new EntityHitResult(enemy));
+            h.assertTrue(marker.hits==2 && !arrow.isRemoved(),"Native arrow bypasses hurt cooldown, repeated accepted hits continue");
+            callback.onResolveEffect(h.getLevel(),block(a.center.add(0,0,4)));arrow.tick();
+            h.assertTrue(marker.hits==3 && arrow.getTransparency()==0,"Block impact does not permanently ground or fade orbit arrow");
+            close(h,mana.getCurrentMana(),10000-3*CataclysmConfig.cost(Ability.PHANTOM_ARROW),"Each repeated contact pays");
+            enemy.setInvulnerable(true);callback.onResolveEffect(h.getLevel(),new EntityHitResult(enemy));
+            h.assertTrue(marker.hits==3 && !arrow.isRemoved(),"Rejected hurt retains native aftermath without continuation");
+            h.assertTrue(h.getLevel().getEntitiesOfClass(net.minecraft.world.entity.item.ItemEntity.class,new AABB(a.center,a.center).inflate(12)).isEmpty(),"Failed hurt cannot spawn a pickup arrow");
+            mana.setMana(0);callback.onResolveEffect(h.getLevel(),block(a.center));
+            h.assertTrue(arrow.isRemoved() && carrier.isRemoved(),"Empty mana ends both repeating carriers");h.succeed();
+        }
+    }
+    public static void maledictusHalberdNative(GameTestHelper h) {
+        var a=new Arena(h);var victim=a.target(a.center,false);var ally=a.target(a.center,true);MaledictusRage.gain(a.p,5);
+        try {
+            var mana=CapabilityRegistry.getMana(a.p);a.cast(GlyphCatalog.PHANTOM_HALBERD,new EntityHitResult(victim),true);
+            var halberds=h.getLevel().getEntitiesOfClass(Phantom_Halberd_Entity.class,new AABB(a.center,a.center).inflate(4));
+            h.assertTrue(halberds.size()==1,"Native halberd registered entity is spawned");var halberd=halberds.getFirst();
+            close(h,halberd.getDamage(),com.github.L_Ender.cataclysm.config.CMCommonConfig.Maledictus.PhantomHalberdDamage*1.5,"Native coefficient snapshots caster rage");
+            h.assertTrue(halberd.getCaster()==a.p && !halberd.shouldBeSaved(),"Real owner and transient lifecycle");
+            close(h,mana.getCurrentMana(),10000-CataclysmConfig.cost(Ability.PHANTOM_HALBERD)-10,"Ground effect pays once");
+            victim.getAttribute(Attributes.ARMOR).setBaseValue(20);
+            h.runAfterDelay(15,()->close(h,victim.getHealth(),500,"Warmup retains original delayed attack"));
+            h.runAfterDelay(55,()->{
+                try {
+                    double hit=Resources.augmentedDamage(halberd.getDamage(),1);
+                    h.assertTrue(halberd.getState()>=1 && halberd.getState()<=4,"Native random appearance animation runs");
+                    h.assertTrue(500-victim.getHealth()>=2*hit-.01,"Native timed window permits multiple armor-bypassing hits");
+                    close(h,ally.getHealth(),500,"Allies are excluded from the entire window");
+                    h.assertTrue(victim.getLastDamageSource().getEntity()==a.p,"Halberd keeps real damage owner");
+                    a.p.discard();ExecutionSessions.tick();h.assertTrue(halberd.isRemoved(),"Owner loss clears remaining native visual");h.succeed();
+                }finally{a.close();}
+            });
+        }catch(Throwable failure){a.close();throw failure;}
+    }
+    public static void maledictusHalberdRefundAndExpiry(GameTestHelper h) {
+        var a=new Arena(h);
+        try {
+            var mana=CapabilityRegistry.getMana(a.p);a.cast(GlyphCatalog.PHANTOM_HALBERD,block(a.center.add(0,12,0)),false);
+            close(h,mana.getCurrentMana(),10000,"No ground within four blocks means refund");
+            a.cast(GlyphCatalog.PHANTOM_HALBERD,block(a.center),false);
+            h.runAfterDelay(100,()->{
+                try{h.assertTrue(h.getLevel().getEntitiesOfClass(Phantom_Halberd_Entity.class,new AABB(a.center,a.center).inflate(8)).isEmpty(),"Native lifetime expires without lingering entity");
+                    for(var glyph:List.of(GlyphCatalog.PHANTOM_ARROW,GlyphCatalog.PHANTOM_HALBERD,GlyphCatalog.RAGE))
+                        h.assertTrue(h.getLevel().getRecipeManager().byKey(glyph.getRegistryName()).isPresent(),"Real scribe recipe: "+glyph.getRegistryName());
+                    h.succeed();
+                }finally{a.close();}
+            });
+        }catch(Throwable failure){a.close();throw failure;}
+    }
     private static Vec3 scene(GameTestHelper h) {
         var origin=h.absoluteVec(new Vec3(4,0,4));
         return new Vec3(origin.x,h.getLevel().getMaxBuildHeight()-48,origin.z);

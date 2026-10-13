@@ -25,8 +25,8 @@ import java.util.function.Supplier;
 /** Native payloads own visuals/hit bodies; a single trajectory owns motion and collision. */
 public final class HarbingerCasting {
     private static final ThreadLocal<Entity> DECORATING=new ThreadLocal<>();
-    public static boolean supports(Ability a) {return switch(a){case IGNIS_FIREBALL,IGNIS_ABYSS_FIREBALL,LASER_BOLT,WITHER_MISSILE,HOMING_MISSILE,WITHER_HOWITZER,GUARDIAN_BULLET->true;default->false;};}
-    public static boolean nativePayload(Entity e) {return e instanceof Ignis_Fireball_Entity || e instanceof Ignis_Abyss_Fireball_Entity || e instanceof Laser_Beam_Entity || e instanceof Wither_Missile_Entity || e instanceof Wither_Homing_Missile_Entity || e instanceof Wither_Howitzer_Entity || e instanceof Ender_Guardian_Bullet_Entity;}
+    public static boolean supports(Ability a) {return switch(a){case PHANTOM_ARROW,IGNIS_FIREBALL,IGNIS_ABYSS_FIREBALL,LASER_BOLT,WITHER_MISSILE,HOMING_MISSILE,WITHER_HOWITZER,GUARDIAN_BULLET->true;default->false;};}
+    public static boolean nativePayload(Entity e) {return e instanceof Phantom_Arrow_Entity || e instanceof Ignis_Fireball_Entity || e instanceof Ignis_Abyss_Fireball_Entity || e instanceof Laser_Beam_Entity || e instanceof Wither_Missile_Entity || e instanceof Wither_Homing_Missile_Entity || e instanceof Wither_Howitzer_Entity || e instanceof Ender_Guardian_Bullet_Entity;}
     public static boolean decorating(Entity e) {return DECORATING.get()==e && e instanceof ManagedProjectile s && s.confluxCataclysm$mode()==1;}
     public static void decorate(Entity e,Runnable tick) {
         var old=DECORATING.get();DECORATING.set(e);
@@ -36,7 +36,7 @@ public final class HarbingerCasting {
         return Allies.areAllies(c.caster(),target) || Allies.areAllies(c.damageOwner(),target) || Allies.areAllies(c.executor(),target);
     }
     public static boolean rejectDamage(Entity source,Entity target) {
-        if(!nativePayload(source) && !(source instanceof Death_Laser_Beam_Entity) && !(source instanceof Wither_Smoke_Effect_Entity) && !(source instanceof com.github.L_Ender.cataclysm.entity.effect.Flame_Strike_Entity) && !(source instanceof SpellIgnis))return false;
+        if(!nativePayload(source) && !(source instanceof Phantom_Halberd_Entity) && !(source instanceof Death_Laser_Beam_Entity) && !(source instanceof Wither_Smoke_Effect_Entity) && !(source instanceof com.github.L_Ender.cataclysm.entity.effect.Flame_Strike_Entity) && !(source instanceof SpellIgnis))return false;
         var c=NativeSpellDamage.context(source);if(c==null)return false;
         return allied(c,target) || source instanceof Death_Laser_Beam_Entity beam && beam.tickCount>20+beam.getDuration();
     }
@@ -58,6 +58,12 @@ public final class HarbingerCasting {
         if(IgnisCasting.projectile(a))return IgnisCasting.create(a,world,c,direction,target,amplify);
         var owner=c.damageOwner()==null?c.caster():c.damageOwner();float bonus=Resources.amplification(amplify);
         Projectile p=switch(a) {
+            case PHANTOM_ARROW->{
+                var arrow=new Phantom_Arrow_Entity(world,owner,target);
+                arrow.setBaseDamage(MaledictusRage.arrowDamage(CMCommonConfig.Maledictus.PhantomArrowDamage,c.caster()));
+                arrow.pickup=AbstractArrow.Pickup.DISALLOWED;
+                yield arrow;
+            }
             case GUARDIAN_BULLET->new Ender_Guardian_Bullet_Entity(world,owner,direction);
             case LASER_BOLT->new Laser_Beam_Entity(owner,direction,world,Math.max(0,(float)CMCommonConfig.Harbinger.Laserdamage));
             case WITHER_MISSILE->new Wither_Missile_Entity(owner,direction,world,Math.max(0,(float)CMCommonConfig.Harbinger.WitherMissiledamage));
@@ -72,7 +78,7 @@ public final class HarbingerCasting {
         var resolver=ArsSpellAccess.resolver(carrier);var frame=CastContext.of(resolver.spellContext,null,null);
         if(frame.caster()==null || !frame.caster().isAlive())return true;
         Vec3 direction=TriggerGeometry.direction(carrier);
-        var selected=(a==Ability.HOMING_MISSILE || IgnisCasting.projectile(a))?target(world,carrier.position(),direction,frame):null;
+        var selected=(a==Ability.PHANTOM_ARROW || a==Ability.HOMING_MISSILE || IgnisCasting.projectile(a))?target(world,carrier.position(),direction,frame):null;
         if(a==Ability.HOMING_MISSILE && !profile.arsDriven() && selected==null)return true;
         var stats=resolver.getCastStats();var quote=Resources.quote(resolver.spellContext,a,stats.getAugments());
         var payload=create(a,world,frame,direction,selected,stats.getAmpMultiplier());
@@ -98,7 +104,8 @@ public final class HarbingerCasting {
             if(payload instanceof CMAbstractHurtingProjectile fire)IgnisCasting.accelerate(fire,acceleration,target(s.world(),carrier.position(),direction,s.context()));
             if(trajectory!=null)return trajectory.start(s.world(),()->{},h->impact(s,h));
             payload.setPos(carrier.position());
-            if(payload instanceof Wither_Howitzer_Entity shell)shell.shoot(direction.x,direction.y,direction.z,(float)(.6*acceleration),0);
+            if(payload instanceof Phantom_Arrow_Entity arrow)arrow.shoot(direction.x,direction.y,direction.z,(float)(1.8*acceleration),0);
+            else if(payload instanceof Wither_Howitzer_Entity shell)shell.shoot(direction.x,direction.y,direction.z,(float)(.6*acceleration),0);
             else {payload.setDeltaMovement(payload.getDeltaMovement().scale(acceleration));if(payload instanceof Laser_Beam_Entity laser)laser.accelerationPower*=acceleration;if(payload instanceof Wither_Missile_Entity missile)missile.accelerationPower*=acceleration;if(payload instanceof Wither_Homing_Missile_Entity homing)homing.accelerationPower*=acceleration;}
             payload.setYRot((float)(Math.atan2(direction.x,direction.z)*180/Math.PI));payload.setXRot((float)(Math.atan2(direction.y,direction.horizontalDistance())*180/Math.PI));
             return s.world().addFreshEntity(payload);

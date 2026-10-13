@@ -19,6 +19,8 @@ public final class CataclysmEffects {
             ()->new MobEffect(MobEffectCategory.BENEFICIAL,0xEF7426) {});
     public static final DeferredHolder<MobEffect,MobEffect> WATER_WALKING=EFFECTS.register("water_walking",
             ()->new MobEffect(MobEffectCategory.BENEFICIAL,0x63C2E0) {});
+    public static final DeferredHolder<MobEffect,MobEffect> CURSED_RAGE=EFFECTS.register("cursed_rage",
+            ()->new MobEffect(MobEffectCategory.BENEFICIAL,0xA240CD) {});
     public static void register(IEventBus bus) {EFFECTS.register(bus);}
     @SubscribeEvent
     public static void lavaDamage(LivingIncomingDamageEvent event) {

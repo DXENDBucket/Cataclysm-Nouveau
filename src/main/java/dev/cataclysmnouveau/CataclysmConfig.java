@@ -26,6 +26,7 @@ public final class CataclysmConfig {
     private static final ModConfigSpec.IntValue SCYLLA_CLOUD_WARMUP;
     private static final ModConfigSpec.IntValue WATER_WALKING_DURATION;
     private static final ModConfigSpec.DoubleValue ANCHOR_PULL_SPEED;
+    private static final ModConfigSpec.IntValue RAGE_DECAY,RAGE_GAIN,HALBERD_WARMUP;
     static {
         var b = new ModConfigSpec.Builder(); b.push("mana");
         for (var a : Ability.values()) COSTS.put(a, b.comment("Ars mana per actual launch or repeated impact.").defineInRange(a.id, a.mana, 0, 100000));
@@ -84,6 +85,10 @@ public final class CataclysmConfig {
         GUARDIAN_ACTION_RANGE=b.comment("Maximum target distance for Guardian actor actions; never loads extra chunks.").defineInRange("action_target_range",32,4,128);
         GUARDIAN_BULLET_DELAY=b.comment("Preparation ticks before the bullet leaves its staging position. Special Ars trajectories keep their own motion.").defineInRange("bullet_preparation_ticks",30,1,200);
         GUARDIAN_VORTEX_LIFETIME=b.comment("Native vortex lifespan before duration augments; collapse explodes without terrain damage.").defineInRange("vortex_lifetime_ticks",300,40,1200);b.pop();
+        b.push("maledictus");
+        RAGE_DECAY=b.comment("Ticks before losing one rage level; gaining rage refreshes this interval. Maximum five levels.").defineInRange("rage_decay_ticks",200,1,72000);
+        RAGE_GAIN=b.comment("Rage levels gained by the active glyph before potency augments.").defineInRange("rage_stacks_per_cast",1,1,5);
+        HALBERD_WARMUP=b.comment("Initial ground-halberd delay before its native animation and damage window.").defineInRange("halberd_warmup_ticks",10,0,1200);b.pop();
         b.push("cooldowns");
         COOLDOWNS=b.comment("Gate new active uses through Conflux; existing trajectories keep running.").define("enabled",true);
         CREATIVE_COOLDOWN=b.define("creative_cooldown",false);
@@ -98,6 +103,9 @@ public final class CataclysmConfig {
         AUGMENT_MAX=b.defineInRange("maximum",10.0,0,100000);b.pop();
         SPEC=b.build();
     }
+    public static int rageDecay(){return SPEC.isLoaded()?RAGE_DECAY.get():200;}
+    public static int rageGain(){return SPEC.isLoaded()?RAGE_GAIN.get():1;}
+    public static int halberdWarmup(){return SPEC.isLoaded()?HALBERD_WARMUP.get():10;}
     public static int cost(Ability a) { return SPEC.isLoaded()?COSTS.get(a).get():a.mana; }
     public static boolean capHealthDamage() { return !SPEC.isLoaded() || CAP_HEALTH_DAMAGE.get(); }
     public static int amplifyCost() { return SPEC.isLoaded()?AMPLIFY_COST.get():10; }
@@ -127,7 +135,7 @@ public final class CataclysmConfig {
     public static float flareDirectDamage() {return SPEC.isLoaded()?FLARE_DIRECT_DAMAGE.get().floatValue():7;}
     public static float flareJetDamage() {return SPEC.isLoaded()?FLARE_JET_DAMAGE.get().floatValue():7;}
     private static int defaultCooldown(Ability ability) {
-        return switch(ability) {case IGNIS_FIREBALL_ARRAY->160;case IGNIS_EARTH_SHUDDERS->240;case IGNIS_REINFORCED_SMASH->300;case IGNIS_ULTIMATE->400;case IGNIS_FLAME_STRIKE->120;case IGNIS_FIREBALL->40;case IGNIS_ABYSS_FIREBALL->80;case IGNIS_BLADE_FIREBALLS->120;case IGNIS_AIR_SMASH->160;case IGNIS_SWORD_COMBO->240;case GUARDIAN_UPPERCUT->200;case GUARDIAN_BLINK->120;case GUARDIAN_AIR_STRIKE->240;case GUARDIAN_ROCKET_PUNCH->100;case GUARDIAN_BULLET->0;case VOID_VORTEX->300;case GUARDIAN_STOMP->200;case GRAVITY_PUNCH->80;case HARBINGER_CHARGE->80;case HOWITZER_VOLLEY->80;case MISSILE_SALVO->60;case WITHER_SMOKE->20;case LASER_BOLT->0;case WITHER_MISSILE->60;case HOMING_MISSILE->80;case WITHER_HOWITZER->160;case DEATH_LASER->200;case CERAUNUS->40;case WAVE->100;case FLARE_BOMB->160;case LAVA_BOMB->100;case EARTHQUAKE->160;case FISSURE->200;case FLAME_RING->200;case SHOULDER_CHECK->80;case LAVA_ABSORPTION->400;case MONSTROUS->350;case WATER_SPEAR->40;case LIGHTNING_SPEAR->60;case STORM_SERPENT->120;case LIGHTNING_STORM->80;case LIGHTNING_FIELD->100;case STORM_BURST->240;case SPARK->60;case THUNDER_CLOUD->400;case LIGHTNING_ROW->200;case THUNDER_COMBO->360;case ANCHOR_SPIN->240;case ANCHOR_LEAP->300;default->0;};
+        return switch(ability) {case PHANTOM_HALBERD->60;case IGNIS_FIREBALL_ARRAY->160;case IGNIS_EARTH_SHUDDERS->240;case IGNIS_REINFORCED_SMASH->300;case IGNIS_ULTIMATE->400;case IGNIS_FLAME_STRIKE->120;case IGNIS_FIREBALL->40;case IGNIS_ABYSS_FIREBALL->80;case IGNIS_BLADE_FIREBALLS->120;case IGNIS_AIR_SMASH->160;case IGNIS_SWORD_COMBO->240;case GUARDIAN_UPPERCUT->200;case GUARDIAN_BLINK->120;case GUARDIAN_AIR_STRIKE->240;case GUARDIAN_ROCKET_PUNCH->100;case GUARDIAN_BULLET->0;case VOID_VORTEX->300;case GUARDIAN_STOMP->200;case GRAVITY_PUNCH->80;case HARBINGER_CHARGE->80;case HOWITZER_VOLLEY->80;case MISSILE_SALVO->60;case WITHER_SMOKE->20;case LASER_BOLT->0;case WITHER_MISSILE->60;case HOMING_MISSILE->80;case WITHER_HOWITZER->160;case DEATH_LASER->200;case CERAUNUS->40;case WAVE->100;case FLARE_BOMB->160;case LAVA_BOMB->100;case EARTHQUAKE->160;case FISSURE->200;case FLAME_RING->200;case SHOULDER_CHECK->80;case LAVA_ABSORPTION->400;case MONSTROUS->350;case WATER_SPEAR->40;case LIGHTNING_SPEAR->60;case STORM_SERPENT->120;case LIGHTNING_STORM->80;case LIGHTNING_FIELD->100;case STORM_BURST->240;case SPARK->60;case THUNDER_CLOUD->400;case LIGHTNING_ROW->200;case THUNDER_COMBO->360;case ANCHOR_SPIN->240;case ANCHOR_LEAP->300;default->0;};
     }
     public static int cooldownTicks(Ability ability) {
         return SPEC.isLoaded()?COOLDOWN_TICKS.get(ability).get():defaultCooldown(ability);
