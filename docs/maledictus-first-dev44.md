@@ -38,3 +38,8 @@ Java21，`runGameTestServer jar sourcesJar verifyDistributions -PgameTestNamespa
 
 - `cataclysm-nouveau-0.1.0-dev.44-mc1.21.1-neoforge.jar`：`144b86bcc2682a05395a112cdfb093fd424e3fb016aefc6a1f7f344fa7d950c6`
 - `cataclysm-nouveau-0.1.0-dev.44-sources.jar`：`9f88a866b972e114e608dfd1c2e310d87156b96b7b02a6e9d9b3827d7f72efb0`
+
+
+## 本地交付
+
+实现提交 `9109a868a7bc2edb583551c3736058f5d20550ca`，已快进合入主仓库并标记 `v0.1.0-dev.44`，未推送远程。协调者在没有运行客户端时替换“万法归一”中的本附属，部署后SHA-256与上表一致；mods中只有dev.44一个本附属版本。旧dev.43移至实例的`codex-backups/cataclysm-dev44`。Core和其他附属JAR未替换；没有遗留本次GameTest Java进程，现有Gradle守护进程保留。
