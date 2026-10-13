@@ -6,7 +6,7 @@ import net.neoforged.neoforge.common.ModConfigSpec;
 public final class CataclysmClientConfig {
     public static final ModConfigSpec SPEC;
     public static final ModConfigSpec.BooleanValue VORTEX_DIAGNOSTICS;
-    private static final ModConfigSpec.BooleanValue IGNIS_PHANTOM,IGNIS_ACTIONS,SCYLLA_ACTIONS,HARBINGER_ACTIONS,GUARDIAN_ACTIONS,MONSTROSITY_ACTIONS;
+    private static final ModConfigSpec.BooleanValue IGNIS_PHANTOM,IGNIS_ACTIONS,SCYLLA_ACTIONS,HARBINGER_ACTIONS,GUARDIAN_ACTIONS,MONSTROSITY_ACTIONS,MALEDICTUS_ACTIONS;
     private static final ModConfigSpec.DoubleValue PHANTOM_OPACITY,FIRST_PERSON_OPACITY,PHANTOM_SCALE;
     static {
         var builder = new ModConfigSpec.Builder();
@@ -24,6 +24,7 @@ public final class CataclysmClientConfig {
         HARBINGER_ACTIONS=builder.comment("Native Harbinger charge phantom.").define("harbinger_actions",true);
         GUARDIAN_ACTIONS=builder.comment("Native Ender Guardian punch, uppercut, blink and air strike phantoms.").define("guardian_actions",true);
         MONSTROSITY_ACTIONS=builder.comment("Native Monstrosity shoulder check phantom.").define("monstrosity_actions",true);
+        MALEDICTUS_ACTIONS=builder.comment("Native Maledictus halberd cleave and soul burst phantoms.").define("maledictus_actions",true);
         PHANTOM_OPACITY=builder.comment("Opacity of all native model layers. Does not change damage or attack range.").defineInRange("opacity",.28,0,1);
         FIRST_PERSON_OPACITY=builder.comment("Lower opacity when the local player is the executor and the camera is first person.").defineInRange("first_person_opacity",.10,0,1);
         PHANTOM_SCALE=builder.comment("Visual scale only; 1 keeps the original Boss weapon reach. Does not change hitboxes.").defineInRange("scale",1.0,.25,2);
@@ -36,7 +37,7 @@ public final class CataclysmClientConfig {
         if(kind==null)return false;
         return !SPEC.isLoaded() || switch(kind){
             case SCYLLA -> SCYLLA_ACTIONS.get();case HARBINGER -> HARBINGER_ACTIONS.get();
-            case GUARDIAN -> GUARDIAN_ACTIONS.get();case MONSTROSITY -> MONSTROSITY_ACTIONS.get();
+            case GUARDIAN -> GUARDIAN_ACTIONS.get();case MONSTROSITY -> MONSTROSITY_ACTIONS.get();case MALEDICTUS -> MALEDICTUS_ACTIONS.get();
         };
     }
     public static float phantomOpacity(boolean firstPerson){return SPEC.isLoaded()?(firstPerson?FIRST_PERSON_OPACITY:PHANTOM_OPACITY).get().floatValue():firstPerson?.10F:.28F;}

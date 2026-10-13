@@ -173,6 +173,161 @@ public final class NativeAbilityTests {
             });
         }catch(Throwable failure){a.close();throw failure;}
     }
+    private static void maledictusAfter(GameTestHelper h,int ticks,Arena arena,Runnable check) {
+        h.runAfterDelay(ticks,()->{try{check.run();}catch(RuntimeException | Error failure){arena.close();throw failure;}});
+    }
+    private static List<Phantom_Halberd_Entity> maledictusHalberds(Arena a) {
+        return a.h.getLevel().getEntitiesOfClass(Phantom_Halberd_Entity.class,new AABB(a.center,a.center).inflate(22),e->e.getCaster()==a.p);
+    }
+    public static void maledictusSpiralNativeAndOneFee(GameTestHelper h) {
+        try(var a=new Arena(h)) {
+            MaledictusRage.gain(a.p,5);var mana=CapabilityRegistry.getMana(a.p);
+            a.cast(GlyphCatalog.PHANTOM_SPIRAL,block(a.center),true);
+            var children=maledictusHalberds(a);h.assertTrue(children.size()==100,"Both full native spiral patterns spawned on flat ground");
+            close(h,mana.getCurrentMana(),10000-CataclysmConfig.cost(Ability.PHANTOM_SPIRAL)-10,"The entire formation pays once, not 100 child charges");
+            for(var child:children) {
+                h.assertTrue(child.getCaster()==a.p && !child.shouldBeSaved(),"Each native child retains real owner and transient lifetime");
+                close(h,child.getDamage(),com.github.L_Ender.cataclysm.config.CMCommonConfig.Maledictus.PhantomHalberdDamage*1.5,"Unchanged native halberd base and rage coefficient");
+                close(h,NativeDamageContexts.amplification(child),1,"Ars augmentation is inherited once");
+            }
+            var plain=new com.github.L_Ender.cataclysm.entity.InternalAnimationMonster.IABossMonsters.Maledictus.Maledictus_Entity(com.github.L_Ender.cataclysm.init.ModEntities.MALEDICTUS.get(),h.getLevel());
+            plain.setRageMeter(3);h.assertTrue(plain.getRageMeter()==3 && NativeDamageContexts.context(plain)==null,"Original Boss rage is untouched by addon state");plain.discard();
+            a.p.discard();ExecutionSessions.tick();h.assertTrue(children.stream().allMatch(Entity::isRemoved),"Root loss clears every child");
+            for(var glyph:List.of(GlyphCatalog.PHANTOM_SPIRAL,GlyphCatalog.PHANTOM_RINGS,GlyphCatalog.HALBERD_CLEAVE,GlyphCatalog.SOUL_BURST))
+                h.assertTrue(h.getLevel().getRecipeManager().byKey(glyph.getRegistryName()).isPresent(),"Real Scribe recipe for "+glyph.getRegistryName());
+            h.succeed();
+        }
+    }
+    public static void maledictusRingHealthPhases(GameTestHelper h) {
+        for(int expected:new int[]{30,48,68}) {
+            try(var a=new Arena(h)) {
+                a.p.setHealth(a.p.getMaxHealth()*(expected==30?1:expected==48?.5F:.25F));
+                a.cast(GlyphCatalog.PHANTOM_RINGS,block(a.center),false);
+                h.assertTrue(maledictusHalberds(a).size()==14,"First native ring starts immediately");
+                ExecutionSessions.tick();h.assertTrue(maledictusHalberds(a).size()==30,"Second native ring follows one tick later");
+                for(int i=0;i<3;i++)ExecutionSessions.tick();
+                h.assertTrue(maledictusHalberds(a).size()==expected,"Native half/quarter-health pattern count "+expected);
+                close(h,CapabilityRegistry.getMana(a.p).getCurrentMana(),10000-CataclysmConfig.cost(Ability.PHANTOM_RINGS),"Extra health phase rings do not charge separately");
+            }
+        }
+        h.succeed();
+    }
+    public static void maledictusPartialRingAndRefund(GameTestHelper h) {
+        try(var a=new Arena(h)) {
+            // Leave the center support and outer ground, but no usable first-ring ground.
+            for(int x=-5;x<=5;x++)for(int z=-5;z<=5;z++)
+                if((x!=0 || z!=0) && Math.hypot(x+.5,z+.5)<4.8)
+                    for(int y=-5;y<=3;y++)h.getLevel().setBlockAndUpdate(a.base.offset(x,y,z),Blocks.AIR.defaultBlockState());
+            a.cast(GlyphCatalog.PHANTOM_RINGS,block(a.center),false);
+            h.assertTrue(maledictusHalberds(a).isEmpty(),"Missing first-ring ground does not force airborne children");
+            ExecutionSessions.tick();h.assertTrue(!maledictusHalberds(a).isEmpty(),"A valid later ring still permits startup");
+            for(int i=0;i<3;i++)ExecutionSessions.tick();
+            var mana=CapabilityRegistry.getMana(a.p);double before=mana.getCurrentMana();
+            a.cast(GlyphCatalog.PHANTOM_SPIRAL,block(a.center.add(0,12,0)),false);
+            close(h,mana.getCurrentMana(),before,"No projected ground refunds the whole formation");
+            maledictusHalberds(a).forEach(Entity::discard);ExecutionSessions.tick();
+            // Retain only the center floor: no array's actual candidate has support.
+            for(int x=-18;x<=18;x++)for(int z=-18;z<=18;z++)
+                if(x!=0 || z!=0)h.getLevel().setBlockAndUpdate(a.base.offset(x,0,z),Blocks.AIR.defaultBlockState());
+            for(var glyph:List.of(GlyphCatalog.PHANTOM_SPIRAL,GlyphCatalog.PHANTOM_RINGS))a.cast(glyph,block(a.center.add(.5,0,.5)),false);
+            h.assertTrue(maledictusHalberds(a).isEmpty(),"No native candidates means no array");close(h,mana.getCurrentMana(),before,"Zero-child arrays refund");h.succeed();
+        }
+    }
+    public static void maledictusCleaveExecution(GameTestHelper h,boolean fixed) {
+        var frames=new ArrayList<dev.cataclysmnouveau.network.BodyPhantomPayload>();
+        var a=new Arena(h,packet->{if(packet instanceof net.minecraft.network.protocol.common.ClientboundCustomPayloadPacket custom
+                && custom.payload() instanceof dev.cataclysmnouveau.network.BodyPhantomPayload data)frames.add(data);});
+        LivingEntity host=null;
+        if(!fixed) {
+            var buddy=player(h,packet->{if(packet instanceof net.minecraft.network.protocol.common.ClientboundCustomPayloadPacket custom
+                    && custom.payload() instanceof dev.cataclysmnouveau.network.BodyPhantomPayload data)frames.add(data);});
+            buddy.setPos(a.center);buddy.setNoGravity(true);buddy.setYRot(0);a.actors.add(buddy);
+            h.getLevel().getScoreboard().addPlayerToTeam(buddy.getScoreboardName(),a.team);host=buddy;
+        }
+        final LivingEntity executor=host;a.p.setYRot(0);
+        var front=a.target(a.center.add(0,0,2),false);var side=a.target(a.center.add(-2,0,0),false);var ally=a.target(a.center.add(0,0,2),true);
+        if(fixed) {
+            MaledictusRage.gain(a.p,5);var rage=a.p.getEffect(CataclysmEffects.CURSED_RAGE);
+            for(int i=0;i<50;i++)rage.tick(a.p,()->{});
+        }
+        try {
+            a.cast(GlyphCatalog.HALBERD_CLEAVE,fixed?block(a.center):new EntityHitResult(host),false);
+            h.assertTrue(!frames.isEmpty() && frames.getFirst().positionAnchored()==fixed && frames.getFirst().valid(),"Shared native phantom supports the actual anchor");
+            h.assertTrue(fixed?!ExecutionSessions.isCasting(a.p):MaledictusCasting.isActing(host),"Position execution does not claim payer body");
+            close(h,CapabilityRegistry.getMana(a.p).getCurrentMana(),10000-CataclysmConfig.cost(Ability.HALBERD_CLEAVE),"Full action charges once");
+            maledictusAfter(h,16,a,()->{
+                double attack=13*com.github.L_Ender.cataclysm.config.CMCommonConfig.Maledictus.attackMultiplier*(fixed?2:1)*1.2;
+                close(h,500-front.getHealth(),attack+Math.min(attack,500*com.github.L_Ender.cataclysm.config.CMCommonConfig.Maledictus.SmashHpDamage),"Native first melee strike");
+                close(h,ally.getHealth(),500,"Friendly melee is filtered");
+                h.assertTrue(front.getLastDamageSource().getEntity()==a.p,"Native melee credits caster, not the proxy or executor");
+                h.assertTrue(MaledictusRage.stacks(a.p)==(fixed?5:1),"Accepted first strike updates the same rage effect");
+                if(fixed)h.assertTrue(a.p.getEffect(CataclysmEffects.CURSED_RAGE).getDuration()==CataclysmConfig.rageDecay(),"Accepted hit at cap refreshes decay");
+                else executor.setYRot(90);
+            });
+            maledictusAfter(h,45,a,()->{
+                if(!fixed)close(h,500-front.getHealth(),31.2,"Second melee uses ally facing; later fan contact has not started yet");
+            });
+            maledictusAfter(h,60,a,()->{
+                h.assertTrue(maledictusHalberds(a).size()==162,"Eight native fan distances produce the full candidate pattern on flat ground");
+                if(!fixed) {
+                    h.assertTrue(side.getHealth()<500 && MaledictusRage.stacks(a.p)==2,"Second strike follows ally view and builds another level");
+                    var old=List.copyOf(maledictusHalberds(a));
+                    a.cast(GlyphCatalog.PHANTOM_HALBERD,block(a.center.add(6,0,0)),false);
+                    var independent=maledictusHalberds(a).stream().filter(e->!old.contains(e)).findFirst().orElseThrow();
+                    a.cast(GlyphCatalog.HALBERD_CLEAVE,new EntityHitResult(executor),false);
+                    h.assertTrue(old.stream().allMatch(Entity::isRemoved) && !independent.isRemoved(),"Replacing a body action only removes its own children");
+                    h.assertTrue(frames.stream().anyMatch(dev.cataclysmnouveau.network.BodyPhantomPayload::closed),"Interrupted phantom is explicitly closed");
+                    a.p.discard();ExecutionSessions.tick();h.succeed();a.close();
+                }
+            });
+            if(fixed)maledictusAfter(h,76,a,()->{
+                try{h.assertTrue(frames.getLast().closed() && !maledictusHalberds(a).isEmpty(),"Natural body completion leaves native child lifetimes running");h.succeed();}finally{a.close();}
+            });
+        }catch(Throwable failure){a.close();throw failure;}
+    }
+    public static void maledictusSoulNativeDamageVisualsAndClear(GameTestHelper h) {
+        var particles=new ArrayList<net.minecraft.network.protocol.game.ClientboundLevelParticlesPacket>();
+        var frames=new ArrayList<dev.cataclysmnouveau.network.BodyPhantomPayload>();
+        var a=new Arena(h,packet->{if(packet instanceof net.minecraft.network.protocol.game.ClientboundLevelParticlesPacket data)particles.add(data);
+            if(packet instanceof net.minecraft.network.protocol.common.ClientboundCustomPayloadPacket custom && custom.payload() instanceof dev.cataclysmnouveau.network.BodyPhantomPayload data)frames.add(data);});
+        var victim=a.target(a.center.add(0,0,1),false);victim.getAttribute(Attributes.MAX_HEALTH).setBaseValue(50);victim.setHealth(50);
+        var large=a.target(a.center.add(0,0,3),false);var ally=a.target(a.center,true);MaledictusRage.gain(a.p,5);
+        try {
+            a.cast(GlyphCatalog.SOUL_BURST,block(a.center),true);
+            h.assertTrue(!ExecutionSessions.isCasting(a.p),"Soul area does not occupy a body action");
+            maledictusAfter(h,33,a,()->{
+                close(h,victim.getHealth(),50,"Native preparation finishes before damage");h.assertTrue(MaledictusRage.stacks(a.p)==5,"Preparation does not prematurely spend rage");
+                h.assertTrue(!particles.isEmpty() && frames.stream().anyMatch(f->f.animation()==7 && f.flags()==5),"Native preparation particles and phantom packets actually sent");
+            });
+            maledictusAfter(h,35,a,()->{
+                double base=13*com.github.L_Ender.cataclysm.config.CMCommonConfig.Maledictus.attackMultiplier*1.5;
+                close(h,50-victim.getHealth(),Resources.augmentedDamage(base+Math.min(base,50*com.github.L_Ender.cataclysm.config.CMCommonConfig.Maledictus.AOEHpDamage),1),"Native capped health fraction after rage clearing");
+                close(h,500-large.getHealth(),Resources.augmentedDamage(base*2,1),"Large-health target stays at original native cap");
+                close(h,ally.getHealth(),500,"Soul burst excludes allies");
+                h.assertTrue(MaledictusRage.stacks(a.p)==0 && victim.getLastDamageSource().getEntity()==a.p,"Strike clears the authoritative rage effect and retains owner");
+                h.assertTrue(particles.stream().anyMatch(p->p.getParticle() instanceof com.github.L_Ender.cataclysm.client.particle.Options.RingParticleOptions),"Native ring transported on actual strike");
+            });
+            maledictusAfter(h,70,a,()->{try{h.assertTrue(frames.getLast().closed() && particles.stream().anyMatch(p->p.getParticle()==com.github.L_Ender.cataclysm.init.ModParticle.CURSED_FLAME.get()),"Native recovery particles and phantom close are present");h.succeed();}finally{a.close();}});
+        }catch(Throwable failure){a.close();throw failure;}
+    }
+    public static void maledictusInvalidActorAndParallelSoul(GameTestHelper h) {
+        var a=new Arena(h);var hostile=a.target(a.center,false);var host=a.target(a.center.add(3,0,0),true);host.setYRot(90);
+        try {
+            a.cast(GlyphCatalog.HALBERD_CLEAVE,new EntityHitResult(hostile),false);
+            close(h,CapabilityRegistry.getMana(a.p).getCurrentMana(),10000,"Hostile execution target fails without fee");
+            h.assertTrue(!MaledictusCasting.isActing(a.p) && !MaledictusCasting.isActing(hostile),"No caster fallback or hostile actor claim");hostile.discard();
+            MaledictusRage.gain(a.p,5);a.cast(GlyphCatalog.SOUL_BURST,block(a.center),false);
+            a.cast(GlyphCatalog.HALBERD_CLEAVE,new EntityHitResult(host),false);
+            a.cast(GlyphCatalog.HALBERD_CLEAVE,new EntityHitResult(host),false);
+            h.assertTrue(MaledictusCasting.isActing(host),"Replacement action holds the actual ally claim");
+            final LivingEntity[] victim={null};maledictusAfter(h,30,a,()->{victim[0]=a.target(a.center,false);victim[0].getAttribute(Attributes.MAX_HEALTH).setBaseValue(50);victim[0].setHealth(50);});
+            maledictusAfter(h,35,a,()->{
+                try{h.assertTrue(victim[0].getHealth()<50 && MaledictusRage.stacks(a.p)==0,"Replacing an action never cancels the concurrent soul burst");
+                    h.succeed();
+                }finally{a.close();}
+            });
+        }catch(Throwable failure){a.close();throw failure;}
+    }
     private static Vec3 scene(GameTestHelper h) {
         var origin=h.absoluteVec(new Vec3(4,0,4));
         return new Vec3(origin.x,h.getLevel().getMaxBuildHeight()-48,origin.z);
@@ -567,7 +722,7 @@ public final class NativeAbilityTests {
     private static final class Arena implements AutoCloseable {
         final GameTestHelper h;final ServerPlayer p;final Vec3 center;final BlockPos base;
         final List<net.minecraft.world.level.ChunkPos> forced=new ArrayList<>();
-        final List<Entity> actors=new ArrayList<>();final net.minecraft.world.scores.PlayerTeam team;
+        final List<Entity> actors=new ArrayList<>();final net.minecraft.world.scores.PlayerTeam team;boolean closed;
         Arena(GameTestHelper h) {
             this(h,packet->{});
         }
@@ -592,6 +747,7 @@ public final class NativeAbilityTests {
             var cast=resolver(h,p,new Spell(parts));cast.spellContext.nextPart();cast.onResolveEffect(h.getLevel(),hit);
         }
         @Override public void close() {
+            if(closed)return;closed=true;
             actors.forEach(Entity::discard);h.getLevel().getScoreboard().removePlayerTeam(team);clean(h,p);
             for(int x=-18;x<=18;x++) for(int z=-18;z<=18;z++) for(int y=0;y<=3;y++)
                 h.getLevel().setBlockAndUpdate(base.offset(x,y,z),Blocks.AIR.defaultBlockState());
@@ -2086,12 +2242,13 @@ public final class NativeAbilityTests {
                     case GUARDIAN -> new SpellGuardian(h.getLevel(),cast,a.center,new Vec3(-1,0,0),0,ability);
                     case HARBINGER -> new SpellHarbinger(h.getLevel(),cast,ability,a.center,0,0);
                     case MONSTROSITY -> new SpellMonstrosity(h.getLevel(),cast,a.center,new Vec3(-1,0,0),0);
+                    case MALEDICTUS -> new SpellMaledictus(h.getLevel(),cast,ability,a.center,new Vec3(-1,0,0),0);
                 };
                 int[] states=switch(ability) {
                     case THUNDER_COMBO -> new int[]{25};case ANCHOR_SPIN -> new int[]{7};case ANCHOR_LEAP -> new int[]{15,17};
                     case HARBINGER_CHARGE,GRAVITY_PUNCH -> new int[]{1};case GUARDIAN_UPPERCUT -> new int[]{2,3};
                     case GUARDIAN_BLINK -> new int[]{4};case GUARDIAN_AIR_STRIKE -> new int[]{5,6};
-                    case GUARDIAN_ROCKET_PUNCH -> new int[]{7};default -> new int[]{8};
+                    case GUARDIAN_ROCKET_PUNCH -> new int[]{7};case HALBERD_CLEAVE -> new int[]{26};case SOUL_BURST -> new int[]{7};default -> new int[]{8};
                 };
                 for(int state:states) {
                     switch(boss) {
@@ -2099,6 +2256,7 @@ public final class NativeAbilityTests {
                         case SpellGuardian b -> {b.setAnimation(BodyPhantomAnimations.animation(kind,state));b.setAnimationTick(37);}
                         case SpellHarbinger b -> {b.setAnimation(BodyPhantomAnimations.animation(kind,state));b.setAnimationTick(26);b.setIsCharge(true);}
                         case SpellMonstrosity b -> {b.setAttackState(state);b.attackTicks=35;}
+                        case SpellMaledictus b -> {b.setAttackState(state);b.attackTicks=20;MaledictusRage.gain(a.p,5);}
                         default -> throw new AssertionError();
                     }
                     var data=dev.cataclysmnouveau.network.BodyPhantomSync.snapshot(token,ability,actor,boss,12,false);

@@ -35,7 +35,7 @@ public final class GlyphClientExtensions {
             }
         },dev.cataclysmnouveau.CataclysmEffects.LAVA_WALKING,dev.cataclysmnouveau.CataclysmEffects.WATER_WALKING,dev.cataclysmnouveau.CataclysmEffects.CURSED_RAGE);
         event.registerItem(nativeItem(() -> ModItems.CURSED_BOW.get()),GlyphCatalog.PHANTOM_ARROW.getGlyph());
-        event.registerItem(nativeItem(() -> ModItems.SOUL_RENDER.get()),GlyphCatalog.PHANTOM_HALBERD.getGlyph());
+        event.registerItem(nativeItem(() -> ModItems.SOUL_RENDER.get()),GlyphCatalog.PHANTOM_HALBERD.getGlyph(),GlyphCatalog.PHANTOM_SPIRAL.getGlyph(),GlyphCatalog.PHANTOM_RINGS.getGlyph(),GlyphCatalog.HALBERD_CLEAVE.getGlyph());
         event.registerItem(nativeItem(() -> ModItems.CERAUNUS.get()),GlyphCatalog.ANCHOR.getGlyph(),GlyphCatalog.WAVE.getGlyph(),GlyphCatalog.SPIN.getGlyph(),GlyphCatalog.LEAP.getGlyph());
         event.registerItem(nativeItem(() -> ModItems.LASER_GATLING.get()),GlyphCatalog.LASER_BOLT.getGlyph(),GlyphCatalog.DEATH_LASER.getGlyph());
         event.registerItem(nativeItem(() -> ModItems.WITHER_ASSULT_SHOULDER_WEAPON.get()),GlyphCatalog.MISSILE.getGlyph(),GlyphCatalog.HOMING.getGlyph(),GlyphCatalog.HOWITZER.getGlyph(),GlyphCatalog.HOWITZER_VOLLEY.getGlyph(),GlyphCatalog.MISSILE_SALVO.getGlyph());

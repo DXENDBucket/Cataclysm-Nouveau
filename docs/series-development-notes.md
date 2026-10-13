@@ -138,3 +138,14 @@ CMAbstractHurtingProjectile是本体独立运动基类，Ars特殊轨迹也要�
 Phantom Arrow继承AbstractArrow，必须禁止玩家构造器默认的ALLOWED拾取。特殊Ars形态还需运行原生子类tick保存拖尾，抑制原生运动，重复方块命中后解除inGround而不是永久淡出。原生箭的伤害类型穿透hurt冷却；“第二下也成功”不能按其他弹体的无敌帧失败规则断言。单戟是地面Entity，不是飞行长枪；原生事件4、state1–4、延迟攻击及消退保留，服务器才读取Core上下文。
 
 本轮首跑5/6通过：衰减检查用了未加入PlayerList的伪ServerPlayer，它不走实际连接的doTick。用真实已生成生物验证自然状态tick后6/6通过；持久化和整段隐藏链递减另做检查。不得为测试伪玩家缺少tick修改业务状态逻辑。客户端未人工验证。
+
+
+## dev.47：原生阵列与共享锚点
+
+咒翼第二批调用本体私有布阵和完整Goal／aiStep，不复制螺旋、环形、扇形的实现。把未加入世界的候选预先分阶段收集，可判断无有效地面退款，也避免第一圈缺地面但第二圈可用时错误拒绝。原生幻影戟仍继承真实owner、一次增强和原生伤害／怒气系数；只通过场景条件选择能生效的落点，不强行补数量。
+
+身体行动共用ExecutionAnchor与ActionGeometry，不另写自身／友军／位置伤害流程。怒气必须实时读取同一个逻辑施法者状态；原生setRageMeter增层接到该状态，满层时原生不再调用setter但成功伤害仍应刷新衰减，需补这条边界。灵魂爆发清空发生在打击而非启动，且自身不再加层。面积效果不声明body claim，身体被替换不能误取消并行爆发。
+
+新增AnimationState家族时，同时扩展协议白名单、服务端snapshot、客户端proxy、动画key／武器形态和独立client开关，并更新专用服务器的全状态往返测试。Maledictus getAnimationState使用字符串identity，客户端使用原生字面量radagon／mass_effect，并显式启动状态时钟，视觉proxy不tick AI。
+
+测试不能在戟浪已开始接触后用总掉血断言第二次近战朝向，也不能把方块角点当作中心推断无落点。真实ServerPlayer友军可检查self包，伪payer未建立追踪时tracking-only包为空不等于客户端缺失。异步断言失败必须即时清理夹具，实体查询按真实owner过滤，避免泄漏造成下一批计数失败。

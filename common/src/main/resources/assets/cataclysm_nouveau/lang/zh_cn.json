@@ -169,5 +169,17 @@
   "cataclysm_nouveau.glyph_name.glyph_cursed_rage": "咒翼怒气",
   "cataclysm_nouveau.glyph_desc.glyph_cursed_rage": "为自身或友军叠加一层怒气，最多五层；强化增加叠层数。未刷新时每十秒衰减一层。只强化咒翼灵骸的能力。",
   "item.cataclysm_nouveau.glyph_cursed_rage": "咒翼怒气",
-  "effect.cataclysm_nouveau.cursed_rage": "咒翼怒气"
+  "effect.cataclysm_nouveau.cursed_rage": "咒翼怒气",
+  "cataclysm_nouveau.glyph_name.glyph_phantom_spiral": "螺旋戟阵",
+  "item.cataclysm_nouveau.glyph_phantom_spiral": "螺旋戟阵",
+  "cataclysm_nouveau.glyph_desc.glyph_phantom_spiral": "在附近地面展开两组原生螺旋戟阵。各戟保留原生伤害与怒气加成，整组只消耗一次费用。",
+  "cataclysm_nouveau.glyph_name.glyph_phantom_rings": "环形戟阵",
+  "item.cataclysm_nouveau.glyph_phantom_rings": "环形戟阵",
+  "cataclysm_nouveau.glyph_desc.glyph_phantom_rings": "在附近地面展开两圈原生幻影戟。施法者半血、四分之一血时增加圈数；各戟享受怒气加成，整组只消耗一次费用。",
+  "cataclysm_nouveau.glyph_name.glyph_halberd_cleave": "扇形戟斩",
+  "item.cataclysm_nouveau.glyph_halberd_cleave": "扇形戟斩",
+  "cataclysm_nouveau.glyph_desc.glyph_halberd_cleave": "自身或友军执行两次原生戟斩，随后展开向前推进的扇形戟浪。近战伤害成功时积攒怒气；也可由固定位置和方向执行。",
+  "cataclysm_nouveau.glyph_name.glyph_soul_burst": "灵魂爆发",
+  "item.cataclysm_nouveau.glyph_soul_burst": "灵魂爆发",
+  "cataclysm_nouveau.glyph_desc.glyph_soul_burst": "在触发位置蓄势后释放原生灵魂爆发。打击发生时清空施法者怒气，再计算伤害。"
 }

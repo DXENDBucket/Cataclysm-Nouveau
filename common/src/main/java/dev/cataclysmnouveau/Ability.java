@@ -59,7 +59,11 @@ public enum Ability {
     IGNIS_FLAME_STRIKE("ignis_flame_strike", "Ignis Flame Strike", 280),
     PHANTOM_ARROW("phantom_arrow", "Phantom Arrow", 45),
     PHANTOM_HALBERD("phantom_halberd", "Phantom Halberd", 30),
-    CURSED_RAGE("cursed_rage", "Cursed Rage", 30);
+    CURSED_RAGE("cursed_rage", "Cursed Rage", 30),
+    PHANTOM_SPIRAL("phantom_spiral", "Phantom Spiral", 300),
+    PHANTOM_RINGS("phantom_rings", "Phantom Rings", 240),
+    HALBERD_CLEAVE("halberd_cleave", "Halberd Cleave", 360),
+    SOUL_BURST("soul_burst", "Soul Burst", 120);
     public final String id, name;
     public final int mana;
     Ability(String id, String name, int mana) { this.id=id; this.name=name; this.mana=mana; }
@@ -67,7 +71,7 @@ public enum Ability {
     /** Acquisition/source families, shared by all presentation surfaces. */
     public Series series() {
         return switch(this) {
-            case PHANTOM_ARROW,PHANTOM_HALBERD,CURSED_RAGE -> Series.MALEDICTUS;
+            case PHANTOM_ARROW,PHANTOM_HALBERD,CURSED_RAGE,PHANTOM_SPIRAL,PHANTOM_RINGS,HALBERD_CLEAVE,SOUL_BURST -> Series.MALEDICTUS;
             case IGNIS_FIREBALL,IGNIS_ABYSS_FIREBALL,IGNIS_BLADE_FIREBALLS,IGNIS_AIR_SMASH,IGNIS_SWORD_COMBO,
                     IGNIS_FIREBALL_ARRAY,IGNIS_EARTH_SHUDDERS,IGNIS_REINFORCED_SMASH,IGNIS_ULTIMATE,IGNIS_FLAME_STRIKE -> Series.IGNIS;
             case GUARDIAN_BULLET,VOID_VORTEX,GUARDIAN_STOMP,GRAVITY_PUNCH,GUARDIAN_UPPERCUT,GUARDIAN_BLINK,GUARDIAN_AIR_STRIKE,GUARDIAN_ROCKET_PUNCH -> Series.ENDER_GUARDIAN;

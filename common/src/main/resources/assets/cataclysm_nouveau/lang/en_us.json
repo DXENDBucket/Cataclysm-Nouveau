@@ -169,5 +169,17 @@
   "cataclysm_nouveau.glyph_name.glyph_cursed_rage": "Cursed Rage",
   "cataclysm_nouveau.glyph_desc.glyph_cursed_rage": "Adds one level of rage to yourself or an ally, up to five. Amplify adds levels. Each level decays after ten seconds without refreshing. Only Maledictus abilities benefit.",
   "item.cataclysm_nouveau.glyph_cursed_rage": "Cursed Rage",
-  "effect.cataclysm_nouveau.cursed_rage": "Cursed Rage"
+  "effect.cataclysm_nouveau.cursed_rage": "Cursed Rage",
+  "cataclysm_nouveau.glyph_name.glyph_phantom_spiral": "Phantom Spiral",
+  "item.cataclysm_nouveau.glyph_phantom_spiral": "Phantom Spiral",
+  "cataclysm_nouveau.glyph_desc.glyph_phantom_spiral": "Creates the native two-part spiral formation around nearby ground. Each halberd retains native damage and benefits from Cursed Rage. The formation pays once.",
+  "cataclysm_nouveau.glyph_name.glyph_phantom_rings": "Phantom Rings",
+  "item.cataclysm_nouveau.glyph_phantom_rings": "Phantom Rings",
+  "cataclysm_nouveau.glyph_desc.glyph_phantom_rings": "Raises two rings of native halberds. At half and quarter caster health, further rings appear. Each halberd benefits from Cursed Rage; the formation pays once.",
+  "cataclysm_nouveau.glyph_name.glyph_halberd_cleave": "Halberd Cleave",
+  "item.cataclysm_nouveau.glyph_halberd_cleave": "Halberd Cleave",
+  "cataclysm_nouveau.glyph_desc.glyph_halberd_cleave": "You or an ally perform two native halberd strikes followed by an advancing fan of halberds. Successful melee hits build Cursed Rage. Also supports a fixed position and incoming direction.",
+  "cataclysm_nouveau.glyph_name.glyph_soul_burst": "Soul Burst",
+  "item.cataclysm_nouveau.glyph_soul_burst": "Soul Burst",
+  "cataclysm_nouveau.glyph_desc.glyph_soul_burst": "Prepares a native soul explosion at the resolved position. Clears the caster's Cursed Rage when the strike occurs, before computing damage."
 }

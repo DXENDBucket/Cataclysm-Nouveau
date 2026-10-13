@@ -1,0 +1,16 @@
+{
+  "type": "ars_nouveau:glyph",
+  "exp": 27,
+  "output": {
+    "id": "cataclysm_nouveau:glyph_soul_burst",
+    "count": 1
+  },
+  "inputs": [
+    {
+      "item": "cataclysm:cursium_ingot"
+    },
+    {
+      "item": "ars_nouveau:source_gem"
+    }
+  ]
+}

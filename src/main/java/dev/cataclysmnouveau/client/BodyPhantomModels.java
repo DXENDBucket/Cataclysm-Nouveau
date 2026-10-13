@@ -15,6 +15,7 @@ import net.minecraft.world.entity.Mob;
 final class BodyPhantomModels {
     static Mob create(Kind kind,ClientLevel level) {
         Mob proxy=switch(kind) {
+            case MALEDICTUS -> new com.github.L_Ender.cataclysm.entity.InternalAnimationMonster.IABossMonsters.Maledictus.Maledictus_Entity(ModEntities.MALEDICTUS.get(),level);
             case SCYLLA -> new Scylla_Entity(ModEntities.SCYLLA.get(),level);
             case HARBINGER -> new The_Harbinger_Entity(ModEntities.THE_HARBINGER.get(),level);
             case GUARDIAN -> new Ender_Guardian_Entity(ModEntities.ENDER_GUARDIAN.get(),level);
@@ -25,6 +26,11 @@ final class BodyPhantomModels {
     }
     static void pose(Mob proxy,BodyPhantomPayload data,int age) {
         switch(proxy) {
+            case com.github.L_Ender.cataclysm.entity.InternalAnimationMonster.IABossMonsters.Maledictus.Maledictus_Entity boss -> {
+                boss.setWeapon(data.animation()==26?2:0);boss.setRageMeter(data.flags());
+                boss.setAttackState(data.animation());boss.stopAllAnimationStates();
+                boss.attackTicks=age;boss.tickCount=age;boss.getAnimationState(data.animation()==26?"radagon":"mass_effect").start(0);
+            }
             case Scylla_Entity boss -> {
                 boss.setPhase(0);boss.setEye((data.flags()&1)!=0);boss.setFlying((data.flags()&2)!=0);
                 boss.setAttackState(data.animation());boss.stopAllAnimationStates();

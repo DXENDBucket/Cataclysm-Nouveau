@@ -7,13 +7,14 @@ import dev.cataclysmnouveau.Ability;
 
 /** Stable visual IDs for the supported native body actions; no client classes. */
 public final class BodyPhantomAnimations {
-    public enum Kind { SCYLLA, HARBINGER, GUARDIAN, MONSTROSITY }
+    public enum Kind { SCYLLA, HARBINGER, GUARDIAN, MONSTROSITY, MALEDICTUS }
     public static Kind kind(Ability ability) {
         return switch(ability) {
             case THUNDER_COMBO, ANCHOR_SPIN, ANCHOR_LEAP -> Kind.SCYLLA;
             case HARBINGER_CHARGE -> Kind.HARBINGER;
             case GRAVITY_PUNCH, GUARDIAN_UPPERCUT, GUARDIAN_BLINK, GUARDIAN_AIR_STRIKE, GUARDIAN_ROCKET_PUNCH -> Kind.GUARDIAN;
             case SHOULDER_CHECK -> Kind.MONSTROSITY;
+            case HALBERD_CLEAVE, SOUL_BURST -> Kind.MALEDICTUS;
             default -> null;
         };
     }
@@ -40,7 +41,7 @@ public final class BodyPhantomAnimations {
         return 0;
     }
     public static boolean valid(Ability ability,int state,int age,int flags) {
-        if(ability==null || age<0 || age>1200 || flags<0 || flags>3) return false;
+        if(ability==null || age<0 || age>1200 || flags<0 || flags>(kind(ability)==Kind.MALEDICTUS?5:3)) return false;
         return switch(ability) {
             case THUNDER_COMBO -> state==25;
             case ANCHOR_SPIN -> state==7;
@@ -52,6 +53,8 @@ public final class BodyPhantomAnimations {
             case GUARDIAN_AIR_STRIKE -> state==5 || state==6;
             case GUARDIAN_ROCKET_PUNCH -> state==7;
             case SHOULDER_CHECK -> state==8;
+            case HALBERD_CLEAVE -> state==26;
+            case SOUL_BURST -> state==7;
             default -> false;
         };
     }
