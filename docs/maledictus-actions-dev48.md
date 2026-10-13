@@ -71,3 +71,10 @@
 串行部署记录在下方补充；共享实例为万法归一，万途归零不是本任务部署位置。
 
 最终仅将后撤准备期的客户端武器显示校正为原生双锤（随后突进才持戟）；`build/maledictus-actions-dev48-package.log`重编译、双语键和发行边界通过，不重复战斗矩阵。
+
+
+## 串行部署记录
+
+代码提交：`52c1d617f269fe1c90084cdf9f89dcea2d942288`，本地tag `v0.1.0-dev.48`，已快进合入main。协调者已部署到 `C:/Users/57991/Desktop/.minecraft/versions/1.21.1-万法归一/mods`，仅一个dev.48附属JAR，复制后SHA-256与上方一致。旧dev.47及原全局配置保存在 `codex-backups/cataclysm-dev48`。
+
+全局 `config/cataclysm_nouveau-server.toml`仅补六项Mana与六项主动冷却；原配置值全部保留，幻影戟30/0、虚空符文20/0再次核对。其他mods名称、长度与时间戳快照一致，Core和其他附属JAR未替换。此记录不代表已有独立服务器世界配置已更新。没有启动客户端进行画面验收。
