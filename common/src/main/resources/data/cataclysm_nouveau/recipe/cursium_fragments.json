@@ -1,0 +1,12 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "ingredients": [
+    {
+      "item": "cataclysm:cursium_ingot"
+    }
+  ],
+  "result": {
+    "id": "cataclysm_nouveau:cursium_fragment",
+    "count": 9
+  }
+}

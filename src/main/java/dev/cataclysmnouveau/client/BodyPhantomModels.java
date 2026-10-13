@@ -27,9 +27,16 @@ final class BodyPhantomModels {
     static void pose(Mob proxy,BodyPhantomPayload data,int age) {
         switch(proxy) {
             case com.github.L_Ender.cataclysm.entity.InternalAnimationMonster.IABossMonsters.Maledictus.Maledictus_Entity boss -> {
-                boss.setWeapon(data.animation()==26?2:0);boss.setRageMeter(data.flags());
+                boss.setWeapon(switch(data.animation()){case 3,4->1;case 11,12,15,16,17,24,25,26->2;default->0;});boss.setRageMeter(data.flags());
                 boss.setAttackState(data.animation());boss.stopAllAnimationStates();
-                boss.attackTicks=age;boss.tickCount=age;boss.getAnimationState(data.animation()==26?"radagon":"mass_effect").start(0);
+                boss.attackTicks=age;boss.tickCount=age;boss.getAnimationState(switch(data.animation()) {
+                    case 3->"flying_shoot";case 4->"fall_loop";case 5->"fall_end";
+                    case 9->"flying_smash_2";case 10->"back_step";case 11->"back_step_dash";
+                    case 12->"back_step_dash_no_back_step";case 15->"dash2";case 16->"dash2_no_back_step";case 17->"dash3";
+                    case 19->"combo_first";case 20->"combo_first_end";case 21->"combo_second";
+                    case 22->"uppercut_right";case 23->"uppercut_left";
+                    case 24->"flying_halberd_smash_1";case 25->"flying_halberd_smash_2";case 26->"radagon";default->"mass_effect";
+                }).start(0);
             }
             case Scylla_Entity boss -> {
                 boss.setPhase(0);boss.setEye((data.flags()&1)!=0);boss.setFlying((data.flags()&2)!=0);

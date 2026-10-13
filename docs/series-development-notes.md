@@ -149,3 +149,14 @@ Phantom Arrow继承AbstractArrow，必须禁止玩家构造器默认的ALLOWED�
 新增AnimationState家族时，同时扩展协议白名单、服务端snapshot、客户端proxy、动画key／武器形态和独立client开关，并更新专用服务器的全状态往返测试。Maledictus getAnimationState使用字符串identity，客户端使用原生字面量radagon／mass_effect，并显式启动状态时钟，视觉proxy不tick AI。
 
 测试不能在戟浪已开始接触后用总掉血断言第二次近战朝向，也不能把方块角点当作中心推断无落点。真实ServerPlayer友军可检查self包，伪payer未建立追踪时tracking-only包为空不等于客户端缺失。异步断言失败必须即时清理夹具，实体查询按真实owner过滤，避免泄漏造成下一批计数失败。
+
+
+## dev.48：原生状态 Goal 与完整动作
+
+InternalAttackGoal与InternalStateGoal的start不能视为等价入口：后者假定状态已由上一动作进入。独立调用状态型动作必须明确进入初始状态，否则可能收费但没有伤害和有效幻影包。服务端检查要同时确认实际伤害、动画包和动作结束，不止Mana扣除。
+
+读取原生goal状态/持续时间替代匿名类序号；普通共用接口放casting包，不能放Mixin专属包，否则可能在注册实体时类加载失败。新增namespace要有实际GameTest模板；用根任务:runGameTestServer，避免顺带运行Core子项目的不同测试。
+
+位置动作可以使用未注册帧的碰撞/简化运动，实体动作把原生冲量作用于实际actor，两者调用同一攻击Goal。不要用升空超时伪造落地；原生goal.lookAt与ActionGeometry不能同时拥有朝向控制，否则冲量和可见攻击朝向可能不一致。子箭与原生可视地面碎块也要随根清理，不能只管理主要伤害载荷。地面波不自动积攒怒气，不能因扩展满层刷新入口就改变原生状态规则。
+
+新增获取预算用九拆咒魂碎片，保留旧配方，13魔符实际9锭覆盖三次保底击杀。资源只引用；依赖真实实体ID的AfterImage未伪造ID，记录翼焰替代尾迹和位置运动近似。15项服务端检查通过，客户端仍待人工确认。

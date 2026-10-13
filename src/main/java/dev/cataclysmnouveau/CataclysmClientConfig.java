@@ -24,7 +24,7 @@ public final class CataclysmClientConfig {
         HARBINGER_ACTIONS=builder.comment("Native Harbinger charge phantom.").define("harbinger_actions",true);
         GUARDIAN_ACTIONS=builder.comment("Native Ender Guardian punch, uppercut, blink and air strike phantoms.").define("guardian_actions",true);
         MONSTROSITY_ACTIONS=builder.comment("Native Monstrosity shoulder check phantom.").define("monstrosity_actions",true);
-        MALEDICTUS_ACTIONS=builder.comment("Native Maledictus halberd cleave and soul burst phantoms.").define("maledictus_actions",true);
+        MALEDICTUS_ACTIONS=builder.comment("Native Maledictus combat and soul burst phantoms.").define("maledictus_actions",true);
         PHANTOM_OPACITY=builder.comment("Opacity of all native model layers. Does not change damage or attack range.").defineInRange("opacity",.28,0,1);
         FIRST_PERSON_OPACITY=builder.comment("Lower opacity when the local player is the executor and the camera is first person.").defineInRange("first_person_opacity",.10,0,1);
         PHANTOM_SCALE=builder.comment("Visual scale only; 1 keeps the original Boss weapon reach. Does not change hitboxes.").defineInRange("scale",1.0,.25,2);

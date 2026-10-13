@@ -17,7 +17,7 @@ public final class MaledictusCasting {
     public static boolean isActing(Entity actor){return ACTORS.contains(actor.getUUID());}
     static void lock(LivingEntity actor){if(actor!=null)ACTORS.add(actor.getUUID());}
     static void unlock(LivingEntity actor){if(actor!=null)ACTORS.remove(actor.getUUID());}
-    public static boolean supports(Ability ability) {return switch(ability){case PHANTOM_HALBERD,CURSED_RAGE,PHANTOM_SPIRAL,PHANTOM_RINGS,HALBERD_CLEAVE,SOUL_BURST->true;default->false;};}
+    public static boolean supports(Ability ability) {return switch(ability){case PHANTOM_HALBERD,CURSED_RAGE,PHANTOM_SPIRAL,PHANTOM_RINGS,HALBERD_CLEAVE,SOUL_BURST,MALEDICTUS_AERIAL_SMASH,PHANTOM_AERIAL_VOLLEY,MALEDICTUS_RUSH,MALEDICTUS_SHOCKWAVE,MALEDICTUS_UPPERCUT,MALEDICTUS_MELEE_COMBO->true;default->false;};}
     static boolean enabled(Ability ability) {
         return switch(ability){
             case PHANTOM_HALBERD -> GlyphCatalog.PHANTOM_HALBERD.isEnabled();
@@ -25,6 +25,12 @@ public final class MaledictusCasting {
             case PHANTOM_RINGS -> GlyphCatalog.PHANTOM_RINGS.isEnabled();
             case HALBERD_CLEAVE -> GlyphCatalog.HALBERD_CLEAVE.isEnabled();
             case SOUL_BURST -> GlyphCatalog.SOUL_BURST.isEnabled();
+            case MALEDICTUS_AERIAL_SMASH -> GlyphCatalog.MALEDICTUS_AERIAL_SMASH.isEnabled();
+            case PHANTOM_AERIAL_VOLLEY -> GlyphCatalog.PHANTOM_AERIAL_VOLLEY.isEnabled();
+            case MALEDICTUS_RUSH -> GlyphCatalog.MALEDICTUS_RUSH.isEnabled();
+            case MALEDICTUS_SHOCKWAVE -> GlyphCatalog.MALEDICTUS_SHOCKWAVE.isEnabled();
+            case MALEDICTUS_UPPERCUT -> GlyphCatalog.MALEDICTUS_UPPERCUT.isEnabled();
+            case MALEDICTUS_MELEE_COMBO -> GlyphCatalog.MALEDICTUS_MELEE_COMBO.isEnabled();
             default -> false;
         };
     }
@@ -38,6 +44,7 @@ public final class MaledictusCasting {
             return MaledictusFormations.start(ability,world,cast,amplify);
         if(ability==Ability.HALBERD_CLEAVE || ability==Ability.SOUL_BURST)
             return MaledictusActions.start(ability,world,cast,amplify);
+        if(MaledictusCombatActions.supports(ability))return MaledictusCombatActions.start(ability,world,cast,amplify);
         if(ability!=Ability.PHANTOM_HALBERD)return false;
         var point=NativePayloads.groundPoint(world,cast);if(point==null)return false;
         var direction=cast.incomingDirection();
@@ -76,6 +83,28 @@ public final class MaledictusCasting {
                     public void close(ExecutionSession<Phantom_Halberd_Entity> s,ExecutionSession.EndReason reason){boss.children.remove(halberd);halberd.discard();}
                 },h->{},()->enabled(boss.ability),ExecutionScope.DIRECT));
         if(started){boss.spawnedHalberds++;boss.children.add(halberd);MaledictusVisuals.halberd(world,halberd,boss.ability);}
+        return started;
+    }
+    /** Action volleys and visual debris share the parent lease, not independent payment or continuations. */
+    public static boolean actionChild(ServerLevel world,Entity entity,SpellMaledictus boss) {
+        if(boss.childrenCancelled || !world.hasChunkAt(entity.blockPosition()))return false;
+        if(entity instanceof com.github.L_Ender.cataclysm.entity.projectile.Phantom_Arrow_Entity arrow) {
+            arrow.setOwner(boss.cast.damageOwner());
+            arrow.pickup=net.minecraft.world.entity.projectile.AbstractArrow.Pickup.DISALLOWED;
+            var executor=boss.cast.executor();
+            arrow.setPos(boss.getX(),boss.getY()+(executor==null?1.62:executor.getEyeHeight())-.1,boss.getZ());
+            NativeDamageContexts.bind(arrow,boss.cast,boss.amplification);
+        }
+        int life=entity instanceof net.minecraft.world.entity.projectile.Projectile?240:80;
+        boolean started=ExecutionSessions.start(new ExecutionSession<>(world,boss.cast,entity,life,
+                new ExecutionDriver<Entity>() {
+                    public boolean start(ExecutionSession<Entity> s){return world.addFreshEntity(entity);}
+                    public boolean tick(ExecutionSession<Entity> s){return entity.isRemoved() || boss.childrenCancelled
+                            || !world.hasChunkAt(entity.blockPosition()) || !enabled(boss.ability)
+                            || boss.cast.executor()!=null && !ExecutionAnchor.mayExecute(boss.cast,boss.cast.executor());}
+                    public void close(ExecutionSession<Entity> s,ExecutionSession.EndReason reason){boss.children.remove(entity);entity.discard();}
+                },h->{},()->enabled(boss.ability),ExecutionScope.DIRECT));
+        if(started)boss.children.add(entity);
         return started;
     }
     private MaledictusCasting() {}

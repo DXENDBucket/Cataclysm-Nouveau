@@ -1,0 +1,17 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    "FFF",
+    "FFF",
+    "FFF"
+  ],
+  "key": {
+    "F": {
+      "item": "cataclysm_nouveau:cursium_fragment"
+    }
+  },
+  "result": {
+    "id": "cataclysm:cursium_ingot",
+    "count": 1
+  }
+}

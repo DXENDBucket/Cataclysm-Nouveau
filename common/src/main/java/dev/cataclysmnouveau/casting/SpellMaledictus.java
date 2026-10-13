@@ -17,7 +17,7 @@ public final class SpellMaledictus extends Maledictus_Entity {
     public final CastContext cast;
     public final Ability ability;
     public final double amplification;
-    final Set<Phantom_Halberd_Entity> children=new HashSet<>();
+    final Set<Entity> children=new HashSet<>();
     final Map<Integer,List<Phantom_Halberd_Entity>> stages=new LinkedHashMap<>();
     boolean collecting,childrenCancelled;
     int collectingStage;
@@ -32,12 +32,12 @@ public final class SpellMaledictus extends Maledictus_Entity {
         yRotO=yBodyRot=yHeadRot=getYRot();
     }
     public Goal nativeGoal(int state) {
-        // The supported release registers the native mass-effect and radagon goals as these inner classes.
-        String suffix=state==26?"$6":"$5";
         return goalSelector.getAvailableGoals().stream().map(g->g.getGoal())
-                .filter(g->g.getClass().getName().endsWith(suffix)).findFirst()
-                .orElseThrow(()->new IllegalStateException("Missing native Maledictus goal "+state));
+                .filter(g->g instanceof NativeInternalGoal access && access.confluxMaledictus$state()==state)
+                .findFirst().orElseThrow(()->new IllegalStateException("Missing native Maledictus goal "+state));
     }
+    /** ActionGeometry owns facing; native goal lookAt must not calculate impulses with a different heading. */
+    @Override public void lookAt(Entity target,float yawLimit,float pitchLimit){if(cast==null)super.lookAt(target,yawLimit,pitchLimit);}
     @Override public int getRageMeter(){return cast==null?super.getRageMeter():MaledictusRage.stacks(cast.caster());}
     @Override public void setRageMeter(int value) {
         if(cast==null){super.setRageMeter(value);return;}

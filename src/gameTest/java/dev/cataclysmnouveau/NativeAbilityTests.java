@@ -328,6 +328,133 @@ public final class NativeAbilityTests {
             });
         }catch(Throwable failure){a.close();throw failure;}
     }
+    public static void maledictusAerialSmashNativePhases(GameTestHelper h) {
+        var frames=new ArrayList<dev.cataclysmnouveau.network.BodyPhantomPayload>();
+        try(var a=new Arena(h,packet->{if(packet instanceof net.minecraft.network.protocol.common.ClientboundCustomPayloadPacket c
+                && c.payload() instanceof dev.cataclysmnouveau.network.BodyPhantomPayload f)frames.add(f);})) {
+            a.p.setYRot(0);a.cast(GlyphCatalog.MALEDICTUS_AERIAL_SMASH,block(a.center),false);
+            h.assertTrue(!ExecutionSessions.isCasting(a.p),"Position leap never claims payer body");
+            for(int i=0;i<59;i++)ExecutionSessions.tick();
+            h.assertTrue(maledictusHalberds(a).isEmpty(),"No airborne phantom impact before real landing");
+            for(int i=0;i<180;i++)ExecutionSessions.tick();
+            h.assertTrue(frames.stream().anyMatch(f->f.animation()==24 && f.position().y>a.center.y+2)
+                    && frames.stream().anyMatch(f->f.animation()==25),"Native ascent reaches actual collision landing phase");
+            h.assertTrue(maledictusHalberds(a).size()==130,"Full-health landing produces native 100 spiral and 30 ring candidates");
+            h.assertTrue(frames.getLast().closed(),"Complete landing recovery closes phantom");
+            close(h,CapabilityRegistry.getMana(a.p).getCurrentMana(),10000-CataclysmConfig.cost(Ability.MALEDICTUS_AERIAL_SMASH),"Two strikes and all children pay once");
+            var children=List.copyOf(maledictusHalberds(a));a.p.discard();ExecutionSessions.tick();
+            h.assertTrue(children.stream().allMatch(Entity::isRemoved),"Owner loss cleans still-live formation children");h.succeed();
+        }
+    }
+    public static void maledictusAerialVolleyNativeChildren(GameTestHelper h) {
+        try(var a=new Arena(h)) {
+            a.p.setYRot(0);MaledictusRage.gain(a.p,5);a.cast(GlyphCatalog.PHANTOM_AERIAL_VOLLEY,block(a.center),true);
+            for(int i=0;i<49;i++)ExecutionSessions.tick();
+            var range=new AABB(a.center,a.center).inflate(40);
+            h.assertTrue(h.getLevel().getEntitiesOfClass(com.github.L_Ender.cataclysm.entity.projectile.Phantom_Arrow_Entity.class,range).isEmpty(),"Native volley waits until phase tick 50");
+            ExecutionSessions.tick();
+            var arrows=h.getLevel().getEntitiesOfClass(com.github.L_Ender.cataclysm.entity.projectile.Phantom_Arrow_Entity.class,range,e->e.getOwner()==a.p);
+            h.assertTrue(arrows.size()==4,"Exactly four native arrows");
+            for(var arrow:arrows) {
+                close(h,arrow.getBaseDamage(),com.github.L_Ender.cataclysm.config.CMCommonConfig.Maledictus.PhantomArrowDamage*1.25,"Native five-layer arrow base");
+                h.assertTrue(Math.abs(arrow.getDeltaMovement().length()-1.5)<.06,"Native flying volley velocity with native inaccuracy");
+                h.assertTrue(arrow.pickup==net.minecraft.world.entity.projectile.AbstractArrow.Pickup.DISALLOWED,"No free collectible arrows");
+            }
+            close(h,CapabilityRegistry.getMana(a.p).getCurrentMana(),10000-CataclysmConfig.cost(Ability.PHANTOM_AERIAL_VOLLEY)-10,"One augmented volley fee");
+            a.p.discard();ExecutionSessions.tick();h.assertTrue(arrows.stream().allMatch(Entity::isRemoved),"Action children retain root cleanup");h.succeed();
+        }
+    }
+    public static void maledictusUppercutAndCombo(GameTestHelper h,boolean combo) {
+        try(var a=new Arena(h)) {
+            var host=a.target(a.center,true);host.setYRot(0);var victim=a.target(a.center.add(0,0,2),false);
+            var friend=a.target(a.center.add(0,0,2),true);victim.getAttribute(Attributes.KNOCKBACK_RESISTANCE).setBaseValue(0);
+            var glyph=combo?GlyphCatalog.MALEDICTUS_MELEE_COMBO:GlyphCatalog.MALEDICTUS_UPPERCUT;
+            a.cast(glyph,new EntityHitResult(host),false);double total=0;int hit=0;
+            for(int i=1;i<=90;i++) {
+                victim.invulnerableTime=0;double before=victim.getHealth();ExecutionSessions.tick();
+                if(before>victim.getHealth()){hit++;total+=before-victim.getHealth();}
+                if(!combo && i==23)h.assertTrue(victim.getDeltaMovement().y>0,"Native first uppercut launches target");
+            }
+            h.assertTrue(hit==(combo?4:2),"Native hit-conditional combo / two uppercut strikes: "+hit);
+            double expected=0;
+            for(int k=0;k<(combo?4:2);k++) {
+                double fixed=13*com.github.L_Ender.cataclysm.config.CMCommonConfig.Maledictus.attackMultiplier*(1+.2*k)*(combo && k%2==1?1.2:1);
+                expected+=fixed+Math.min(fixed,500*com.github.L_Ender.cataclysm.config.CMCommonConfig.Maledictus.HpDamage);
+            }
+            close(h,total,expected,"Every strike retains its native multiplier, capped health term and live rage");
+            h.assertTrue(MaledictusRage.stacks(a.p)==hit,"Accepted native melee builds shared rage");
+            h.assertTrue(victim.getLastDamageSource().getEntity()==a.p,"Native mob-attack source rebinds real owner");
+            close(h,friend.getHealth(),500,"Nearby allies never receive strike or launch");
+            h.assertTrue(!MaledictusCasting.isActing(host) && host.isNoGravity(),"Action releases ally and leaves unrelated gravity intact");h.succeed();
+        }
+    }
+    public static void maledictusRushHealthChain(GameTestHelper h) {
+        for(int hp=0;hp<3;hp++) {
+            var frames=new ArrayList<dev.cataclysmnouveau.network.BodyPhantomPayload>();
+            try(var a=new Arena(h,packet->{if(packet instanceof net.minecraft.network.protocol.common.ClientboundCustomPayloadPacket c
+                    && c.payload() instanceof dev.cataclysmnouveau.network.BodyPhantomPayload f)frames.add(f);})) {
+                a.p.setYRot(0);a.p.setHealth(a.p.getMaxHealth()*(hp==0?1:hp==1?.5F:.25F));
+                a.cast(GlyphCatalog.MALEDICTUS_RUSH,block(a.center),false);
+                for(int i=0;i<230;i++)ExecutionSessions.tick();
+                final int level=hp;
+                h.assertTrue(frames.stream().anyMatch(f->f.animation()==(level==0?11:12)),"Native opening rush follows caster health");
+                h.assertTrue(frames.stream().anyMatch(f->f.animation()==15 || f.animation()==16)==(hp>0),"Only native half-health variant gains second rush");
+                h.assertTrue(frames.stream().anyMatch(f->f.animation()==17)==(hp==2),"Only native quarter-health variant gains third rush");
+                h.assertTrue(frames.getLast().closed(),"All native chained phases finish");
+                close(h,CapabilityRegistry.getMana(a.p).getCurrentMana(),10000-CataclysmConfig.cost(Ability.MALEDICTUS_RUSH),"Native extra phases are not separately billed");
+            }
+        }
+        h.succeed();
+    }
+    public static void maledictusGroundWaveAndNoCombo(GameTestHelper h) {
+        var debugFrames=new ArrayList<dev.cataclysmnouveau.network.BodyPhantomPayload>();
+        var a=new Arena(h,packet->{if(packet instanceof net.minecraft.network.protocol.common.ClientboundCustomPayloadPacket c
+                && c.payload() instanceof dev.cataclysmnouveau.network.BodyPhantomPayload f)debugFrames.add(f);});a.p.setYRot(0);
+        var far=a.target(a.center.add(0,0,8),false);var ally=a.target(a.center.add(0,0,8),true);
+        // The outer wave crosses into another chunk: allow forced chunks to become entity-query visible.
+        h.runAfterDelay(10,()->{
+            try {
+                var mana=CapabilityRegistry.getMana(a.p);mana.setMaxMana(10000);mana.setMana(10000);
+                a.cast(GlyphCatalog.MALEDICTUS_SHOCKWAVE,block(a.center),false);
+                close(h,mana.getCurrentMana(),10000-CataclysmConfig.cost(Ability.MALEDICTUS_SHOCKWAVE),"Wave starts and charges once after chunk activation");
+                h.assertTrue(!debugFrames.isEmpty() && debugFrames.getFirst().animation()==9,"A native StateGoal needs its initial state explicitly entered");
+                for(int i=0;i<7;i++)ExecutionSessions.tick();close(h,far.getHealth(),500,"Far target awaits advancing wave");
+                for(int i=0;i<21;i++){far.invulnerableTime=0;ExecutionSessions.tick();}
+                h.assertTrue(far.getHealth()<500 && far.getLastDamageSource().getEntity()==a.p,
+                        "Native advancing ground wave has real damage and owner; health="+far.getHealth()+"; far="+far.position()+"; frames="
+                                +debugFrames.stream().map(f->f.age()+"/"+f.position()+"/"+f.yaw()).toList());
+                close(h,ally.getHealth(),500,"Ground wave leaves allies untouched");
+                var debris=h.getLevel().getEntities((Entity)null,new AABB(a.center,a.center).inflate(20),e->e.getClass().getSimpleName().equals("Cm_Falling_Block_Entity"));
+                h.assertTrue(!debris.isEmpty(),"Native ground debris is actually inserted");
+                a.p.discard();ExecutionSessions.tick();h.assertTrue(debris.stream().allMatch(Entity::isRemoved),"Decorative children are cleaned on owner loss");
+            }finally{a.close();}
+            var frames=new ArrayList<dev.cataclysmnouveau.network.BodyPhantomPayload>();
+            try(var empty=new Arena(h,packet->{if(packet instanceof net.minecraft.network.protocol.common.ClientboundCustomPayloadPacket c
+                    && c.payload() instanceof dev.cataclysmnouveau.network.BodyPhantomPayload f)frames.add(f);})) {
+                empty.p.setYRot(0);empty.cast(GlyphCatalog.MALEDICTUS_MELEE_COMBO,block(empty.center),false);
+                for(int i=0;i<90;i++)ExecutionSessions.tick();
+                h.assertTrue(frames.stream().noneMatch(f->f.animation()==21) && frames.getLast().closed(),"Missed combo does not invent a successful follow-up");h.succeed();
+            }
+        });
+    }
+    public static void maledictusCombatPermissionAndRecipes(GameTestHelper h) {
+        try(var a=new Arena(h)) {
+            var enemy=a.target(a.center,false);
+            for(var glyph:List.of(GlyphCatalog.MALEDICTUS_AERIAL_SMASH,GlyphCatalog.PHANTOM_AERIAL_VOLLEY,GlyphCatalog.MALEDICTUS_RUSH,
+                    GlyphCatalog.MALEDICTUS_SHOCKWAVE,GlyphCatalog.MALEDICTUS_UPPERCUT,GlyphCatalog.MALEDICTUS_MELEE_COMBO)) {
+                a.cast(glyph,new EntityHitResult(enemy),false);
+                h.assertTrue(!ExecutionSessions.isCasting(a.p) && !MaledictusCasting.isActing(enemy),"Hostile target is never replaced by payer fallback");
+                close(h,CapabilityRegistry.getMana(a.p).getCurrentMana(),10000,"Rejected target pays nothing");
+                h.assertTrue(h.getLevel().getRecipeManager().byKey(glyph.getRegistryName()).isPresent(),"Real Scribe recipe present");
+            }
+            h.assertTrue(h.getLevel().getRecipeManager().byKey(net.minecraft.resources.ResourceLocation.parse("cataclysm_nouveau:cursium_fragments")).isPresent(),"Divisible Boss material recipe loaded");
+            var host=a.target(a.center,true);a.cast(GlyphCatalog.MALEDICTUS_AERIAL_SMASH,new EntityHitResult(host),false);
+            for(int i=0;i<26;i++)ExecutionSessions.tick();h.assertTrue(host.isNoGravity() && host.getDeltaMovement().y>0,"Native ascent is applied to actual friendly executor");
+            a.cast(GlyphCatalog.MALEDICTUS_UPPERCUT,new EntityHitResult(host),false);
+            h.assertTrue(host.isNoGravity() && MaledictusCasting.isActing(host),"Interruption restores ally's original gravity before replacement action");
+            a.p.discard();ExecutionSessions.tick();h.assertTrue(!MaledictusCasting.isActing(host),"Root loss releases actual executor claim");h.succeed();
+        }
+    }
     private static Vec3 scene(GameTestHelper h) {
         var origin=h.absoluteVec(new Vec3(4,0,4));
         return new Vec3(origin.x,h.getLevel().getMaxBuildHeight()-48,origin.z);
@@ -2248,7 +2375,7 @@ public final class NativeAbilityTests {
                     case THUNDER_COMBO -> new int[]{25};case ANCHOR_SPIN -> new int[]{7};case ANCHOR_LEAP -> new int[]{15,17};
                     case HARBINGER_CHARGE,GRAVITY_PUNCH -> new int[]{1};case GUARDIAN_UPPERCUT -> new int[]{2,3};
                     case GUARDIAN_BLINK -> new int[]{4};case GUARDIAN_AIR_STRIKE -> new int[]{5,6};
-                    case GUARDIAN_ROCKET_PUNCH -> new int[]{7};case HALBERD_CLEAVE -> new int[]{26};case SOUL_BURST -> new int[]{7};default -> new int[]{8};
+                    case GUARDIAN_ROCKET_PUNCH -> new int[]{7};case HALBERD_CLEAVE -> new int[]{26};case SOUL_BURST -> new int[]{7};case MALEDICTUS_AERIAL_SMASH -> new int[]{24,25};case PHANTOM_AERIAL_VOLLEY -> new int[]{3,4,5};case MALEDICTUS_RUSH -> new int[]{10,11,12,15,16,17};case MALEDICTUS_SHOCKWAVE -> new int[]{9};case MALEDICTUS_UPPERCUT -> new int[]{22,23};case MALEDICTUS_MELEE_COMBO -> new int[]{19,20,21};default -> new int[]{8};
                 };
                 for(int state:states) {
                     switch(boss) {

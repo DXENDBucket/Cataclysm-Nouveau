@@ -63,7 +63,13 @@ public enum Ability {
     PHANTOM_SPIRAL("phantom_spiral", "Phantom Spiral", 300),
     PHANTOM_RINGS("phantom_rings", "Phantom Rings", 240),
     HALBERD_CLEAVE("halberd_cleave", "Halberd Cleave", 360),
-    SOUL_BURST("soul_burst", "Soul Burst", 120);
+    SOUL_BURST("soul_burst", "Soul Burst", 120),
+    MALEDICTUS_AERIAL_SMASH("maledictus_aerial_smash", "Maledictus Aerial Smash", 600),
+    PHANTOM_AERIAL_VOLLEY("phantom_aerial_volley", "Phantom Aerial Volley", 180),
+    MALEDICTUS_RUSH("maledictus_rush", "Maledictus Rush", 220),
+    MALEDICTUS_SHOCKWAVE("maledictus_shockwave", "Maledictus Shockwave", 160),
+    MALEDICTUS_UPPERCUT("maledictus_uppercut", "Maledictus Uppercut", 140),
+    MALEDICTUS_MELEE_COMBO("maledictus_melee_combo", "Maledictus Melee Combo", 200);
     public final String id, name;
     public final int mana;
     Ability(String id, String name, int mana) { this.id=id; this.name=name; this.mana=mana; }
@@ -71,7 +77,7 @@ public enum Ability {
     /** Acquisition/source families, shared by all presentation surfaces. */
     public Series series() {
         return switch(this) {
-            case PHANTOM_ARROW,PHANTOM_HALBERD,CURSED_RAGE,PHANTOM_SPIRAL,PHANTOM_RINGS,HALBERD_CLEAVE,SOUL_BURST -> Series.MALEDICTUS;
+            case PHANTOM_ARROW,PHANTOM_HALBERD,CURSED_RAGE,PHANTOM_SPIRAL,PHANTOM_RINGS,HALBERD_CLEAVE,SOUL_BURST,MALEDICTUS_AERIAL_SMASH,PHANTOM_AERIAL_VOLLEY,MALEDICTUS_RUSH,MALEDICTUS_SHOCKWAVE,MALEDICTUS_UPPERCUT,MALEDICTUS_MELEE_COMBO -> Series.MALEDICTUS;
             case IGNIS_FIREBALL,IGNIS_ABYSS_FIREBALL,IGNIS_BLADE_FIREBALLS,IGNIS_AIR_SMASH,IGNIS_SWORD_COMBO,
                     IGNIS_FIREBALL_ARRAY,IGNIS_EARTH_SHUDDERS,IGNIS_REINFORCED_SMASH,IGNIS_ULTIMATE,IGNIS_FLAME_STRIKE -> Series.IGNIS;
             case GUARDIAN_BULLET,VOID_VORTEX,GUARDIAN_STOMP,GRAVITY_PUNCH,GUARDIAN_UPPERCUT,GUARDIAN_BLINK,GUARDIAN_AIR_STRIKE,GUARDIAN_ROCKET_PUNCH -> Series.ENDER_GUARDIAN;

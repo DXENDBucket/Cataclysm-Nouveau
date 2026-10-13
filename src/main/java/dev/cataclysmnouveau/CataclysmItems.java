@@ -12,6 +12,8 @@ public final class CataclysmItems {
         ITEMS.registerSimpleItem("guardian_void_fragment", new Item.Properties());
     public static final DeferredItem<Item> IGNITIUM_FRAGMENT =
         ITEMS.registerSimpleItem("ignitium_fragment", new Item.Properties());
+    public static final DeferredItem<Item> CURSIUM_FRAGMENT =
+        ITEMS.registerSimpleItem("cursium_fragment", new Item.Properties());
     public static void register(IEventBus bus) { ITEMS.register(bus); }
     private CataclysmItems() {}
 }
