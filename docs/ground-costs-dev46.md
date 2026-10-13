@@ -10,3 +10,5 @@
 
 - `cataclysm-nouveau-0.1.0-dev.46-mc1.21.1-neoforge.jar`：`f91a069ab649f4d0b54647c00c4167943d6e5ddfaeddcac53edaf9ac2d9bf1dc`
 - `cataclysm-nouveau-0.1.0-dev.46-sources.jar`：`49bee1f825fc6a989795335842d8dd5fb9f38764af3924c7a7764d8b2f552d27`
+
+实现提交`427abcc`已快进合入main，标记`v0.1.0-dev.46`，未推送。已部署到万法归一并核对JAR哈希、20／30 Mana和两个零冷却配置。dev.45及旧配置备份于实例`codex-backups/cataclysm-dev46`，Core和其他附属未更换。
