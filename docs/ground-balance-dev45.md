@@ -35,3 +35,6 @@ Core固定`08c307f3238b9b9aa7fd628b9771cd287160448d`（0.1.24），受版本控�
 - `cataclysm-nouveau-0.1.0-dev.45-mc1.21.1-neoforge.jar`：`2d13cefd311382ef14c797283bfba80c389012f5b6aa64bacbd634c9e98e3cdb`
 - `cataclysm-nouveau-0.1.0-dev.45-sources.jar`：`0b62cb811c0e6ba547837fe179f3797acdd5546545f604047010af8bf547c887`
 - Elemental JAR：`9ba4393c98228bb1647e3786c71c30c7eb97574b9e65baba14f34c92f7b86eb9`
+
+
+本地实现提交`bf08a4f`，合入main并标记`v0.1.0-dev.45`，未推送。已串行部署万法归一，仅替换本附属并同步上述三项配置；JAR哈希与上表一致、mods中只存在一个版本。dev.44与原配置备份至实例`codex-backups/cataclysm-dev45`。Core和其他附属未更换；本轮GameTest进程均已退出，已有Gradle守护进程保留。
