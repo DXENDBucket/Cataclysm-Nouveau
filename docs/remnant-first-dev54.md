@@ -55,3 +55,13 @@
   SHA256 `8fc559675299c4ffaba0a2240a53844f10968493ac3cf20735e5083d6b1eeb09`
 - `cataclysm-nouveau-0.1.0-dev.54-sources.jar`
   SHA256 `dc0658c0c022eac574a7585994a163290756e9abf3570655071195697e4b5379`
+
+
+## 提交与部署
+
+- 实现提交 `ab2d656`，标签 `v0.1.0-dev.54`；已快进合并主仓库 `main`，未推送或上传 CurseForge。
+- 二进制和源码产物同步到主仓库 `build/libs`，哈希与上述产物一致。
+- 已部署到 `C:/Users/57991/Desktop/.minecraft/versions/1.21.1-万法归一/mods`，仅以 dev.54 替换 dev.53；其余173个文件哈希不变，实例仍使用 Core 0.1.27。
+- 活跃配置 `config/cataclysm_nouveau-server.toml` 未修改，SHA256 `6a09ae168cb83d65b143c948df18ab48f3c46dfe1d20bdd5d28421f9dc11ec25`；新能力配置键由下一次启动按默认值生成。没有修改存档。
+- 旧JAR与部署清单位于实例的 `codex-backups/cataclysm-dev54-20261019`。
+- 下一步人工检查：三沙暴围绕自身／友军／固定点的外观与声音；沙碑预兆、落下与碎裂；地震波尘浪及特殊形态；地裂光环、地块、声音。无需以人工视觉确认替代现有的服务端计费和伤害证据。
