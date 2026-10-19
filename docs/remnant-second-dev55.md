@@ -58,3 +58,12 @@
   SHA256 `0b44ad351323a54c0df49e0dad98fdd0cd2839f95ae157e4c94d259778f23a6f`
 - `cataclysm-nouveau-0.1.0-dev.55-sources.jar`
   SHA256 `fc21c91642222b96e62a77dc5adace666e7c7c2201be2178166f09eededa3043`
+
+
+## 提交与部署
+
+实现提交 `ee5f35e`，标签 `v0.1.0-dev.55`；夹具空白清理提交 `5a49ec1`，主仓库已快进合并，未推送或上传CurseForge。测试夹具格式整理不影响main二进制／源码产物。
+
+已部署到“万法归一”的 `mods`，仅以dev.55替换dev.54，其余173文件哈希不变；Core仍为0.1.27。活跃服务端配置未改，SHA256 `6a09ae168cb83d65b143c948df18ab48f3c46dfe1d20bdd5d28421f9dc11ec25`，新增配置键由下次启动自动补默认值；未修改存档。产物也已同步主仓库 `build/libs`。旧JAR及部署清单位于实例 `codex-backups/cataclysm-dev55-20261020`。
+
+测试服务已退出，未遗留GameTest Java；只保留Gradle daemon。下一步人工检查native碑阵／尾砸幻影与原生咆哮，沙暴弹的绿色拖尾／两次命中消退、NEG形态组合，失败时按实际画面补最小复现。
