@@ -56,4 +56,6 @@ Java 21，首次编译修正了缺少 ArmorStand import。首轮 7 项新增检�
 - 二进制 `cataclysm-nouveau-0.1.0-dev.51-mc1.21.1-neoforge.jar`，SHA-256 `4ae6e9d515e01b3bb266c20fa0fef075c7d0b802f868adb40973b0c410711817`。
 - 源码 `cataclysm-nouveau-0.1.0-dev.51-sources.jar`，SHA-256 `fc29e1f04226a21313d5aa676f9150e68050c3f8366d2896e3a95b6d313a810f`。
 
-实际部署由协调者完成后补记；本记录不授权其他 agent 写共享实例、推送或发布。
+实现提交 `4397b5c`，已快进主分支并标记 `v0.1.0-dev.51`。协调者已部署到 `C:/Users/57991/Desktop/.minecraft/versions/1.21.1-万法归一/mods`，只替换本附属 dev.50；落地 JAR 哈希与上述一致，其他 **173 个文件**逐一 SHA-256 不变，Core 0.1.27 保持不变。
+
+旧 JAR 及校验清单位于实例 `codex-backups/cataclysm-dev51-20261019/`；主仓库 `build/libs/` 已同步发行包和源码包。没有修改“万途归零”实例，没有推送或上传 CurseForge。
