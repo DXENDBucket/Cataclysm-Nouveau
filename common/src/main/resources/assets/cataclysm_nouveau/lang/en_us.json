@@ -246,5 +246,14 @@
   "item.cataclysm_nouveau.glyph_ground_quake": "Ground Quake",
   "cataclysm_nouveau.glyph_name.glyph_remnant_stomp": "Remnant Shockwave",
   "cataclysm_nouveau.glyph_desc.glyph_remnant_stomp": "Sends a widening ground shockwave forward from the casting location, raising blocks and striking enemies. Damage and the additional maximum-health term follow Ancient Remnant stomps.",
-  "item.cataclysm_nouveau.glyph_remnant_stomp": "Remnant Shockwave"
+  "item.cataclysm_nouveau.glyph_remnant_stomp": "Remnant Shockwave",
+  "cataclysm_nouveau.glyph_name.glyph_desert_stele_array": "Desert Stele Array",
+  "item.cataclysm_nouveau.glyph_desert_stele_array": "Desert Stele Array",
+  "cataclysm_nouveau.glyph_desc.glyph_desert_stele_array": "Calls the complete native eight-arm stele formation and a line aimed forward. Steles fall in sequence, retaining piercing, landing impacts and Curse of the Desert. The entire array pays once.",
+  "cataclysm_nouveau.glyph_name.glyph_remnant_triple_quake": "Remnant Triple Quake",
+  "item.cataclysm_nouveau.glyph_remnant_triple_quake": "Remnant Triple Quake",
+  "cataclysm_nouveau.glyph_desc.glyph_remnant_triple_quake": "Performs three native ground slams, each releasing 22–29 quake waves in all directions. Direct slams, native ground-target damage and knockback are retained. The sequence pays once.",
+  "cataclysm_nouveau.glyph_name.glyph_cursed_sandstorm": "Cursed Sandstorm",
+  "item.cataclysm_nouveau.glyph_cursed_sandstorm": "Cursed Sandstorm",
+  "cataclysm_nouveau.glyph_desc.glyph_cursed_sandstorm": "Replaces the projectile with a native cursed sandstorm that starts homing after a short delay. A normal shot can deal damage twice before fading. Repeating forms pay each accepted contact and retain their Ars trajectory."
 }

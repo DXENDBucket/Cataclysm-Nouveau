@@ -246,5 +246,14 @@
   "item.cataclysm_nouveau.glyph_ground_quake": "地震波",
   "cataclysm_nouveau.glyph_name.glyph_remnant_stomp": "踏地裂波",
   "cataclysm_nouveau.glyph_desc.glyph_remnant_stomp": "从施法位置向前释放逐段推进的扇形地裂，掀起地块并冲击敌人。基础伤害与最大生命附加伤害沿用远古遗魂的践踏。",
-  "item.cataclysm_nouveau.glyph_remnant_stomp": "踏地裂波"
+  "item.cataclysm_nouveau.glyph_remnant_stomp": "踏地裂波",
+  "cataclysm_nouveau.glyph_name.glyph_desert_stele_array": "沙碑阵",
+  "item.cataclysm_nouveau.glyph_desert_stele_array": "沙碑阵",
+  "cataclysm_nouveau.glyph_desc.glyph_desert_stele_array": "召出完整的八臂旋转沙碑阵，并向前方延伸一列沙碑。沙碑陆续坠落，保留贯穿、落地冲击和沙漠诅咒；整阵只收费一次。",
+  "cataclysm_nouveau.glyph_name.glyph_remnant_triple_quake": "三连震地",
+  "item.cataclysm_nouveau.glyph_remnant_triple_quake": "三连震地",
+  "cataclysm_nouveau.glyph_desc.glyph_remnant_triple_quake": "连续三次震击地面，每次向四周释放22至29道地震波。保留直接砸击、地震波对着地目标的伤害与击退；整段只收费一次。",
+  "cataclysm_nouveau.glyph_name.glyph_cursed_sandstorm": "诅咒沙暴弹",
+  "item.cataclysm_nouveau.glyph_cursed_sandstorm": "诅咒沙暴弹",
+  "cataclysm_nouveau.glyph_desc.glyph_cursed_sandstorm": "将弹射物替换为短暂延迟后开始追踪的诅咒沙暴弹。普通弹体可伤害两次后消退；重复触发形态逐次付费，并保留对应的Ars轨迹。"
 }

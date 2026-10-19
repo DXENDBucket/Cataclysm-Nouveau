@@ -1,3 +1,13 @@
+## 0.1.0-dev.55
+
+- Add Desert Stele Array using the complete native eight-arm formation plus a forward line (128 + 16 steles).
+- Add Remnant Triple Quake with native slam timing at ticks 26/55/85, each spawning 22–29 radial quake waves. Preserve direct slam and child-wave damage, source ownership and one-time group billing.
+- Add Cursed Sandstorm projectile replacement with native fifteen-tick delayed homing, two successful hits, curse and fade. Repeating Ars carriers retain their trajectory and pay per contact without exhausting the two-hit state or expiring silently at the native lifetime.
+- Reuse Conflux contexts, projectile motion, continuations, billing and allied relations. Extend the existing native phantom protocol with Ancient Remnant states for both formations; add a client visual toggle and native model/animation delegation.
+- Restore detached-frame roar particles and entity-attached sounds through server position delivery. Correct the health-damage cap baseline for native triple slams.
+- Default cost/cooldown: 600/16s, 420/10s, 50/none. Three new Scribe recipes keep the full seven-glyph series within three guaranteed Boss kills.
+- Nine focused server checks, including relevant projectile/stele regressions and every supported phantom pose roundtrip, pass. Binary/source distribution boundaries pass; client appearance remains unverified.
+
 ## 0.1.0-dev.54
 
 - Add Ancient Remnant's Sandstorm Ring, Desert Stele, Ground Quake projectile replacement and Remnant Shockwave effect.

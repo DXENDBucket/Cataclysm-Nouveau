@@ -191,3 +191,10 @@ Native Goal 使用无世界 Boss 帧构造子光束后，重绑 `beam.caster` �
 EarthQuake 的 tick 在 super.tick 前还有一次 move 和接触／粒子调用，单纯抑制 ThrowableProjectile.tick 不能完成特殊轨迹适配。需要保留视觉tick但阻止前置move、免费伤害和原生60tick到期；触发时再调用原生接触，走伤害成功续接。普通地震波的重复伤害不能反复执行同一实体的后续编排。
 
 StompParticle 只在客户端分支执行，Stompsound 用 playLocalSound；无世界帧没有客户端实体tick，必须分别桥接原生粒子参数与服务端位置声音。不能只验证翻起的地块就宣称全部特效齐全。具体实装及8项服务端验证见 remnant-first-dev54.md，客户端外观未人工确认。
+
+
+## dev.55：自定义弹射物基类与多次命中
+
+Cursed Sandstorm 的 tick 在具体类内调用 CustomAbstractHurtingProjectile.tick 执行原生碰撞／加速，再更新追踪和寿命。只在具体类压制位移仍会留下基类碰撞，特殊Ars轨迹须覆盖基类碰撞，并保留原生具体类粒子与同步。普通弹有两个成功命中次数，不应在第一次命中就关闭会话；重复形态则每触发付款并复位原生预算，不能被290tick寿命／消退状态偷偷永久禁用。
+
+新增原生幻影家族同时更新 Kind 的所有 exhaustive switch、snapshot、客户端proxy、配置和全状态协议夹具。Ancient Remnant 的三连尾砸使用 ground_tail，不能仅看 threetailhit 字段名推断动画key。调用帧的 roar 粒子／实体音效与地裂一样需要独立服务端发送；具体实现和9项验证见 remnant-second-dev55.md。

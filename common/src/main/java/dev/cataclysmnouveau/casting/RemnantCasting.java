@@ -24,7 +24,7 @@ public final class RemnantCasting {
     public static boolean spawn(Entity child,BooleanSupplier original){
         var birth=BIRTH.get();return birth==null?original.getAsBoolean():birth.apply(child);
     }
-    public static boolean supports(Ability a){return a==Ability.SANDSTORM_RING || a==Ability.DESERT_STELE || a==Ability.REMNANT_STOMP;}
+    public static boolean supports(Ability a){return a==Ability.DESERT_STELE_ARRAY || a==Ability.REMNANT_TRIPLE_QUAKE || a==Ability.SANDSTORM_RING || a==Ability.DESERT_STELE || a==Ability.REMNANT_STOMP;}
     public static boolean enabled(Ability a){return GlyphCatalog.ALL.stream().anyMatch(g->g instanceof CataclysmEffectGlyph e && e.ability==a && e.isEnabled());}
     public static boolean rejectDamage(Entity source,Entity target){
         if(source.level().isClientSide || !(source instanceof Sandstorm_Entity || source instanceof Ancient_Desert_Stele_Entity))return false;
@@ -32,14 +32,18 @@ public final class RemnantCasting {
     }
     private static boolean loaded(ServerLevel w,Vec3 p){return w.isInWorldBounds(BlockPos.containing(p)) && w.hasChunkAt(BlockPos.containing(p));}
     public static boolean effect(Ability a,ServerLevel world,CastContext cast,double amp,double duration) {
+        if(a==Ability.DESERT_STELE_ARRAY || a==Ability.REMNANT_TRIPLE_QUAKE)return RemnantFormations.start(a,world,cast,amp);
         if(a==Ability.SANDSTORM_RING)return storms(world,cast,amp,duration);
         if(a==Ability.DESERT_STELE)return stele(world,cast,amp);
         if(a==Ability.REMNANT_STOMP)return stomp(world,cast,amp);
         return false;
     }
-    private static boolean add(ServerLevel world,SpellRemnant frame,Entity child,double amp) {
+    static boolean add(ServerLevel world,SpellRemnant frame,Entity child,double amp) {
         if(!loaded(world,child.position())){child.discard();return false;}
         var owner=frame.cast.damageOwner()==null?frame.cast.caster():frame.cast.damageOwner();
+        if(child instanceof com.github.L_Ender.cataclysm.entity.projectile.EarthQuake_Entity quake){
+            quake.setOwner(owner);var state=(ManagedProjectile)quake;state.confluxCataclysm$mode(2);state.confluxCataclysm$sourceAbility(frame.ability);
+        }
         if(child instanceof Sandstorm_Entity storm){storm.setCaster(owner);((RemnantStorm)storm).confluxRemnant$frame(frame);}
         if(child instanceof Ancient_Desert_Stele_Entity stele)stele.setCaster(owner);
         NativeDamageContexts.bind(child,frame.cast,amp);

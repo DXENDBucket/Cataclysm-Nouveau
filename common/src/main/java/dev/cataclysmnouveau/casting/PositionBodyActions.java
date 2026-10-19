@@ -32,6 +32,7 @@ final class PositionBodyActions {
             case GUARDIAN -> new SpellGuardian(world,frame,point,heading,amp,ability);
             case HARBINGER -> new SpellHarbinger(world,frame,ability,point,0,amp);
             case MONSTROSITY -> new SpellMonstrosity(world,frame,point,heading,amp);
+            case REMNANT -> throw new IllegalArgumentException("Remnant uses its shared formation driver");
             case MALEDICTUS -> throw new IllegalArgumentException("Maledictus uses its shared anchor driver");
         };
         // A private, unregistered aim marker freezes direction even if the caster turns or walks away.

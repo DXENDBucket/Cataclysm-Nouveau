@@ -34,6 +34,7 @@ public final class GlyphClientExtensions {
                 return true;
             }
         },dev.cataclysmnouveau.CataclysmEffects.LAVA_WALKING,dev.cataclysmnouveau.CataclysmEffects.WATER_WALKING,dev.cataclysmnouveau.CataclysmEffects.CURSED_RAGE);
+        event.registerItem(nativeItem(() -> ModItems.WRATH_OF_THE_DESERT.get()),GlyphCatalog.CURSED_SANDSTORM.getGlyph());
         event.registerItem(nativeItem(() -> ModItems.TIDAL_CLAWS.get()),GlyphCatalog.ABYSS_BLAST.getGlyph(),GlyphCatalog.TIDAL_TENTACLE.getGlyph(),GlyphCatalog.ABYSS_TRIPLE_BLAST.getGlyph());
         event.registerItem(nativeItem(() -> com.github.L_Ender.cataclysm.init.ModBlocks.ABYSSAL_EGG.get().asItem()),GlyphCatalog.ABYSS_BOMBARDMENT.getGlyph(),GlyphCatalog.ABYSS_BOMBARDMENT_ARRAY.getGlyph());
         event.registerItem(nativeItem(() -> ModItems.CURSED_BOW.get()),GlyphCatalog.PHANTOM_ARROW.getGlyph(),GlyphCatalog.PHANTOM_AERIAL_VOLLEY.getGlyph());

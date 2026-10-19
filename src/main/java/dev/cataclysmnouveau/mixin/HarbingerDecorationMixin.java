@@ -13,5 +13,5 @@ public abstract class HarbingerDecorationMixin {
     @Inject(method="setDeltaMovement(Lnet/minecraft/world/phys/Vec3;)V",at=@At("HEAD"),cancellable=true)
     private void harbinger$motion(Vec3 v,CallbackInfo ci){if(HarbingerCasting.decorating((Entity)(Object)this))ci.cancel();}
     @Inject(method="discard",at=@At("HEAD"),cancellable=true)
-    private void harbinger$expiry(CallbackInfo ci){var e=(Entity)(Object)this;if(HarbingerCasting.decorating(e) && !((ManagedProjectile)e).confluxCataclysm$resolving())ci.cancel();}
+    private void harbinger$expiry(CallbackInfo ci){var e=(Entity)(Object)this;if(HarbingerCasting.decorating(e) && !((ManagedProjectile)e).confluxCataclysm$resolving() && !(e instanceof com.github.L_Ender.cataclysm.entity.projectile.Cursed_Sandstorm_Entity storm && storm.getState()==2 && !((ManagedProjectile)e).confluxCataclysm$repeated()))ci.cancel();}
 }

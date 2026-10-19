@@ -88,7 +88,10 @@
     "RemnantStormMixin",
     "RemnantAreaMixin",
     "RemnantQuakeMixin",
-    "RemnantQuakeAccess"
+    "RemnantQuakeAccess",
+    "CursedStormMixin",
+    "CursedStormMotionMixin",
+    "CursedStormHitMixin"
   ],
   "client": [
     "client.GuardianVortexRenderProbeMixin",

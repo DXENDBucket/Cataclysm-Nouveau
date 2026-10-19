@@ -84,7 +84,10 @@ public enum Ability {
     SANDSTORM_RING("sandstorm_ring", "Sandstorm Ring", 280),
     DESERT_STELE("desert_stele", "Desert Stele", 45),
     GROUND_QUAKE("ground_quake", "Ground Quake", 50),
-    REMNANT_STOMP("remnant_stomp", "Remnant Shockwave", 240);
+    REMNANT_STOMP("remnant_stomp", "Remnant Shockwave", 240),
+    DESERT_STELE_ARRAY("desert_stele_array", "Desert Stele Array", 600),
+    REMNANT_TRIPLE_QUAKE("remnant_triple_quake", "Remnant Triple Quake", 420),
+    CURSED_SANDSTORM("cursed_sandstorm", "Cursed Sandstorm", 50);
     public final String id, name;
     public final int mana;
     Ability(String id, String name, int mana) { this.id=id; this.name=name; this.mana=mana; }
@@ -92,7 +95,7 @@ public enum Ability {
     /** Acquisition/source families, shared by all presentation surfaces. */
     public Series series() {
         return switch(this) {
-            case SANDSTORM_RING,DESERT_STELE,GROUND_QUAKE,REMNANT_STOMP -> Series.ANCIENT_REMNANT;
+            case DESERT_STELE_ARRAY,REMNANT_TRIPLE_QUAKE,CURSED_SANDSTORM,SANDSTORM_RING,DESERT_STELE,GROUND_QUAKE,REMNANT_STOMP -> Series.ANCIENT_REMNANT;
             case ABYSS_ORB_ARRAY,ABYSS_TRIPLE_BLAST,DIMENSIONAL_RIFT,TIDAL_TENTACLE,ABYSS_MINEFIELD,ABYSS_BOMBARDMENT_ARRAY,ABYSS_ORB,ABYSS_MINE,ABYSS_BLAST,ABYSS_BOMBARDMENT -> Series.LEVIATHAN;
             case PHANTOM_ARROW,PHANTOM_HALBERD,CURSED_RAGE,PHANTOM_SPIRAL,PHANTOM_RINGS,HALBERD_CLEAVE,SOUL_BURST,MALEDICTUS_AERIAL_SMASH,PHANTOM_AERIAL_VOLLEY,MALEDICTUS_RUSH,MALEDICTUS_SHOCKWAVE,MALEDICTUS_UPPERCUT,MALEDICTUS_MELEE_COMBO,MALEDICTUS_SPIN_SLASHES -> Series.MALEDICTUS;
             case IGNIS_FIREBALL,IGNIS_ABYSS_FIREBALL,IGNIS_BLADE_FIREBALLS,IGNIS_AIR_SMASH,IGNIS_SWORD_COMBO,

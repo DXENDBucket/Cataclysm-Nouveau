@@ -15,6 +15,7 @@ public final class BodyPhantomSync {
                                               int elapsed, boolean closed) {
         int state=0,age=0,flags=0;
         switch(frame) {
+            case SpellRemnant boss -> {state=boss.getAttackState();age=boss.attackTicks;flags=boss.getIsPower()?1:0;}
             case SpellMaledictus boss -> {state=boss.getAttackState();age=boss.attackTicks;flags=boss.getRageMeter();}
             case SpellScylla boss -> {
                 state=boss.getAttackState();age=boss.attackTicks;flags=(boss.getEye()?1:0)|(boss.isFlying()?2:0);

@@ -1,0 +1,16 @@
+{
+  "type": "ars_nouveau:glyph",
+  "exp": 27,
+  "output": {
+    "id": "cataclysm_nouveau:glyph_desert_stele_array",
+    "count": 1
+  },
+  "inputs": [
+    {
+      "item": "cataclysm:remnant_skull"
+    },
+    {
+      "item": "ars_nouveau:source_gem"
+    }
+  ]
+}
