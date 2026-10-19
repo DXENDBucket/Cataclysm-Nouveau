@@ -2,6 +2,7 @@ package dev.cataclysmnouveau.client;
 
 import dev.cataclysmnouveau.CataclysmClientConfig;
 import dev.cataclysmnouveau.casting.BodyPhantomAnimations;
+import dev.cataclysmnouveau.casting.VisualSampleClock;
 import net.minecraft.world.entity.Mob;
 import dev.cataclysmnouveau.network.BodyPhantomPayload;
 import net.minecraft.client.Minecraft;
@@ -10,6 +11,7 @@ import net.minecraft.client.renderer.*;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.phys.AABB;
+import net.minecraft.world.phys.Vec3;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
@@ -23,6 +25,7 @@ public final class BodyPhantoms {
     private static final Map<UUID,View> ACTIVE=new LinkedHashMap<>();
     private static WeakReference<ClientLevel> world=new WeakReference<>(null);
     private static final int LEASE=16,FADE=6;
+    private record Trail(BodyPhantomPayload pose,Vec3 point,float yaw,int age,long born) {}
     private static final class View {
         final Mob proxy;
         final BodyPhantomAnimations.Kind kind;
@@ -30,6 +33,9 @@ public final class BodyPhantoms {
         final long born;
         long received,expires;
         float previousYaw;
+        final VisualSampleClock trailClock=new VisualSampleClock();
+        final Deque<Trail> trails=new ArrayDeque<>();
+        Vec3 previousPoint;
         View(ClientLevel world,BodyPhantomAnimations.Kind kind){born=world.getGameTime();this.kind=kind;proxy=BodyPhantomModels.create(kind,world);}
     }
     private static ClientLevel level(){
@@ -75,9 +81,35 @@ public final class BodyPhantoms {
             boolean ownFirstPerson=data.actorUuid().equals(client.player.getUUID()) && client.options.getCameraType().isFirstPerson();
             float fade=Math.min(Mth.clamp((view.expires-now-partial)/FADE,0,1),Mth.clamp((now-view.born+partial+1)/4,0,1));
             float opacity=CataclysmClientConfig.phantomOpacity(ownFirstPerson)*fade;
-            if(opacity<=0)continue;
-            var proxy=view.proxy;float yaw=yaw(view,now,partial);
-            BodyPhantomModels.pose(proxy,data,data.age()+(data.closed()?0:(int)Math.min(4,now-view.received)));
+            float effectOpacity=CataclysmClientConfig.phantomEffectOpacity(ownFirstPerson)*fade;
+            if(opacity<=0 && effectOpacity<=0)continue;
+            float yaw=yaw(view,now,partial);
+            int age=data.age()+(data.closed()?0:(int)Math.min(4,now-view.received));
+            view.trails.removeIf(trail->now-trail.born()>=5);
+            for(var trail:view.trails) {
+                // Fixed historical geometry; use the same native model/layers and local opacity policy.
+                float trailOpacity=CataclysmClientConfig.phantomOpacity(ownFirstPerson)*.5F/(1+now-trail.born()+partial);
+                draw(event,view,trail.pose(),trail.point(),trail.yaw(),trail.age(),partial,trailOpacity,trailOpacity,buffers,touched);
+            }
+            draw(event,view,data,point,yaw,age,partial,opacity,effectOpacity,buffers,touched);
+            if(!data.closed() && view.kind==BodyPhantomAnimations.Kind.MALEDICTUS
+                    && view.trailClock.sample(now,data.animation(),age)!=VisualSampleClock.Step.SKIP) {
+                if(BodyPhantomAnimations.maledictusAfterimage(data.animation(),age)) {
+                    Vec3 previous=view.previousPoint==null?point:view.previousPoint;
+                    // A skipped view/teleport must not leave a trail at a stale, unrelated location.
+                    if(previous.distanceToSqr(point)>16*16)previous=point;
+                    var behind=Vec3.directionFromRotation(0,yaw).scale(-.4);
+                    view.trails.addLast(new Trail(data,previous.add(behind),yaw,age,now));
+                }
+                view.previousPoint=point;
+            }
+        }
+        touched.forEach(buffers::endBatch);
+    }
+    private static void draw(RenderLevelStageEvent event,View view,BodyPhantomPayload data,Vec3 point,float yaw,int age,
+            float partial,float opacity,float effectOpacity,MultiBufferSource.BufferSource buffers,Set<RenderType> touched) {
+            var client=Minecraft.getInstance();var proxy=view.proxy;
+            BodyPhantomModels.pose(proxy,data,age);
             proxy.setPos(point);proxy.xOld=point.x;proxy.yOld=point.y;proxy.zOld=point.z;
             proxy.setYRot(yaw);proxy.yRotO=yaw;proxy.yBodyRot=proxy.yBodyRotO=yaw;proxy.yHeadRot=proxy.yHeadRotO=yaw;
             proxy.setXRot(data.pitch());proxy.xRotO=data.pitch();
@@ -85,10 +117,8 @@ public final class BodyPhantoms {
             try{
                 var camera=event.getCamera().getPosition();pose.translate(point.x-camera.x,point.y-camera.y,point.z-camera.z);
                 float scale=CataclysmClientConfig.phantomScale();pose.scale(scale,scale,scale);
-                client.getEntityRenderDispatcher().getRenderer(proxy).render(proxy,yaw,partial,pose,new PhantomBuffers(buffers,opacity,touched),LightTexture.FULL_BRIGHT);
+                client.getEntityRenderDispatcher().getRenderer(proxy).render(proxy,yaw,partial,pose,new PhantomBuffers(buffers,opacity,effectOpacity,touched),LightTexture.FULL_BRIGHT);
             }finally{pose.popPose();}
-        }
-        touched.forEach(buffers::endBatch);
     }
     private BodyPhantoms(){}
 }

@@ -4,6 +4,8 @@ import com.github.L_Ender.cataclysm.entity.AnimationMonster.BossMonsters.Ignis_E
 import com.github.L_Ender.cataclysm.init.ModEntities;
 import dev.cataclysmnouveau.CataclysmClientConfig;
 import dev.cataclysmnouveau.casting.IgnisAnimations;
+import dev.cataclysmnouveau.casting.VisualSampleClock;
+import dev.cataclysmnouveau.mixin.client.IgnisVisualAccess;
 import dev.cataclysmnouveau.network.IgnisPhantomPayload;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientLevel;
@@ -30,6 +32,7 @@ public final class IgnisPhantoms {
         final long born;
         long received,expires;
         float previousYaw;
+        final VisualSampleClock particles=new VisualSampleClock();
         View(ClientLevel world){born=world.getGameTime();proxy=new Ignis_Entity(ModEntities.IGNIS.get(),world);proxy.setNoAi(true);proxy.setNoGravity(true);proxy.setSilent(true);proxy.noCulling=true;}
     }
     private static ClientLevel level(){
@@ -75,7 +78,8 @@ public final class IgnisPhantoms {
             boolean ownFirstPerson=actor==client.player && client.options.getCameraType().isFirstPerson();
             float fade=Math.min(Mth.clamp((view.expires-now-partial)/FADE,0,1),Mth.clamp((now-view.born+partial+1)/4,0,1));
             float opacity=CataclysmClientConfig.phantomOpacity(ownFirstPerson)*fade;
-            if(opacity<=0)continue;
+            float effectOpacity=CataclysmClientConfig.phantomEffectOpacity(ownFirstPerson)*fade;
+            if(opacity<=0 && effectOpacity<=0)continue;
             var proxy=view.proxy;float yaw=yaw(view,now,partial);
             var animation=IgnisAnimations.animation(data.animation());
             proxy.setAnimation(animation);
@@ -90,7 +94,30 @@ public final class IgnisPhantoms {
             try{
                 var camera=event.getCamera().getPosition();pose.translate(point.x-camera.x,point.y-camera.y,point.z-camera.z);
                 float scale=CataclysmClientConfig.phantomScale();pose.scale(scale,scale,scale);
-                client.getEntityRenderDispatcher().getRenderer(proxy).render(proxy,yaw,partial,pose,new PhantomBuffers(buffers,opacity,touched),LightTexture.FULL_BRIGHT);
+                client.getEntityRenderDispatcher().getRenderer(proxy).render(proxy,yaw,partial,pose,new PhantomBuffers(buffers,opacity,effectOpacity,touched),LightTexture.FULL_BRIGHT);
+                // Native render() has now sampled blade2. Reuse its entire visual-only trail scheduler.
+                // Seed a new/discontinuous sample before calling it, never interpolate from world origin.
+                if(!data.closed()) {
+                    var step=view.particles.sample(now,data.animation(),proxy.getAnimationTick());
+                    var blade=proxy.socketPosArray[0];
+                    if(step!=VisualSampleClock.Step.SKIP) {
+                        var visual=(IgnisVisualAccess)(Object)proxy;
+                        if(blade!=null && Double.isFinite(blade.lengthSqr())) {
+                            blade=point.add(blade.subtract(point).scale(scale));proxy.setSocketPosArray(0,blade);
+                            var previous=visual.cataclysm$previousBlade();
+                            if(step==VisualSampleClock.Step.RESET || previous==null || !Double.isFinite(previous.lengthSqr()) || previous.distanceToSqr(blade)>16*16)
+                                visual.cataclysm$previousBlade(blade);
+                            visual.cataclysm$swingParticles();
+                        }
+                        int t=proxy.getAnimationTick();var nativeAnimation=proxy.getAnimation();
+                        if((nativeAnimation==Ignis_Entity.REINFORCED_SMASH_IN_AIR || nativeAnimation==Ignis_Entity.REINFORCED_SMASH_IN_AIR_SOUL) && t>74 && t<81)
+                            visual.cataclysm$pattern(1.5F,0,1,nativeAnimation==Ignis_Entity.REINFORCED_SMASH_IN_AIR_SOUL);
+                        if((nativeAnimation==Ignis_Entity.REINFORCED_SMASH || nativeAnimation==Ignis_Entity.REINFORCED_SMASH_SOUL) && t>46 && t<56)
+                            visual.cataclysm$sphere(.75F,2,6);
+                        if(nativeAnimation==Ignis_Entity.COMBO2 && t>108 && t<112)
+                            visual.cataclysm$strike(1.25F,5,0);
+                    }
+                }
             }finally{pose.popPose();}
         }
         touched.forEach(buffers::endBatch);

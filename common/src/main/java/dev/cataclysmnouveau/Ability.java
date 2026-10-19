@@ -77,8 +77,8 @@ public enum Ability {
     ABYSS_BOMBARDMENT("abyss_bombardment", "Abyss Bombardment", 300),
     DIMENSIONAL_RIFT("dimensional_rift", "Dimensional Rift", 650),
     TIDAL_TENTACLE("tidal_tentacle", "Tidal Tentacle", 140),
-    ABYSS_MINEFIELD("abyss_minefield", "Abyss Minefield", 900),
-    ABYSS_BOMBARDMENT_ARRAY("abyss_bombardment_array", "Abyss Bombardment Array", 1200);
+    ABYSS_MINEFIELD("abyss_minefield", "Abyss Minefield", 450),
+    ABYSS_BOMBARDMENT_ARRAY("abyss_bombardment_array", "Abyss Bombardment Array", 600);
     public final String id, name;
     public final int mana;
     Ability(String id, String name, int mana) { this.id=id; this.name=name; this.mana=mana; }

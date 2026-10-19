@@ -1,3 +1,12 @@
+## 0.1.0-dev.52
+
+- Reduce Abyss Bombardment Array from 1200 to 600 Mana and Abyss Minefield from 900 to 450; retain their cooldowns and one-payment group billing.
+- Invoke Ignis's native blade-fire trail scheduler after the native renderer samples the weapon socket. Restore missing reinforced-smash preparation/recovery particles and Sword Dance finisher particles through native visual helpers.
+- Prime new/discontinuous blade samples, and emit visual samples once per changing client tick rather than once per render frame.
+- Add short Maledictus aerial/rush afterimages using the existing native model/layer renderer and historical positions, without fabricated world entities or entity IDs.
+- Separate native action ring/arc/lightning opacity from translucent Boss bodies: default 80%, or 65% for the local first-person executor; retain 28%/10% body defaults.
+- Six focused server checks pass; binary and source packages contain no upstream media or implementation. Client appearance still requires in-game confirmation.
+
 ## 0.1.0-dev.51
 
 - Add Dimensional Rift, Tidal Tentacle, Abyss Minefield and Abyss Bombardment Array effect glyphs.

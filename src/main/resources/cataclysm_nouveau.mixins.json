@@ -86,6 +86,7 @@
     "client.PhantomRenderTypeAccess",
     "client.PhantomCompositeStateAccess",
     "client.PhantomTextureStateAccess",
+    "client.IgnisVisualAccess",
     "client.LeviathanBeamViewMixin"
   ],
   "injectors": {

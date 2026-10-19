@@ -80,7 +80,7 @@ public final class LeviathanSecondTests {
     @GameTest(template="empty",batch="lev_second_4",timeoutTicks=100)
     public static void minefieldNativeCountDelayAndGroupedFee(GameTestHelper h){
         try(var a=new NativeAbilityTests.Arena(h)){
-            a.cast(GlyphCatalog.ABYSS_MINEFIELD,block(a.center.add(0,10,0)),true);near(h,mana(a),9090,"Single array quote");
+            a.cast(GlyphCatalog.ABYSS_MINEFIELD,block(a.center.add(0,10,0)),true);near(h,mana(a),9540,"Single array quote");
             for(int i=0;i<30;i++)ExecutionSessions.tick();h.assertTrue(entities(a,Abyss_Mine_Entity.class).isEmpty(),"Native preparation retained");
             ExecutionSessions.tick();var mines=entities(a,Abyss_Mine_Entity.class);
             h.assertTrue(!mines.isEmpty() && mines.size()<=35,"Native space-checked mine distribution");
@@ -92,7 +92,7 @@ public final class LeviathanSecondTests {
     public static void bombardmentNativePhasesLiveTargetAndChildCleanup(GameTestHelper h){
         try(var a=new NativeAbilityTests.Arena(h)){
             var target=a.target(a.center,false);a.cast(GlyphCatalog.ABYSS_BOMBARDMENT_ARRAY,new EntityHitResult(target),false);
-            near(h,mana(a),8800,"One bombardment quote");for(int i=0;i<55;i++)ExecutionSessions.tick();h.assertTrue(entities(a,Abyss_Blast_Portal_Entity.class).isEmpty(),"Native 56-tick preparation");
+            near(h,mana(a),9400,"One bombardment quote");for(int i=0;i<55;i++)ExecutionSessions.tick();h.assertTrue(entities(a,Abyss_Blast_Portal_Entity.class).isEmpty(),"Native 56-tick preparation");
             ExecutionSessions.tick();var first=entities(a,Abyss_Blast_Portal_Entity.class);h.assertTrue(!first.isEmpty() && first.size()<=10,"Nine random attempts plus first aimed portal");
             var aimed=first.stream().filter(p->p.position().distanceToSqr(target.position())<.1).findFirst().orElseThrow();tick(aimed,22);
             var beam=((LeviathanPortal)aimed).confluxLeviathan$child();h.assertTrue(beam!=null && beam.caster==a.p,"Native child beam retains real caster");

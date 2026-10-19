@@ -8,6 +8,16 @@ import dev.cataclysmnouveau.Ability;
 /** Stable visual IDs for the supported native body actions; no client classes. */
 public final class BodyPhantomAnimations {
     public enum Kind { SCYLLA, HARBINGER, GUARDIAN, MONSTROSITY, MALEDICTUS }
+    /** Native Maledictus afterimage windows (the renderer proxy has no world entity ID). */
+    public static boolean maledictusAfterimage(int state,int age) {
+        return age>=0 && switch(state) {
+            case 3,8,24,28,29 -> true;
+            case 11,12,13,14 -> age>=24 && age<=33;
+            case 15,16 -> age>=16 && age<=25;
+            case 17 -> age>=16 && age<=24;
+            default -> false;
+        };
+    }
     public static Kind kind(Ability ability) {
         return switch(ability) {
             case THUNDER_COMBO, ANCHOR_SPIN, ANCHOR_LEAP -> Kind.SCYLLA;
