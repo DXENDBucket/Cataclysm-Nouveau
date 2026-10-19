@@ -52,4 +52,8 @@
 - `build/libs/cataclysm-nouveau-0.1.0-dev.49-mc1.21.1-neoforge.jar`：`f3c4bd6e8f38c95b3d70d1d87305763dd551eda329376171ed7384c1f0393dc1`。
 - `build/libs/cataclysm-nouveau-0.1.0-dev.49-sources.jar`：`6115718b8cabe0146be51c0b686484e53140de2183338a6c0c546465961866ee`。
 
-串行部署完成后在下方补充记录；目标仍为「万法归一」，不是当前会话入口的「万途归零」。
+## 串行部署记录
+
+实现提交 `b89cedf2bfea1bfc4f641abdf45ecc51bfa03e33`，本地tag `v0.1.0-dev.49`，已快进合入main。协调者已将发行包部署到 `C:/Users/57991/Desktop/.minecraft/versions/1.21.1-万法归一/mods`，仅一个dev.49附属JAR，复制后SHA-256与上方一致。
+
+旧dev.48已移至该实例的 `codex-backups/cataclysm-dev49-20261019`。其余173个mod文件名称、长度、修改时间快照相同，Core及其他附属未替换；未修改现有配置或世界。新费用／冷却键由配置规范在下次加载时补充。没有启动客户端进行画面验收，也未改动「万途归零」。
