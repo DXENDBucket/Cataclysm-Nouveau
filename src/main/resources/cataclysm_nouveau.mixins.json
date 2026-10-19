@@ -81,7 +81,14 @@
     "LeviathanRiftMixin",
     "LeviathanFormationGoalMixin",
     "TidalClawsCastMixin",
-    "TidalTentacleMixin"
+    "TidalTentacleMixin",
+    "RemnantAdapterMixin",
+    "RemnantMonolithAccess",
+    "RemnantMonolithBirthMixin",
+    "RemnantStormMixin",
+    "RemnantAreaMixin",
+    "RemnantQuakeMixin",
+    "RemnantQuakeAccess"
   ],
   "client": [
     "client.GuardianVortexRenderProbeMixin",

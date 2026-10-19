@@ -182,3 +182,12 @@ InternalAttackGoal与InternalStateGoal的start不能视为等价入口：后者�
 Native Goal 使用无世界 Boss 帧构造子光束后，重绑 `beam.caster` 还不够，必须同步更新 native caster ID；真实执行者 ID 另行保留，不能把友军、付款者和伤害拥有者混成一个。原生 `Level.playSound(player, entity, ...)` 会发送绑定实体 ID 的声音包，无世界帧不会在客户端出现。只对本附属帧把声音改为实际锚点的位置调用，保留原声与参数；不要同时补播一份而保留可解析的重复声音。可用 NeoForge 的 PlayLevelSoundEvent 同时验证位置、数量与事件类型，不依赖伪玩家是否出现在 PlayerList。
 
 利维坦灵珠 12／24 阵调用原生 aiStep 的实际布阵片段，不复制方向表；三连调用已注册 native Goal，并复用单束 driver。延长时效后不同束可能重叠，各束必须保留自己的锁定方向；任一束未付费时取消整组排队输出，不能回蓝后再次凭旧会话发射。细节与验证见 leviathan-volleys-dev53.md。
+
+
+## dev.54：远古遗魂的运动来源与视觉入口
+
+原生 Sandstorm 的轨道采样按 caster 类型分支，玩家瓶中沙暴半径6、Boss半径8，且不能直接支持其他友军或固定点。只在 updateMotion 临时提供脱离世界的原生Boss帧作为中心，伤害仍保留真实owner，避免为了几何改动伤害身份。延长寿命后原生295tick出生动画门槛也要同步调整。
+
+EarthQuake 的 tick 在 super.tick 前还有一次 move 和接触／粒子调用，单纯抑制 ThrowableProjectile.tick 不能完成特殊轨迹适配。需要保留视觉tick但阻止前置move、免费伤害和原生60tick到期；触发时再调用原生接触，走伤害成功续接。普通地震波的重复伤害不能反复执行同一实体的后续编排。
+
+StompParticle 只在客户端分支执行，Stompsound 用 playLocalSound；无世界帧没有客户端实体tick，必须分别桥接原生粒子参数与服务端位置声音。不能只验证翻起的地块就宣称全部特效齐全。具体实装及8项服务端验证见 remnant-first-dev54.md，客户端外观未人工确认。

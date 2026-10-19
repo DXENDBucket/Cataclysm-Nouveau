@@ -1,3 +1,12 @@
+## 0.1.0-dev.54
+
+- Add Ancient Remnant's Sandstorm Ring, Desert Stele, Ground Quake projectile replacement and Remnant Shockwave effect.
+- Invoke native three-storm birth and eight-block orbit, the native single-stele ceiling search, and the original stomp attack timeline/ground blocks. Keep native warning/fall/impact, curse, dust, sound and contact behavior.
+- Support allied or fixed storm anchors without changing damage credit. Protect Core-defined allies, preserve native damage and bounded amplification, and apply Ars equipment/events once.
+- Retain grounded-target quake damage with one damage-success continuation per enemy for ordinary waves; repeating Ars forms keep one motion driver and pay each accepted contact, stopping before unfunded output.
+- Add four native Scribe recipes within one guaranteed Boss kill's drops. Default costs: 280/45/50/240 Mana; cooldowns: 12/0/0/8 seconds. Add configurable storm lifetime and per-glyph cost/cooldown keys.
+- Eight focused server tests pass; binary and source distribution checks pass. Native client appearance still requires manual verification.
+
 ## 0.1.0-dev.53
 
 - Add Abyss Orb Array: after a short preparation, invoke the native twelve-orb burst, or the twenty-four-orb phase burst when the logical caster starts at half health or less. Preserve the native layered directions, delayed homing, explosions, fear and client visuals.

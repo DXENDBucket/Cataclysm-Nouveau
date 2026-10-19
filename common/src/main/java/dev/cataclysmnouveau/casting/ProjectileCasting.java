@@ -10,6 +10,7 @@ import net.minecraft.world.entity.projectile.ThrowableProjectile;
 import net.minecraft.world.phys.*;
 public final class ProjectileCasting {
     public static boolean replace(Ability ability,EntityProjectileSpell carrier,CarrierProfile profile) {
+        if (ability==Ability.GROUND_QUAKE) return RemnantQuake.replace(carrier,profile);
         if (HarbingerCasting.supports(ability)) return HarbingerCasting.replace(ability,carrier,profile);
         if (ability==Ability.WATER_SPEAR || ability==Ability.LIGHTNING_SPEAR) return SpearCasting.replace(ability,carrier,profile);
         if (ability==Ability.CERAUNUS || ability==Ability.WAVE)

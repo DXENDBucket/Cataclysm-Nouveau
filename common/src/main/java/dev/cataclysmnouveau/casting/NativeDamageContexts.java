@@ -7,6 +7,7 @@ import net.minecraft.world.entity.Entity;
 /** Cataclysm-specific invocation frames; general attachments and damage processing live in Core. */
 public final class NativeDamageContexts {
     public static CastContext context(Entity entity) {
+        if (entity instanceof SpellRemnant frame) return frame.cast;
         if (entity instanceof SpellHarbinger frame) return frame.cast;
         if (entity instanceof SpellGuardian frame) return frame.cast;
         if (entity instanceof SpellMaledictus frame) return frame.cast;

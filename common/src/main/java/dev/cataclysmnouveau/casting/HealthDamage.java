@@ -18,6 +18,7 @@ public final class HealthDamage {
     }
     public static float limit(Entity source,float total) {
         if(!enabled(source))return total;
+        if(source instanceof SpellRemnant frame)return limit(total,frame.getAttributeValue(net.minecraft.world.entity.ai.attributes.Attributes.ATTACK_DAMAGE)*.9);
         if(source instanceof Ignis_Abyss_Fireball_Entity)return limit(total,10);
         if(source instanceof Ignis_Fireball_Entity fire)return limit(total,fire.isSoul()?8:6);
         if(source instanceof Lightning_Storm_Entity storm)return limit(total,storm.getDamage());

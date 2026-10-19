@@ -234,5 +234,17 @@
   "cataclysm_nouveau.glyph_desc.glyph_abyss_orb_array": "After a short preparation, releases the native three-layer array of 12 Abyss Orbs, or five layers of 24 if the caster starts at half health or less. Preserves delayed homing, explosions and healing prevention. Emits from self or allied eyes, or a fixed block impact. Pay once for the entire array.",
   "cataclysm_nouveau.glyph_name.glyph_abyss_triple_blast": "Triple Abyss Blast",
   "item.cataclysm_nouveau.glyph_abyss_triple_blast": "Triple Abyss Blast",
-  "cataclysm_nouveau.glyph_desc.glyph_abyss_triple_blast": "Releases three native abyssal rays with separate aiming and locking windows. Emits from self or allied eyes, or a fixed impact and direction. Duration augments change each ray's active time. Prepay each active second of each ray; insufficient mana stops the entire remaining sequence."
+  "cataclysm_nouveau.glyph_desc.glyph_abyss_triple_blast": "Releases three native abyssal rays with separate aiming and locking windows. Emits from self or allied eyes, or a fixed impact and direction. Duration augments change each ray's active time. Prepay each active second of each ray; insufficient mana stops the entire remaining sequence.",
+  "cataclysm_nouveau.glyph_name.glyph_sandstorm_ring": "Sandstorm Ring",
+  "cataclysm_nouveau.glyph_desc.glyph_sandstorm_ring": "Summons three native sandstorms around yourself, an ally, or a fixed point for 15 seconds. Contact damages enemies and applies Curse of the Desert. Duration augments change their lifetime.",
+  "item.cataclysm_nouveau.glyph_sandstorm_ring": "Sandstorm Ring",
+  "cataclysm_nouveau.glyph_name.glyph_desert_stele": "Desert Stele",
+  "cataclysm_nouveau.glyph_desc.glyph_desert_stele": "Forms a native stele above the selected location. After a brief warning it falls, piercing enemies and causing a small landing impact with Curse of the Desert.",
+  "item.cataclysm_nouveau.glyph_desert_stele": "Desert Stele",
+  "cataclysm_nouveau.glyph_name.glyph_ground_quake": "Ground Quake",
+  "cataclysm_nouveau.glyph_desc.glyph_ground_quake": "Replaces the projectile with a ground-travelling quake that damages and knocks back grounded enemies. Entity-hit follow-up effects require successful damage and continue only once per enemy for each wave.",
+  "item.cataclysm_nouveau.glyph_ground_quake": "Ground Quake",
+  "cataclysm_nouveau.glyph_name.glyph_remnant_stomp": "Remnant Shockwave",
+  "cataclysm_nouveau.glyph_desc.glyph_remnant_stomp": "Sends a widening ground shockwave forward from the casting location, raising blocks and striking enemies. Damage and the additional maximum-health term follow Ancient Remnant stomps.",
+  "item.cataclysm_nouveau.glyph_remnant_stomp": "Remnant Shockwave"
 }

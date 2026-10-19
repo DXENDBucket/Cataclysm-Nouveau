@@ -80,7 +80,11 @@ public enum Ability {
     ABYSS_MINEFIELD("abyss_minefield", "Abyss Minefield", 450),
     ABYSS_BOMBARDMENT_ARRAY("abyss_bombardment_array", "Abyss Bombardment Array", 600),
     ABYSS_ORB_ARRAY("abyss_orb_array", "Abyss Orb Array", 300),
-    ABYSS_TRIPLE_BLAST("abyss_triple_blast", "Triple Abyss Blast", 80);
+    ABYSS_TRIPLE_BLAST("abyss_triple_blast", "Triple Abyss Blast", 80),
+    SANDSTORM_RING("sandstorm_ring", "Sandstorm Ring", 280),
+    DESERT_STELE("desert_stele", "Desert Stele", 45),
+    GROUND_QUAKE("ground_quake", "Ground Quake", 50),
+    REMNANT_STOMP("remnant_stomp", "Remnant Shockwave", 240);
     public final String id, name;
     public final int mana;
     Ability(String id, String name, int mana) { this.id=id; this.name=name; this.mana=mana; }
@@ -88,6 +92,7 @@ public enum Ability {
     /** Acquisition/source families, shared by all presentation surfaces. */
     public Series series() {
         return switch(this) {
+            case SANDSTORM_RING,DESERT_STELE,GROUND_QUAKE,REMNANT_STOMP -> Series.ANCIENT_REMNANT;
             case ABYSS_ORB_ARRAY,ABYSS_TRIPLE_BLAST,DIMENSIONAL_RIFT,TIDAL_TENTACLE,ABYSS_MINEFIELD,ABYSS_BOMBARDMENT_ARRAY,ABYSS_ORB,ABYSS_MINE,ABYSS_BLAST,ABYSS_BOMBARDMENT -> Series.LEVIATHAN;
             case PHANTOM_ARROW,PHANTOM_HALBERD,CURSED_RAGE,PHANTOM_SPIRAL,PHANTOM_RINGS,HALBERD_CLEAVE,SOUL_BURST,MALEDICTUS_AERIAL_SMASH,PHANTOM_AERIAL_VOLLEY,MALEDICTUS_RUSH,MALEDICTUS_SHOCKWAVE,MALEDICTUS_UPPERCUT,MALEDICTUS_MELEE_COMBO,MALEDICTUS_SPIN_SLASHES -> Series.MALEDICTUS;
             case IGNIS_FIREBALL,IGNIS_ABYSS_FIREBALL,IGNIS_BLADE_FIREBALLS,IGNIS_AIR_SMASH,IGNIS_SWORD_COMBO,
@@ -103,5 +108,5 @@ public enum Ability {
                     STORM_SERPENT,LIGHTNING_STORM,LIGHTNING_FIELD,STORM_BURST,SPARK,THUNDER_CLOUD,LIGHTNING_ROW,THUNDER_COMBO,ANCHOR_SPIN,ANCHOR_LEAP,WATER_WALKING -> Series.SCYLLA;
         };
     }
-    public enum Series { AMETHYST_CRAB, LIONFISH, ENDER_GOLEM, MONSTROSITY, SCYLLA, HARBINGER, ENDER_GUARDIAN, IGNIS, MALEDICTUS, LEVIATHAN }
+    public enum Series { AMETHYST_CRAB, LIONFISH, ENDER_GOLEM, MONSTROSITY, SCYLLA, HARBINGER, ENDER_GUARDIAN, IGNIS, MALEDICTUS, LEVIATHAN, ANCIENT_REMNANT }
 }

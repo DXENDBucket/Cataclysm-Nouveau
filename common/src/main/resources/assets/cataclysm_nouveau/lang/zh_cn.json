@@ -234,5 +234,17 @@
   "cataclysm_nouveau.glyph_desc.glyph_abyss_orb_array": "短暂聚集魔力后，按原生三层阵型向四周释放12枚深渊灵珠；施法者启动时生命不高于一半则为五层24枚。保留延迟追踪、爆炸和禁疗。自身或友军从眼部释放，方块触发以该位置为中心；整阵只收费一次。",
   "cataclysm_nouveau.glyph_name.glyph_abyss_triple_blast": "三连深渊冲击波",
   "item.cataclysm_nouveau.glyph_abyss_triple_blast": "三连深渊冲击波",
-  "cataclysm_nouveau.glyph_desc.glyph_abyss_triple_blast": "按原生节奏释放三段深渊光束，各有重新瞄准和锁定窗口。自身或友军从眼部释放，方块触发保留固定方向；时效修饰改变每段输出时长。每段实际输出按秒预付魔力，不足时停止整组后续输出。"
+  "cataclysm_nouveau.glyph_desc.glyph_abyss_triple_blast": "按原生节奏释放三段深渊光束，各有重新瞄准和锁定窗口。自身或友军从眼部释放，方块触发保留固定方向；时效修饰改变每段输出时长。每段实际输出按秒预付魔力，不足时停止整组后续输出。",
+  "cataclysm_nouveau.glyph_name.glyph_sandstorm_ring": "沙暴环阵",
+  "cataclysm_nouveau.glyph_desc.glyph_sandstorm_ring": "在自身、友军或选定位置周围召出三个沙暴，持续15秒。沙暴接触敌人时造成伤害并施加沙漠诅咒。延长时效改变沙暴的持续时间。",
+  "item.cataclysm_nouveau.glyph_sandstorm_ring": "沙暴环阵",
+  "cataclysm_nouveau.glyph_name.glyph_desert_stele": "远古沙碑",
+  "cataclysm_nouveau.glyph_desc.glyph_desert_stele": "在选定位置上方显现一座沙碑，短暂预兆后坠落，伤害路径上的敌人并在落地时造成小范围冲击，附加沙漠诅咒。",
+  "item.cataclysm_nouveau.glyph_desert_stele": "远古沙碑",
+  "cataclysm_nouveau.glyph_name.glyph_ground_quake": "地震波",
+  "cataclysm_nouveau.glyph_desc.glyph_ground_quake": "将弹射物替换为贴地推进的地震波，伤害并击退接触的着地敌人。命中实体后的编排仅在伤害成功时继续；同一波对同一敌人只续接一次。",
+  "item.cataclysm_nouveau.glyph_ground_quake": "地震波",
+  "cataclysm_nouveau.glyph_name.glyph_remnant_stomp": "踏地裂波",
+  "cataclysm_nouveau.glyph_desc.glyph_remnant_stomp": "从施法位置向前释放逐段推进的扇形地裂，掀起地块并冲击敌人。基础伤害与最大生命附加伤害沿用远古遗魂的践踏。",
+  "item.cataclysm_nouveau.glyph_remnant_stomp": "踏地裂波"
 }
