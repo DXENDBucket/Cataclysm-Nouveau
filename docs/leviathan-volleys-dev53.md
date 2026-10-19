@@ -59,4 +59,9 @@
 
 客户端画面尚未人工验证：特别是原生环阵电弧／追踪外观、三束锁定的视觉和第一人称裁剪。没有另外启动 NEG／Hex／其他附属的共存矩阵。服务端通过不等于这些画面已验收。
 
-提交、最终 JAR 哈希与共享部署记录由协调者完成后追加。
+## 交付
+
+- 实现提交 `2d896a1`，标签 `v0.1.0-dev.53`。发行包 `cataclysm-nouveau-0.1.0-dev.53-mc1.21.1-neoforge.jar` SHA-256：`beb0c58da4b312378d52386da92185fba18a5ce44e634b4131e098b2af7bd806`。
+- 源码包 `cataclysm-nouveau-0.1.0-dev.53-sources.jar` SHA-256：`28a06a5d345718ceff6aa53f8c3c7642438210ade21a65307c6941d384ba4376`。两包均在工作树和主仓库 `build/libs/`。
+- 协调者已部署到“万法归一”，只替换 dev.52 的附属 JAR；其他 173 个文件哈希完全不变，运行时 Core 仍为 0.1.27。旧 JAR 与 SHA 清单在实例 `codex-backups/cataclysm-dev53-20261019/`。
+- 实例服务端配置哈希未变，新能力 Mana／冷却条目由下一次加载正常补入；没有改动存档或“万途归零”。固定 Core 副本保持干净，GameTest JVM 自然退出；没有推送或上传 CurseForge。
