@@ -27,7 +27,7 @@ public final class RemnantSecondTests {
     @GameTest(template="empty",batch="remnant_second_0",timeoutTicks=100)
     public static void completeNativeSteleArrayTimingGeometryAndOneFee(GameTestHelper h){
         var frames=new ArrayList<BodyPhantomPayload>();
-        try(var a=new NativeAbilityTests.Arena(h,p->{if(p instanceof net.minecraft.network.protocol.common.ClientboundCustomPayloadPacket c && c.payload() instanceof BodyPhantomPayload f)frames.add(f);})){ 
+        try(var a=new NativeAbilityTests.Arena(h,p->{if(p instanceof net.minecraft.network.protocol.common.ClientboundCustomPayloadPacket c && c.payload() instanceof BodyPhantomPayload f)frames.add(f);})){
             force(a);a.p.setYRot(0);a.p.setXRot(0);a.cast(GlyphCatalog.DESERT_STELE_ARRAY,block(a.center),true);
             near(h,mana(a),9390,"Whole formation pays one quote plus augment");step(19);h.assertTrue(steles(a).isEmpty(),"Native twenty-tick birth retained");a.p.setYRot(90);step(1);
             var all=steles(a);h.assertTrue(all.size()==144,"Eight times sixteen plus sixteen native line steles: "+all.size());
