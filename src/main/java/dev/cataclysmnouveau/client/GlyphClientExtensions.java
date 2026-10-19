@@ -34,8 +34,8 @@ public final class GlyphClientExtensions {
                 return true;
             }
         },dev.cataclysmnouveau.CataclysmEffects.LAVA_WALKING,dev.cataclysmnouveau.CataclysmEffects.WATER_WALKING,dev.cataclysmnouveau.CataclysmEffects.CURSED_RAGE);
-        event.registerItem(nativeItem(() -> ModItems.TIDAL_CLAWS.get()),GlyphCatalog.ABYSS_BLAST.getGlyph());
-        event.registerItem(nativeItem(() -> com.github.L_Ender.cataclysm.init.ModBlocks.ABYSSAL_EGG.get().asItem()),GlyphCatalog.ABYSS_BOMBARDMENT.getGlyph());
+        event.registerItem(nativeItem(() -> ModItems.TIDAL_CLAWS.get()),GlyphCatalog.ABYSS_BLAST.getGlyph(),GlyphCatalog.TIDAL_TENTACLE.getGlyph());
+        event.registerItem(nativeItem(() -> com.github.L_Ender.cataclysm.init.ModBlocks.ABYSSAL_EGG.get().asItem()),GlyphCatalog.ABYSS_BOMBARDMENT.getGlyph(),GlyphCatalog.ABYSS_BOMBARDMENT_ARRAY.getGlyph());
         event.registerItem(nativeItem(() -> ModItems.CURSED_BOW.get()),GlyphCatalog.PHANTOM_ARROW.getGlyph(),GlyphCatalog.PHANTOM_AERIAL_VOLLEY.getGlyph());
         event.registerItem(nativeItem(() -> ModItems.SOUL_RENDER.get()),GlyphCatalog.PHANTOM_HALBERD.getGlyph(),GlyphCatalog.PHANTOM_SPIRAL.getGlyph(),GlyphCatalog.PHANTOM_RINGS.getGlyph(),GlyphCatalog.HALBERD_CLEAVE.getGlyph(),GlyphCatalog.MALEDICTUS_AERIAL_SMASH.getGlyph(),GlyphCatalog.MALEDICTUS_RUSH.getGlyph(),GlyphCatalog.MALEDICTUS_SHOCKWAVE.getGlyph(),GlyphCatalog.MALEDICTUS_UPPERCUT.getGlyph(),GlyphCatalog.MALEDICTUS_MELEE_COMBO.getGlyph(),GlyphCatalog.MALEDICTUS_SPIN_SLASHES.getGlyph());
         event.registerItem(nativeItem(() -> ModItems.CERAUNUS.get()),GlyphCatalog.ANCHOR.getGlyph(),GlyphCatalog.WAVE.getGlyph(),GlyphCatalog.SPIN.getGlyph(),GlyphCatalog.LEAP.getGlyph());

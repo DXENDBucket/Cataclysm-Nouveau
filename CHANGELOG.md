@@ -1,3 +1,12 @@
+## 0.1.0-dev.51
+
+- Add Dimensional Rift, Tidal Tentacle, Abyss Minefield and Abyss Bombardment Array effect glyphs.
+- Preserve native rift growth, pull, contact damage and closing explosion; disable terrain lifting only for managed casts.
+- Invoke native claw launch, chaining and retraction. Maintain the native attachment UUID/ID fields required by its getter, and clear only pointers owned by the finishing chain.
+- Invoke native formation goals with original delays, spatial distribution, ground search and live target bombardments. Charge once for each array, inherit real ownership and clean all parents/child beams.
+- Add four Scribe recipes; the full eight-glyph Leviathan series needs two whole claws and six fragments, covered by three guaranteed kills.
+- Seven new server checks pass after a targeted attachment fix; eight first-batch regressions also passed. Client visuals remain unverified.
+
 ## 0.1.0-dev.50
 
 - Add the native Abyss Orb projectile replacement, floating Abyss Mine, sustained Abyss Blast and upward Abyss Bombardment portal effect.

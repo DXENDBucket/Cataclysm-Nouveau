@@ -75,7 +75,11 @@
     "LeviathanPortalMixin",
     "LeviathanLaserMixin",
     "LeviathanPortalBeamMixin",
-    "LeviathanLoadedRayMixin"
+    "LeviathanLoadedRayMixin",
+    "LeviathanRiftMixin",
+    "LeviathanFormationGoalMixin",
+    "TidalClawsCastMixin",
+    "TidalTentacleMixin"
   ],
   "client": [
     "client.GuardianVortexRenderProbeMixin",

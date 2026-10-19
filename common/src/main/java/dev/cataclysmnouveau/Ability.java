@@ -74,7 +74,11 @@ public enum Ability {
     ABYSS_ORB("abyss_orb", "Abyss Orb", 60),
     ABYSS_MINE("abyss_mine", "Abyss Mine", 80),
     ABYSS_BLAST("abyss_blast", "Abyss Blast", 80),
-    ABYSS_BOMBARDMENT("abyss_bombardment", "Abyss Bombardment", 300);
+    ABYSS_BOMBARDMENT("abyss_bombardment", "Abyss Bombardment", 300),
+    DIMENSIONAL_RIFT("dimensional_rift", "Dimensional Rift", 650),
+    TIDAL_TENTACLE("tidal_tentacle", "Tidal Tentacle", 140),
+    ABYSS_MINEFIELD("abyss_minefield", "Abyss Minefield", 900),
+    ABYSS_BOMBARDMENT_ARRAY("abyss_bombardment_array", "Abyss Bombardment Array", 1200);
     public final String id, name;
     public final int mana;
     Ability(String id, String name, int mana) { this.id=id; this.name=name; this.mana=mana; }
@@ -82,7 +86,7 @@ public enum Ability {
     /** Acquisition/source families, shared by all presentation surfaces. */
     public Series series() {
         return switch(this) {
-            case ABYSS_ORB,ABYSS_MINE,ABYSS_BLAST,ABYSS_BOMBARDMENT -> Series.LEVIATHAN;
+            case DIMENSIONAL_RIFT,TIDAL_TENTACLE,ABYSS_MINEFIELD,ABYSS_BOMBARDMENT_ARRAY,ABYSS_ORB,ABYSS_MINE,ABYSS_BLAST,ABYSS_BOMBARDMENT -> Series.LEVIATHAN;
             case PHANTOM_ARROW,PHANTOM_HALBERD,CURSED_RAGE,PHANTOM_SPIRAL,PHANTOM_RINGS,HALBERD_CLEAVE,SOUL_BURST,MALEDICTUS_AERIAL_SMASH,PHANTOM_AERIAL_VOLLEY,MALEDICTUS_RUSH,MALEDICTUS_SHOCKWAVE,MALEDICTUS_UPPERCUT,MALEDICTUS_MELEE_COMBO,MALEDICTUS_SPIN_SLASHES -> Series.MALEDICTUS;
             case IGNIS_FIREBALL,IGNIS_ABYSS_FIREBALL,IGNIS_BLADE_FIREBALLS,IGNIS_AIR_SMASH,IGNIS_SWORD_COMBO,
                     IGNIS_FIREBALL_ARRAY,IGNIS_EARTH_SHUDDERS,IGNIS_REINFORCED_SMASH,IGNIS_ULTIMATE,IGNIS_FLAME_STRIKE -> Series.IGNIS;

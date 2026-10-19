@@ -16,11 +16,14 @@ import net.minecraft.world.phys.*;
 
 /** Native stationary areas retain their own tick, events, attacks and visual lifecycle. */
 public final class LeviathanCasting {
-    public static boolean supports(Ability a) { return a==Ability.ABYSS_MINE || a==Ability.ABYSS_BOMBARDMENT; }
+    public static boolean supports(Ability a) { return switch(a){case DIMENSIONAL_RIFT,TIDAL_TENTACLE,ABYSS_MINEFIELD,ABYSS_BOMBARDMENT_ARRAY,ABYSS_MINE,ABYSS_BOMBARDMENT->true;default->false;}; }
     public static boolean enabled(Ability a) {
         return GlyphCatalog.ALL.stream().anyMatch(g->g instanceof CataclysmEffectGlyph e && e.ability==a && e.isEnabled());
     }
     public static boolean rejectDamage(Entity source,Entity target) {
+        if(source instanceof Dimensional_Rift_Entity || source instanceof com.github.L_Ender.cataclysm.entity.projectile.Tidal_Tentacle_Entity){
+            var cast=NativeDamageContexts.context(source);return cast!=null && HarbingerCasting.allied(cast,target);
+        }
         if(!(source instanceof Abyss_Blast_Entity || source instanceof Portal_Abyss_Blast_Entity))return false;
         var cast=NativeDamageContexts.context(source);
         if(cast==null)return false;
@@ -28,6 +31,9 @@ public final class LeviathanCasting {
         return HarbingerCasting.allied(cast,target) || source.tickCount>20+duration;
     }
     public static boolean effect(Ability ability,ServerLevel world,CastContext cast,double amp,double duration) {
+        if(ability==Ability.DIMENSIONAL_RIFT)return LeviathanRift.start(world,cast,amp,duration);
+        if(ability==Ability.TIDAL_TENTACLE)return LeviathanTentacles.start(world,cast,amp);
+        if(ability==Ability.ABYSS_MINEFIELD || ability==Ability.ABYSS_BOMBARDMENT_ARRAY)return LeviathanFormations.start(ability,world,cast,amp,duration);
         if(cast.target()==null || cast.target().getType()==HitResult.Type.MISS)return false;
         // Mines can float; bombardment portals retain the native local ground search.
         Vec3 point=ability==Ability.ABYSS_MINE?cast.origin():NativePayloads.groundPoint(world,cast);

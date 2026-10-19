@@ -22,7 +22,7 @@ public final class CataclysmEffectGlyph extends AbstractEffect implements Trigge
     public CataclysmEffectGlyph(Ability ability) {
         super(CarrierRegistry.id("cataclysm_nouveau:glyph_" + ability.id), ability.name);
         this.ability = ability;
-        if (ability == Ability.MONSTROUS || ability == Ability.SHOULDER_CHECK || ability == Ability.BONE_FRACTURE || ability == Ability.LAVA_WALKING || ability == Ability.LIGHTNING_FIELD || ability == Ability.THUNDER_CLOUD || ability == Ability.WATER_WALKING || ability == Ability.DEATH_LASER || ability == Ability.WITHER_SMOKE || ability == Ability.VOID_VORTEX || ability == Ability.IGNIS_FLAME_STRIKE || ability == Ability.ABYSS_MINE || ability == Ability.ABYSS_BLAST || ability == Ability.ABYSS_BOMBARDMENT) {
+        if (ability == Ability.MONSTROUS || ability == Ability.SHOULDER_CHECK || ability == Ability.BONE_FRACTURE || ability == Ability.LAVA_WALKING || ability == Ability.LIGHTNING_FIELD || ability == Ability.THUNDER_CLOUD || ability == Ability.WATER_WALKING || ability == Ability.DEATH_LASER || ability == Ability.WITHER_SMOKE || ability == Ability.VOID_VORTEX || ability == Ability.IGNIS_FLAME_STRIKE || ability == Ability.ABYSS_MINE || ability == Ability.ABYSS_BLAST || ability == Ability.ABYSS_BOMBARDMENT || ability == Ability.DIMENSIONAL_RIFT || ability == Ability.ABYSS_MINEFIELD || ability == Ability.ABYSS_BOMBARDMENT_ARRAY) {
             compatibleAugments.add(AugmentExtendTime.INSTANCE);
             compatibleAugments.add(AugmentDurationDown.INSTANCE);
             augmentDescriptions.put(AugmentExtendTime.INSTANCE, Component.translatable("cataclysm_nouveau.augment.duration_up"));

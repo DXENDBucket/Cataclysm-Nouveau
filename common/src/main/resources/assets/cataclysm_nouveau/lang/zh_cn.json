@@ -216,5 +216,17 @@
   "cataclysm_nouveau.glyph_name.glyph_abyss_bombardment": "深渊轰炸",
   "item.cataclysm_nouveau.glyph_abyss_bombardment": "深渊轰炸",
   "cataclysm_nouveau.glyph_desc.glyph_abyss_bombardment": "在落点地面展开深渊门户，随后向上发射原生光束，基础输出8秒。附加深渊灼烧；延长时效延长光束，费用包含门户与子光束。",
-  "item.cataclysm_nouveau.tidal_claw_fragment": "潮汐利爪碎片"
+  "item.cataclysm_nouveau.tidal_claw_fragment": "潮汐利爪碎片",
+  "cataclysm_nouveau.glyph_name.glyph_dimensional_rift": "维度裂隙",
+  "item.cataclysm_nouveau.glyph_dimensional_rift": "维度裂隙",
+  "cataclysm_nouveau.glyph_desc.glyph_dimensional_rift": "在落点展开不断成长的维度裂隙，牵引附近敌人与物体，造成接触伤害，最后收缩爆炸。保留原生阶段和完整收尾，不掀起地形；时效修饰改变存续时间。",
+  "cataclysm_nouveau.glyph_name.glyph_tidal_tentacle": "潮汐触手",
+  "item.cataclysm_nouveau.glyph_tidal_tentacle": "潮汐触手",
+  "cataclysm_nouveau.glyph_desc.glyph_tidal_tentacle": "向16格内可见的敌方生物伸出原生潮汐触手，连锁攻击附近目标并叠加深渊诅咒，随后收回。同一施法者沿用利爪的单链限制；整条链只支付一次费用。",
+  "cataclysm_nouveau.glyph_name.glyph_abyss_minefield": "深渊水雷场",
+  "item.cataclysm_nouveau.glyph_abyss_minefield": "深渊水雷场",
+  "cataclysm_nouveau.glyph_desc.glyph_abyss_minefield": "在原生准备后围绕落点或目标分布至多35枚深渊水雷，依次启动。障碍或未加载区域会减少数量；费用包含整片雷场，时效修饰改变水雷的存续。",
+  "cataclysm_nouveau.glyph_name.glyph_abyss_bombardment_array": "深渊轰炸阵",
+  "item.cataclysm_nouveau.glyph_abyss_bombardment_array": "深渊轰炸阵",
+  "cataclysm_nouveau.glyph_desc.glyph_abyss_bombardment_array": "准备后在目标周围展开随机门户，并分三次瞄准目标进行向上轰炸。保留原生落地搜索与时序，至多12个有效门户；费用包含全阵与子光束。"
 }

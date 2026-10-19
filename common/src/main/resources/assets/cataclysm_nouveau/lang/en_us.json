@@ -216,5 +216,17 @@
   "cataclysm_nouveau.glyph_name.glyph_abyss_bombardment": "Abyss Bombardment",
   "item.cataclysm_nouveau.glyph_abyss_bombardment": "Abyss Bombardment",
   "cataclysm_nouveau.glyph_desc.glyph_abyss_bombardment": "Opens a native ground portal which then fires an upward beam for eight seconds, inflicting Abyssal Burn. Duration augments extend the beam. Its price includes the portal and child beam.",
-  "item.cataclysm_nouveau.tidal_claw_fragment": "Tidal Claw Fragment"
+  "item.cataclysm_nouveau.tidal_claw_fragment": "Tidal Claw Fragment",
+  "cataclysm_nouveau.glyph_name.glyph_dimensional_rift": "Dimensional Rift",
+  "item.cataclysm_nouveau.glyph_dimensional_rift": "Dimensional Rift",
+  "cataclysm_nouveau.glyph_desc.glyph_dimensional_rift": "Opens a growing native rift at the impact, pulling nearby enemies and objects, dealing contact damage and collapsing in an explosion. Preserves native stages and closing; terrain lifting is disabled. Duration augments change its lifespan.",
+  "cataclysm_nouveau.glyph_name.glyph_tidal_tentacle": "Tidal Tentacle",
+  "item.cataclysm_nouveau.glyph_tidal_tentacle": "Tidal Tentacle",
+  "cataclysm_nouveau.glyph_desc.glyph_tidal_tentacle": "Launches the native claw tentacle at a visible hostile living target within 16 blocks. Chains, stacks Abyssal Curse and retracts. Shares the native claw single-chain gate; one payment covers all links.",
+  "cataclysm_nouveau.glyph_name.glyph_abyss_minefield": "Abyss Minefield",
+  "item.cataclysm_nouveau.glyph_abyss_minefield": "Abyss Minefield",
+  "cataclysm_nouveau.glyph_desc.glyph_abyss_minefield": "After native preparation, distributes up to 35 floating mines around the impact or target with staggered arming. Obstructions and unloaded terrain reduce the count. One payment covers the field; duration augments extend the mines.",
+  "cataclysm_nouveau.glyph_name.glyph_abyss_bombardment_array": "Abyss Bombardment Array",
+  "item.cataclysm_nouveau.glyph_abyss_bombardment_array": "Abyss Bombardment Array",
+  "cataclysm_nouveau.glyph_desc.glyph_abyss_bombardment_array": "After preparation, opens random surrounding portals and performs three aimed upward bombardments. Preserves native ground search and timing, with up to 12 portals. One payment includes the array and child beams."
 }
