@@ -3,6 +3,7 @@
 - 日期：2026-10-19；MC 1.21.1 NeoForge；版本 `0.1.0-dev.50`。
 - 工作树：`C:/Users/57991/Documents/MinecraftDev/parallel-workspaces/cataclysm-leviathan-dev50-20261019/Cataclysm-Nouveau`。
 - 分支：`feature/leviathan-first-dev50`，起点 `c5985d0990fd4ccd981572e2c445a6c547ecc680`。
+- 实现提交：`c9cf7d5`，已快进主分支，并标记 `v0.1.0-dev.50`。
 - 固定 Core：`ed44ebb86bd087f3546a1bc6a315d2692f70262c` / 0.1.28；独立构建副本受版本控制文件保持干净。
 - 本体：`L_Ender's Cataclysm 1.21.1-3.33.jar`，SHA-256 `371956d0c2e3b56729ee93b955e936875d210e372fe734cdb74326d89ef79875`。
 - 行为、费用、边界和两次击杀材料预算：[实现记录](leviathan-first-dev50.md)。
@@ -30,4 +31,8 @@ Java 21，隔离工作树，离线构建。先做一次编译及资源校验。�
 - `cataclysm-nouveau-0.1.0-dev.50-sources.jar`
   - SHA-256 `56a9797da72df74c106d089daeddaedec0b75b806d3d6a049828600fedbf8647`
 
-部署由协调者完成后另补实际目标、备份和校验结果；本交接不自动授权其他 agent 改写共享实例。
+## 协调者实际部署
+
+已部署至 `C:/Users/57991/Desktop/.minecraft/versions/1.21.1-万法归一/mods`，仅将本附属 dev.49 换为 dev.50，落地 JAR 哈希与上述构建一致。其他 **173 个文件**部署前后逐一 SHA-256 相同，原有 Core 0.1.27 保持不变，没有改写“万途归零”实例。
+
+原 dev.49 备份位于测试实例 `codex-backups/cataclysm-dev50-20261019/`，其中 `deployment.json` 保存新旧哈希及其他文件校验清单。主仓库 `build/libs/` 已同步二进制及源码产物。此次未推送或上传 CurseForge。
