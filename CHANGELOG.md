@@ -1,3 +1,10 @@
+## 0.1.0-dev.49
+
+- Add Maledictus Twin Spin as an effect glyph, invoking the complete native spin goal and attack body.
+- Preserve both lunges, native strike timing and damage, second-strike shield disabling, live Cursed Rage and preparation-only steering.
+- Reuse entity/position execution, action replacement, native Boss phantoms, cast ownership, allied protection and cleanup.
+- Default group cost is 180 Mana with a 5-second active cooldown. Learn with a Cursium Fragment and Source Gem; the full Maledictus collection remains within three guaranteed kills.
+
 ## 0.1.0-dev.36
 
 - Opt existing physical actions into Conflux claim replacement, across Ignis, Scylla, Harbinger, Guardian and Monstrosity shoulder actions. Minimum Core is 0.1.21.

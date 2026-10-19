@@ -200,5 +200,8 @@
   "cataclysm_nouveau.glyph_name.glyph_maledictus_melee_combo": "咒翼近战连段",
   "item.cataclysm_nouveau.glyph_maledictus_melee_combo": "咒翼近战连段",
   "cataclysm_nouveau.glyph_desc.glyph_maledictus_melee_combo": "先进行两次近战；第二击成功命中时追加追击，否则收势。保留原生伤害、破盾和怒气机制。",
-  "item.cataclysm_nouveau.cursium_fragment": "咒魂碎片"
+  "item.cataclysm_nouveau.cursium_fragment": "咒魂碎片",
+  "cataclysm_nouveau.glyph_name.glyph_maledictus_spin_slashes": "咒翼双段旋斩",
+  "item.cataclysm_nouveau.glyph_maledictus_spin_slashes": "咒翼双段旋斩",
+  "cataclysm_nouveau.glyph_desc.glyph_maledictus_spin_slashes": "向前冲出并连续旋斩两次，第二击可破盾。保留原生伤害与怒气机制；两击准备期间可调整朝向。"
 }

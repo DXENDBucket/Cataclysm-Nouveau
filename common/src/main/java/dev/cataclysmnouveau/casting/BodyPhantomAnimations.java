@@ -14,7 +14,7 @@ public final class BodyPhantomAnimations {
             case HARBINGER_CHARGE -> Kind.HARBINGER;
             case GRAVITY_PUNCH, GUARDIAN_UPPERCUT, GUARDIAN_BLINK, GUARDIAN_AIR_STRIKE, GUARDIAN_ROCKET_PUNCH -> Kind.GUARDIAN;
             case SHOULDER_CHECK -> Kind.MONSTROSITY;
-            case HALBERD_CLEAVE, SOUL_BURST, MALEDICTUS_AERIAL_SMASH, PHANTOM_AERIAL_VOLLEY, MALEDICTUS_RUSH, MALEDICTUS_SHOCKWAVE, MALEDICTUS_UPPERCUT, MALEDICTUS_MELEE_COMBO -> Kind.MALEDICTUS;
+            case HALBERD_CLEAVE, SOUL_BURST, MALEDICTUS_AERIAL_SMASH, PHANTOM_AERIAL_VOLLEY, MALEDICTUS_RUSH, MALEDICTUS_SHOCKWAVE, MALEDICTUS_UPPERCUT, MALEDICTUS_MELEE_COMBO, MALEDICTUS_SPIN_SLASHES -> Kind.MALEDICTUS;
             default -> null;
         };
     }
@@ -61,6 +61,7 @@ public final class BodyPhantomAnimations {
             case MALEDICTUS_SHOCKWAVE -> state==9;
             case MALEDICTUS_UPPERCUT -> state==22 || state==23;
             case MALEDICTUS_MELEE_COMBO -> state==19 || state==20 || state==21;
+            case MALEDICTUS_SPIN_SLASHES -> state==18;
             default -> false;
         };
     }

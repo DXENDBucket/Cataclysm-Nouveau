@@ -200,5 +200,8 @@
   "cataclysm_nouveau.glyph_name.glyph_maledictus_melee_combo": "Maledictus Melee Combo",
   "item.cataclysm_nouveau.glyph_maledictus_melee_combo": "Maledictus Melee Combo",
   "cataclysm_nouveau.glyph_desc.glyph_maledictus_melee_combo": "Performs two native melee strikes. A successful second strike enables a follow-up combo; otherwise recovers. Preserves native damage, shield breaking and rage.",
-  "item.cataclysm_nouveau.cursium_fragment": "Cursium Fragment"
+  "item.cataclysm_nouveau.cursium_fragment": "Cursium Fragment",
+  "cataclysm_nouveau.glyph_name.glyph_maledictus_spin_slashes": "Maledictus Twin Spin",
+  "item.cataclysm_nouveau.glyph_maledictus_spin_slashes": "Maledictus Twin Spin",
+  "cataclysm_nouveau.glyph_desc.glyph_maledictus_spin_slashes": "Lunges forward for two native spinning slashes. The second strike breaks shields. Preserves native damage and Cursed Rage, with steering during preparation windows."
 }

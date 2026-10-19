@@ -33,7 +33,7 @@ final class BodyPhantomModels {
                     case 3->"flying_shoot";case 4->"fall_loop";case 5->"fall_end";
                     case 9->"flying_smash_2";case 10->"back_step";case 11->"back_step_dash";
                     case 12->"back_step_dash_no_back_step";case 15->"dash2";case 16->"dash2_no_back_step";case 17->"dash3";
-                    case 19->"combo_first";case 20->"combo_first_end";case 21->"combo_second";
+                    case 18->"spin_slashes";case 19->"combo_first";case 20->"combo_first_end";case 21->"combo_second";
                     case 22->"uppercut_right";case 23->"uppercut_left";
                     case 24->"flying_halberd_smash_1";case 25->"flying_halberd_smash_2";case 26->"radagon";default->"mass_effect";
                 }).start(0);

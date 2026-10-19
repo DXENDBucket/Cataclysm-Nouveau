@@ -388,6 +388,85 @@ public final class NativeAbilityTests {
             h.assertTrue(!MaledictusCasting.isActing(host) && host.isNoGravity(),"Action releases ally and leaves unrelated gravity intact");h.succeed();
         }
     }
+    public static void maledictusSpinNativeAllyAndSteering(GameTestHelper h) {
+        var frames=new ArrayList<dev.cataclysmnouveau.network.BodyPhantomPayload>();
+        try(var a=new Arena(h)) {
+            var host=player(h,packet->{if(packet instanceof net.minecraft.network.protocol.common.ClientboundCustomPayloadPacket c
+                    && c.payload() instanceof dev.cataclysmnouveau.network.BodyPhantomPayload f)frames.add(f);});
+            a.actors.add(host);host.setNoGravity(true);host.setPos(a.center);host.setYRot(0);a.p.setYRot(-90);
+            h.getLevel().getScoreboard().addPlayerToTeam(host.getScoreboardName(),a.team);
+            var victim=a.target(a.center.add(0,0,2),false);var friend=a.target(a.center.add(0,0,2),true);
+            a.cast(GlyphCatalog.MALEDICTUS_SPIN_SLASHES,new EntityHitResult(host),true);
+            var hits=new ArrayList<Integer>();double total=0;
+            for(int tick=1;tick<=68;tick++) {
+                if(tick==21){host.setYRot(90);victim.setPos(a.center.add(-2,0,0));}
+                if(tick==29)host.setDeltaMovement(Vec3.ZERO);
+                victim.invulnerableTime=0;double before=victim.getHealth();ExecutionSessions.tick();
+                if(before>victim.getHealth()){hits.add(tick);total+=before-victim.getHealth();}
+                if(tick==14)close(h,host.getDeltaMovement().horizontalDistance(),0,"No early native spin lunge");
+                if(tick==15)h.assertTrue(host.getDeltaMovement().z>0 && Math.abs(host.getDeltaMovement().x)<.001,"First lunge follows actual ally facing, not payer");
+                if(tick==23)close(h,frames.getLast().yaw(),0,"First strike window locks heading");
+                if(tick==28)close(h,frames.getLast().yaw(),90,"Between-strike preparation follows ally camera");
+                if(tick==29)h.assertTrue(host.getDeltaMovement().x<0 && Math.abs(host.getDeltaMovement().z)<.001,"Second native lunge uses the updated heading");
+            }
+            h.assertTrue(hits.equals(List.of(20,34)),"Only the two native spin strike ticks deal damage: "+hits);
+            double expected=0;
+            for(int rage=0;rage<2;rage++) {
+                double base=13*com.github.L_Ender.cataclysm.config.CMCommonConfig.Maledictus.attackMultiplier*(1+.2*rage);
+                expected+=Resources.augmentedDamage(base+Math.min(base,500*com.github.L_Ender.cataclysm.config.CMCommonConfig.Maledictus.HpDamage),1);
+            }
+            close(h,total,expected,"Native hit damage, capped health term, live rage and one amplification per hit");
+            close(h,friend.getHealth(),500,"Spin leaves allies untouched");
+            h.assertTrue(victim.getLastDamageSource().getEntity()==a.p && MaledictusRage.stacks(a.p)==2,"Damage credit and rage remain on the caster");
+            close(h,CapabilityRegistry.getMana(a.p).getCurrentMana(),10000-CataclysmConfig.cost(Ability.MALEDICTUS_SPIN_SLASHES)-10,"Two lunges and strikes pay once");
+            h.assertTrue(!frames.isEmpty() && frames.stream().allMatch(f->f.animation()==18 && f.valid()) && frames.getLast().closed(),"Native spin phantom has valid pose and closes after recovery");
+            h.assertTrue(!MaledictusCasting.isActing(host) && host.isNoGravity(),"Spin releases only its actual actor claim");h.succeed();
+        }
+    }
+    public static void maledictusSpinPositionAndFailure(GameTestHelper h) {
+        var frames=new ArrayList<dev.cataclysmnouveau.network.BodyPhantomPayload>();
+        try(var a=new Arena(h,packet->{if(packet instanceof net.minecraft.network.protocol.common.ClientboundCustomPayloadPacket c
+                && c.payload() instanceof dev.cataclysmnouveau.network.BodyPhantomPayload f)frames.add(f);})) {
+            a.p.setYRot(0);var original=a.p.position();var movement=a.p.getDeltaMovement();
+            var victim=a.target(a.center.add(0,0,5.5),false);var friend=a.target(a.center.add(0,0,5.5),true);
+            a.cast(GlyphCatalog.MALEDICTUS_SPIN_SLASHES,new EntityHitResult(victim),false);
+            close(h,CapabilityRegistry.getMana(a.p).getCurrentMana(),10000,"Hostile executor fails without payment");
+            h.assertTrue(frames.isEmpty(),"Hostile selection does not fall back to payer");
+            var mana=CapabilityRegistry.getMana(a.p);mana.setMana(0);
+            a.cast(GlyphCatalog.MALEDICTUS_SPIN_SLASHES,block(a.center),false);
+            h.assertTrue(frames.isEmpty(),"Insufficient mana creates no phantom");mana.setMana(10000);
+            a.cast(GlyphCatalog.MALEDICTUS_SPIN_SLASHES,block(a.center),false);
+            for(int i=0;i<68;i++){victim.invulnerableTime=0;ExecutionSessions.tick();}
+            var beforeSecond=frames.stream().filter(f->!f.closed() && f.age()<=28).reduce((x,y)->y).orElseThrow();
+            var secondStrike=frames.stream().filter(f->!f.closed() && f.age()>=36).findFirst().orElseThrow();
+            h.assertTrue(beforeSecond.position().z>a.center.z+1 && secondStrike.position().z>beforeSecond.position().z+1,"Position phantom moves through both native lunges");
+            h.assertTrue(frames.stream().allMatch(f->f.positionAnchored() && f.valid()) && frames.getLast().closed(),"Fixed-origin execution has moving position snapshots and normal recovery");
+            h.assertTrue(victim.getHealth()<500 && victim.getLastDamageSource().getEntity()==a.p,"Position spin deals actual native melee damage");
+            close(h,friend.getHealth(),500,"Position spin protects allies");
+            h.assertTrue(a.p.position().equals(original) && a.p.getDeltaMovement().equals(movement) && !ExecutionSessions.isCasting(a.p),"Remote spin never moves or claims payer body");
+            close(h,mana.getCurrentMana(),10000-CataclysmConfig.cost(Ability.MALEDICTUS_SPIN_SLASHES),"Position spin charges the group once");
+            h.assertTrue(h.getLevel().getRecipeManager().byKey(GlyphCatalog.MALEDICTUS_SPIN_SLASHES.getRegistryName()).isPresent(),"Real Scribe recipe loaded");h.succeed();
+        }
+    }
+    public static void maledictusSpinSecondStrikeBreaksShield(GameTestHelper h) {
+        try(var a=new Arena(h)) {
+            a.p.setPos(a.center);a.p.setYRot(0);
+            var blocker=player(h,packet->{},"SpinGuard");a.actors.add(blocker);blocker.setPos(a.center.add(0,0,2));blocker.setNoGravity(true);blocker.setYRot(180);
+            h.assertTrue(!a.p.isAlliedTo(blocker),"Shield target has its own scoreboard identity");
+            blocker.setItemInHand(net.minecraft.world.InteractionHand.MAIN_HAND,new ItemStack(net.minecraft.world.item.Items.SHIELD));
+            blocker.startUsingItem(net.minecraft.world.InteractionHand.MAIN_HAND);
+            // Fake network players do not receive normal connection doTick calls. Warm up the real shield use.
+            for(int i=0;i<6;i++)blocker.doTick();
+            h.assertTrue(blocker.isBlocking(),"Real vanilla shield is raised");
+            a.cast(GlyphCatalog.MALEDICTUS_SPIN_SLASHES,new EntityHitResult(a.p),false);
+            for(int i=0;i<20;i++)ExecutionSessions.tick();
+            h.assertTrue(blocker.isBlocking() && !blocker.getCooldowns().isOnCooldown(net.minecraft.world.item.Items.SHIELD),"First spin strike does not disable shield");
+            for(int i=20;i<34;i++)ExecutionSessions.tick();
+            h.assertTrue(!blocker.isBlocking() && blocker.getCooldowns().isOnCooldown(net.minecraft.world.item.Items.SHIELD),"Second native strike applies shield cooldown");
+            h.assertTrue(MaledictusRage.stacks(a.p)==0,"Blocked strikes do not create rage");
+            a.p.discard();ExecutionSessions.tick();h.assertTrue(!MaledictusCasting.isActing(a.p),"Caster loss clears unfinished spin");h.succeed();
+        }
+    }
     public static void maledictusRushHealthChain(GameTestHelper h) {
         for(int hp=0;hp<3;hp++) {
             var frames=new ArrayList<dev.cataclysmnouveau.network.BodyPhantomPayload>();
@@ -441,7 +520,7 @@ public final class NativeAbilityTests {
         try(var a=new Arena(h)) {
             var enemy=a.target(a.center,false);
             for(var glyph:List.of(GlyphCatalog.MALEDICTUS_AERIAL_SMASH,GlyphCatalog.PHANTOM_AERIAL_VOLLEY,GlyphCatalog.MALEDICTUS_RUSH,
-                    GlyphCatalog.MALEDICTUS_SHOCKWAVE,GlyphCatalog.MALEDICTUS_UPPERCUT,GlyphCatalog.MALEDICTUS_MELEE_COMBO)) {
+                    GlyphCatalog.MALEDICTUS_SHOCKWAVE,GlyphCatalog.MALEDICTUS_UPPERCUT,GlyphCatalog.MALEDICTUS_MELEE_COMBO,GlyphCatalog.MALEDICTUS_SPIN_SLASHES)) {
                 a.cast(glyph,new EntityHitResult(enemy),false);
                 h.assertTrue(!ExecutionSessions.isCasting(a.p) && !MaledictusCasting.isActing(enemy),"Hostile target is never replaced by payer fallback");
                 close(h,CapabilityRegistry.getMana(a.p).getCurrentMana(),10000,"Rejected target pays nothing");
@@ -463,7 +542,10 @@ public final class NativeAbilityTests {
         return player(h,packet->{});
     }
     private static ServerPlayer player(GameTestHelper h,java.util.function.Consumer<net.minecraft.network.protocol.Packet<?>> packets) {
-        var cookie=net.minecraft.server.network.CommonListenerCookie.createInitial(new com.mojang.authlib.GameProfile(UUID.randomUUID(),"CatStudent"),false);
+        return player(h,packets,"CatStudent");
+    }
+    private static ServerPlayer player(GameTestHelper h,java.util.function.Consumer<net.minecraft.network.protocol.Packet<?>> packets,String name) {
+        var cookie=net.minecraft.server.network.CommonListenerCookie.createInitial(new com.mojang.authlib.GameProfile(UUID.randomUUID(),name),false);
         var p=new ServerPlayer(h.getLevel().getServer(),h.getLevel(),cookie.gameProfile(),cookie.clientInformation());
         var connection=new net.minecraft.network.Connection(net.minecraft.network.protocol.PacketFlow.SERVERBOUND);
         new io.netty.channel.embedded.EmbeddedChannel(connection);
@@ -2375,7 +2457,7 @@ public final class NativeAbilityTests {
                     case THUNDER_COMBO -> new int[]{25};case ANCHOR_SPIN -> new int[]{7};case ANCHOR_LEAP -> new int[]{15,17};
                     case HARBINGER_CHARGE,GRAVITY_PUNCH -> new int[]{1};case GUARDIAN_UPPERCUT -> new int[]{2,3};
                     case GUARDIAN_BLINK -> new int[]{4};case GUARDIAN_AIR_STRIKE -> new int[]{5,6};
-                    case GUARDIAN_ROCKET_PUNCH -> new int[]{7};case HALBERD_CLEAVE -> new int[]{26};case SOUL_BURST -> new int[]{7};case MALEDICTUS_AERIAL_SMASH -> new int[]{24,25};case PHANTOM_AERIAL_VOLLEY -> new int[]{3,4,5};case MALEDICTUS_RUSH -> new int[]{10,11,12,15,16,17};case MALEDICTUS_SHOCKWAVE -> new int[]{9};case MALEDICTUS_UPPERCUT -> new int[]{22,23};case MALEDICTUS_MELEE_COMBO -> new int[]{19,20,21};default -> new int[]{8};
+                    case GUARDIAN_ROCKET_PUNCH -> new int[]{7};case HALBERD_CLEAVE -> new int[]{26};case SOUL_BURST -> new int[]{7};case MALEDICTUS_AERIAL_SMASH -> new int[]{24,25};case PHANTOM_AERIAL_VOLLEY -> new int[]{3,4,5};case MALEDICTUS_RUSH -> new int[]{10,11,12,15,16,17};case MALEDICTUS_SHOCKWAVE -> new int[]{9};case MALEDICTUS_UPPERCUT -> new int[]{22,23};case MALEDICTUS_MELEE_COMBO -> new int[]{19,20,21};case MALEDICTUS_SPIN_SLASHES -> new int[]{18};default -> new int[]{8};
                 };
                 for(int state:states) {
                     switch(boss) {

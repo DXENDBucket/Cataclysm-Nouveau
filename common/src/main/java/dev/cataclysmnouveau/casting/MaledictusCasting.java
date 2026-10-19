@@ -17,7 +17,7 @@ public final class MaledictusCasting {
     public static boolean isActing(Entity actor){return ACTORS.contains(actor.getUUID());}
     static void lock(LivingEntity actor){if(actor!=null)ACTORS.add(actor.getUUID());}
     static void unlock(LivingEntity actor){if(actor!=null)ACTORS.remove(actor.getUUID());}
-    public static boolean supports(Ability ability) {return switch(ability){case PHANTOM_HALBERD,CURSED_RAGE,PHANTOM_SPIRAL,PHANTOM_RINGS,HALBERD_CLEAVE,SOUL_BURST,MALEDICTUS_AERIAL_SMASH,PHANTOM_AERIAL_VOLLEY,MALEDICTUS_RUSH,MALEDICTUS_SHOCKWAVE,MALEDICTUS_UPPERCUT,MALEDICTUS_MELEE_COMBO->true;default->false;};}
+    public static boolean supports(Ability ability) {return switch(ability){case PHANTOM_HALBERD,CURSED_RAGE,PHANTOM_SPIRAL,PHANTOM_RINGS,HALBERD_CLEAVE,SOUL_BURST,MALEDICTUS_AERIAL_SMASH,PHANTOM_AERIAL_VOLLEY,MALEDICTUS_RUSH,MALEDICTUS_SHOCKWAVE,MALEDICTUS_UPPERCUT,MALEDICTUS_MELEE_COMBO,MALEDICTUS_SPIN_SLASHES->true;default->false;};}
     static boolean enabled(Ability ability) {
         return switch(ability){
             case PHANTOM_HALBERD -> GlyphCatalog.PHANTOM_HALBERD.isEnabled();
@@ -31,6 +31,7 @@ public final class MaledictusCasting {
             case MALEDICTUS_SHOCKWAVE -> GlyphCatalog.MALEDICTUS_SHOCKWAVE.isEnabled();
             case MALEDICTUS_UPPERCUT -> GlyphCatalog.MALEDICTUS_UPPERCUT.isEnabled();
             case MALEDICTUS_MELEE_COMBO -> GlyphCatalog.MALEDICTUS_MELEE_COMBO.isEnabled();
+            case MALEDICTUS_SPIN_SLASHES -> GlyphCatalog.MALEDICTUS_SPIN_SLASHES.isEnabled();
             default -> false;
         };
     }

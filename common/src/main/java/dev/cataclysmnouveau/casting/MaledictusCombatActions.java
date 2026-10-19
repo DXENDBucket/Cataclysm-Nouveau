@@ -18,7 +18,7 @@ final class MaledictusCombatActions {
     static boolean supports(Ability a){return initialState(a)!=0;}
     private static int initialState(Ability a){return switch(a){
         case MALEDICTUS_AERIAL_SMASH->24;case PHANTOM_AERIAL_VOLLEY->3;case MALEDICTUS_RUSH->10;
-        case MALEDICTUS_SHOCKWAVE->9;case MALEDICTUS_UPPERCUT->22;case MALEDICTUS_MELEE_COMBO->19;default->0;
+        case MALEDICTUS_SHOCKWAVE->9;case MALEDICTUS_UPPERCUT->22;case MALEDICTUS_MELEE_COMBO->19;case MALEDICTUS_SPIN_SLASHES->18;default->0;
     };}
     static boolean start(Ability ability,ServerLevel world,CastContext cast,double amp) {
         if(!supports(ability) || cast.target()==null || cast.target().getType()==HitResult.Type.MISS)return false;
@@ -85,7 +85,8 @@ final class MaledictusCombatActions {
                 int state=boss.getAttackState();
                 boolean tracking=switch(state){case 3->phaseAge<50;case 24->phaseAge<51;case 10->true;
                     case 11,12->phaseAge<18 || phaseAge>31;case 15,16,17->phaseAge<10 || phaseAge>28;
-                    case 22,23->phaseAge<16;case 19,21->phaseAge<24;default->false;};
+                    case 22,23->phaseAge<16;case 19,21->phaseAge<24;
+                    case 18->phaseAge<15 || phaseAge>23 && phaseAge<29;default->false;};
                 heading=geometry.steer(heading,tracking);pose();var input=velocity;
                 goal.tick();
                 // Keep native impulse calculation but restore shared actor/position aiming before native damage.

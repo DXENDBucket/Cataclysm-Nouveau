@@ -11,7 +11,8 @@ import net.minecraft.world.entity.LivingEntity;
 final class MaledictusCombatVisuals {
     static void tick(ServerLevel world,SpellMaledictus frame,LivingEntity actor,int state,int age) {
         boolean strike=switch(state){case 9->age==4;case 25->age==4 || age==37;
-            case 19,21->age==12 || age==24;case 22,23->age==23 || age==33;default->false;};
+            case 19,21->age==12 || age==24;case 22,23->age==23 || age==33;
+            case 18->age==20 || age==34;default->false;};
         if(strike && actor!=null)actor.swing(InteractionHand.MAIN_HAND);
         boolean impact=state==9 && age==4 || state==25 && (age==4 || age==37)
                 || (state==19 || state==21) && age==24 || (state==22 || state==23) && age==33;
