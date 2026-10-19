@@ -1,3 +1,12 @@
+## 0.1.0-dev.57
+
+- Add Ashen Breath using the native growing cone, blindness, synced lifetime and native client smoke/flame particles. Support self, ally and position emission with one server driver and prepaid active-second mana.
+- Add Blazing Bone projectile replacement with native gravity, rotating item renderer and impact fragments. Repeated Ars forms retain their trajectory and pay on each trigger; native shatter no longer ends repeating carriers.
+- Add Bone Storm by invoking the registered native four-volley goal: ticks 5/10/15/20, each randomly firing 6/8/10 native bones. Pay once for the group, preserve child ownership/damage and clean up owned children.
+- Add the native Revenant body phantom family and local revenant_actions switch. Neither breath nor the formation claims a body action.
+- Add three Scribe recipes using burning ashes and source gems; three native kills cover all three glyphs. Group them in their own source series, with projectile replacement among augments.
+- Nine focused server tests pass; 93 bilingual glyph localizations and binary/source distribution checks pass. Native assets and implementation remain runtime references only. Client appearance remains unverified.
+
 ## 0.1.0-dev.56
 
 - Add Remnant Charge and Remnant Tail Sweep using registered native goals, attack bodies, sounds and translucent native Boss animations.

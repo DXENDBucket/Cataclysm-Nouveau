@@ -15,6 +15,7 @@ import net.minecraft.world.entity.Mob;
 final class BodyPhantomModels {
     static Mob create(Kind kind,ClientLevel level) {
         Mob proxy=switch(kind) {
+            case REVENANT -> new Ignited_Revenant_Entity(ModEntities.IGNITED_REVENANT.get(),level);
             case REMNANT -> new com.github.L_Ender.cataclysm.entity.InternalAnimationMonster.IABossMonsters.Ancient_Remnant.Ancient_Remnant_Entity(ModEntities.ANCIENT_REMNANT.get(),level);
             case MALEDICTUS -> new com.github.L_Ender.cataclysm.entity.InternalAnimationMonster.IABossMonsters.Maledictus.Maledictus_Entity(ModEntities.MALEDICTUS.get(),level);
             case SCYLLA -> new Scylla_Entity(ModEntities.SCYLLA.get(),level);
@@ -27,6 +28,10 @@ final class BodyPhantomModels {
     }
     static void pose(Mob proxy,BodyPhantomPayload data,int age) {
         switch(proxy) {
+            case Ignited_Revenant_Entity boss -> {
+                boss.setIsAnger(true);boss.angerProgress=boss.prevangerProgress=5;
+                boss.setAnimation(Ignited_Revenant_Entity.BONE_STORM_ATTACK);boss.setAnimationTick(Math.min(age,48));boss.tickCount=age;
+            }
             case com.github.L_Ender.cataclysm.entity.InternalAnimationMonster.IABossMonsters.Ancient_Remnant.Ancient_Remnant_Entity boss -> {
                 boss.setIsPower((data.flags()&1)!=0);boss.setAttackState(data.animation());boss.stopAllAnimationStates();
                 boss.attackTicks=age;boss.tickCount=age;boss.getAnimationState(switch(data.animation()){

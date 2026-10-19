@@ -205,3 +205,9 @@ Cursed Sandstorm 的 tick 在具体类内调用 CustomAbstractHurtingProjectile.
 原生冲撞的接触伤害只查询Boss自身包围盒，不能直接让它永远沿用玩家的小包围盒，否则与幻影范围和高速移动不符。仅在原生伤害调用期间使用Boss尺寸，真实执行者／脱离实体的位置帧仍用实际碰撞尺寸移动。移动冲撞的位置帧不能每tick重新吸回最初锚点；用同一driver维持位置、重力和碰墙，保留逻辑caster作为付款者与伤害来源。原生 ChargeBlockBreaking 只为本附属SpellRemnant取消，真实Boss保持原样。
 
 原生state13第二次践踏从50tick开始，一直推进到68tick，但注册Goal的时长仅66tick。独立范围效果须调用完整aiStep到68并留出地块退场时间，不能机械按Goal时间截掉最后一圈。半血按原施法者判断，友军生命不改变变体；不新增魔符或额外收费。具体交付见 remnant-actions-dev56.md。
+
+## dev.57：炽燃遗魂的粒子实体与原生骨弹
+
+灰烬吐息的主体是原生Ashen_Breath实体客户端tick产生的80烟／2火焰粒子，不是需要另接的模型。让真实实体出生，并同步管理标记／寿命，服务端只由会话tick一次；不能像未出生的Boss调用帧那样仅运行服务端就宣称有特效。它的tick会读取caster.yHeadRot，友军或固定点执行时须用实际执行方向，不能跟着付款者转。
+
+Blazing Bone本身没有独立尾迹／额外点燃；旋转来自原生物品渲染器，碎裂来自实体事件3。重复Ars载体应保留该事件，仅抑制其原生discard；ThrowableProjectile既有轨迹钩子负责禁止双重重力／碰撞，普通弹继续走原生轨迹。骨骸风暴直接调用注册Goal的四次随机6／8／10发，不复制原生方向表，子弹与独立单弹共用伤害桥接但不独立收费。详见 revenant-dev57.md。

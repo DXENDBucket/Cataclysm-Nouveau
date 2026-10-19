@@ -261,5 +261,14 @@
   "cataclysm_nouveau.glyph_desc.glyph_remnant_charge": "自身或友军蓄势后向前冲撞；也可从指定位置发动。保留原生接触伤害与击退，撞墙结束，不破坏地形。",
   "cataclysm_nouveau.glyph_name.glyph_remnant_tail_sweep": "尾部横扫",
   "item.cataclysm_nouveau.glyph_remnant_tail_sweep": "尾部横扫",
-  "cataclysm_nouveau.glyph_desc.glyph_remnant_tail_sweep": "自身或友军以遗魂之尾横扫前方；也可从指定位置发动。保留原生伤害、击退、禁盾与眩晕。"
+  "cataclysm_nouveau.glyph_desc.glyph_remnant_tail_sweep": "自身或友军以遗魂之尾横扫前方；也可从指定位置发动。保留原生伤害、击退、禁盾与眩晕。",
+  "cataclysm_nouveau.glyph_name.glyph_ashen_breath": "灰烬吐息",
+  "item.cataclysm_nouveau.glyph_ashen_breath": "灰烬吐息",
+  "cataclysm_nouveau.glyph_desc.glyph_ashen_breath": "自身、友军或指定位置喷出灰烬，逐渐伸远并造成魔法伤害，命中附加失明。持续期间每秒消耗魔力。",
+  "cataclysm_nouveau.glyph_name.glyph_blazing_bone": "炽燃骨弹",
+  "item.cataclysm_nouveau.glyph_blazing_bone": "炽燃骨弹",
+  "cataclysm_nouveau.glyph_desc.glyph_blazing_bone": "将弹射物替换为旋转的炽燃骨弹，沿原生抛物线飞行并在碰撞时碎裂。",
+  "cataclysm_nouveau.glyph_name.glyph_bone_storm": "骨骸风暴",
+  "item.cataclysm_nouveau.glyph_bone_storm": "骨骸风暴",
+  "cataclysm_nouveau.glyph_desc.glyph_bone_storm": "自身、友军或指定位置连续向四周释放四轮炽燃骨弹，每轮随机发射六、八或十枚。"
 }

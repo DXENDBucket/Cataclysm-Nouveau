@@ -22,7 +22,7 @@ public final class CataclysmEffectGlyph extends AbstractEffect implements Trigge
     public CataclysmEffectGlyph(Ability ability) {
         super(CarrierRegistry.id("cataclysm_nouveau:glyph_" + ability.id), ability.name);
         this.ability = ability;
-        if (ability == Ability.SANDSTORM_RING || ability == Ability.MONSTROUS || ability == Ability.SHOULDER_CHECK || ability == Ability.BONE_FRACTURE || ability == Ability.LAVA_WALKING || ability == Ability.LIGHTNING_FIELD || ability == Ability.THUNDER_CLOUD || ability == Ability.WATER_WALKING || ability == Ability.DEATH_LASER || ability == Ability.WITHER_SMOKE || ability == Ability.VOID_VORTEX || ability == Ability.IGNIS_FLAME_STRIKE || ability == Ability.ABYSS_TRIPLE_BLAST || ability == Ability.ABYSS_MINE || ability == Ability.ABYSS_BLAST || ability == Ability.ABYSS_BOMBARDMENT || ability == Ability.DIMENSIONAL_RIFT || ability == Ability.ABYSS_MINEFIELD || ability == Ability.ABYSS_BOMBARDMENT_ARRAY) {
+        if (ability == Ability.ASHEN_BREATH || ability == Ability.SANDSTORM_RING || ability == Ability.MONSTROUS || ability == Ability.SHOULDER_CHECK || ability == Ability.BONE_FRACTURE || ability == Ability.LAVA_WALKING || ability == Ability.LIGHTNING_FIELD || ability == Ability.THUNDER_CLOUD || ability == Ability.WATER_WALKING || ability == Ability.DEATH_LASER || ability == Ability.WITHER_SMOKE || ability == Ability.VOID_VORTEX || ability == Ability.IGNIS_FLAME_STRIKE || ability == Ability.ABYSS_TRIPLE_BLAST || ability == Ability.ABYSS_MINE || ability == Ability.ABYSS_BLAST || ability == Ability.ABYSS_BOMBARDMENT || ability == Ability.DIMENSIONAL_RIFT || ability == Ability.ABYSS_MINEFIELD || ability == Ability.ABYSS_BOMBARDMENT_ARRAY) {
             compatibleAugments.add(AugmentExtendTime.INSTANCE);
             compatibleAugments.add(AugmentDurationDown.INSTANCE);
             augmentDescriptions.put(AugmentExtendTime.INSTANCE, Component.translatable("cataclysm_nouveau.augment.duration_up"));
@@ -44,6 +44,9 @@ public final class CataclysmEffectGlyph extends AbstractEffect implements Trigge
         if (!(level instanceof ServerLevel world) || !isEnabled()) return;
         var frame = CastContext.of(context, hit, null);
         if (frame.caster() == null || !frame.caster().isAlive()) return;
+        if (ability == Ability.ASHEN_BREATH) {
+            RevenantBreath.start(world,frame,stats.getAmpMultiplier(),stats.getDurationMultiplier(),firstCharge(context,stats.getAugments()));return;
+        }
         if (ability == Ability.ABYSS_BLAST) {
             LeviathanLaser.start(world,frame,stats.getAmpMultiplier(),stats.getDurationMultiplier(),firstCharge(context,stats.getAugments()));return;
         }
@@ -53,7 +56,9 @@ public final class CataclysmEffectGlyph extends AbstractEffect implements Trigge
         if (ability == Ability.DEATH_LASER) {
             HarbingerLaser.start(world,frame,stats.getAmpMultiplier(),stats.getDurationMultiplier(),firstCharge(context,stats.getAugments()));return;
         }
-        firstCharge(context, stats.getAugments()).trigger(() -> RemnantCasting.supports(ability)
+        firstCharge(context, stats.getAugments()).trigger(() -> ability==Ability.BONE_STORM
+                ? RevenantCasting.storm(world,frame,stats.getAmpMultiplier())
+                : RemnantCasting.supports(ability)
                 ? RemnantCasting.effect(ability,world,frame,stats.getAmpMultiplier(),stats.getDurationMultiplier())
                 : LeviathanCasting.supports(ability)
                 ? LeviathanCasting.effect(ability,world,frame,stats.getAmpMultiplier(),stats.getDurationMultiplier())

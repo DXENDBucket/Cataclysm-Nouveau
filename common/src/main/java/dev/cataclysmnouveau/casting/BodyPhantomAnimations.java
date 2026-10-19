@@ -7,7 +7,7 @@ import dev.cataclysmnouveau.Ability;
 
 /** Stable visual IDs for the supported native body actions; no client classes. */
 public final class BodyPhantomAnimations {
-    public enum Kind { SCYLLA, HARBINGER, GUARDIAN, MONSTROSITY, MALEDICTUS, REMNANT }
+    public enum Kind { SCYLLA, HARBINGER, GUARDIAN, MONSTROSITY, MALEDICTUS, REMNANT, REVENANT }
     /** Native Maledictus afterimage windows (the renderer proxy has no world entity ID). */
     public static boolean maledictusAfterimage(int state,int age) {
         return age>=0 && switch(state) {
@@ -20,6 +20,7 @@ public final class BodyPhantomAnimations {
     }
     public static Kind kind(Ability ability) {
         return switch(ability) {
+            case BONE_STORM -> Kind.REVENANT;
             case REMNANT_CHARGE,REMNANT_TAIL_SWEEP,REMNANT_STOMP,DESERT_STELE_ARRAY,REMNANT_TRIPLE_QUAKE -> Kind.REMNANT;
             case THUNDER_COMBO, ANCHOR_SPIN, ANCHOR_LEAP -> Kind.SCYLLA;
             case HARBINGER_CHARGE -> Kind.HARBINGER;
@@ -34,6 +35,7 @@ public final class BodyPhantomAnimations {
         return null;
     }
     public static Animation animation(Kind kind,int id) {
+        if(kind==Kind.REVENANT)return id==1?com.github.L_Ender.cataclysm.entity.AnimationMonster.BossMonsters.Ignited_Revenant_Entity.BONE_STORM_ATTACK:null;
         if(kind==Kind.HARBINGER) return id==1?The_Harbinger_Entity.CHARGE_ANIMATION:null;
         if(kind!=Kind.GUARDIAN) return null;
         return switch(id) {
@@ -57,6 +59,7 @@ public final class BodyPhantomAnimations {
             case REMNANT_CHARGE -> state==10 || state==11;
             case REMNANT_TAIL_SWEEP -> state==16;
             case REMNANT_STOMP -> state==8 || state==13;
+            case BONE_STORM -> state==1;
             case DESERT_STELE_ARRAY -> state==17;
             case REMNANT_TRIPLE_QUAKE -> state==15;
             case THUNDER_COMBO -> state==25;

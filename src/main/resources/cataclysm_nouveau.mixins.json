@@ -91,7 +91,10 @@
     "RemnantQuakeAccess",
     "CursedStormMixin",
     "CursedStormMotionMixin",
-    "CursedStormHitMixin"
+    "CursedStormHitMixin",
+    "RevenantAdapterMixin",
+    "BlazingBoneMixin",
+    "AshenBreathMixin"
   ],
   "client": [
     "client.GuardianVortexRenderProbeMixin",

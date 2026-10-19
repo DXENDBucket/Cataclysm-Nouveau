@@ -261,5 +261,14 @@
   "cataclysm_nouveau.glyph_desc.glyph_remnant_charge": "The executor prepares, then charges forward with native contact damage and knockback. Supports self, allies and positions; stops at walls without breaking terrain.",
   "cataclysm_nouveau.glyph_name.glyph_remnant_tail_sweep": "Remnant Tail Sweep",
   "item.cataclysm_nouveau.glyph_remnant_tail_sweep": "Remnant Tail Sweep",
-  "cataclysm_nouveau.glyph_desc.glyph_remnant_tail_sweep": "Sweep a Remnant tail ahead of self, an ally or a selected position, retaining native damage, knockback, shield disable and stun."
+  "cataclysm_nouveau.glyph_desc.glyph_remnant_tail_sweep": "Sweep a Remnant tail ahead of self, an ally or a selected position, retaining native damage, knockback, shield disable and stun.",
+  "cataclysm_nouveau.glyph_name.glyph_ashen_breath": "Ashen Breath",
+  "item.cataclysm_nouveau.glyph_ashen_breath": "Ashen Breath",
+  "cataclysm_nouveau.glyph_desc.glyph_ashen_breath": "Emit the native growing ash cone from self, an ally or a position, dealing magic damage and blindness. Pays mana for each active second.",
+  "cataclysm_nouveau.glyph_name.glyph_blazing_bone": "Blazing Bone",
+  "item.cataclysm_nouveau.glyph_blazing_bone": "Blazing Bone",
+  "cataclysm_nouveau.glyph_desc.glyph_blazing_bone": "Replace a projectile with a spinning Blazing Bone, retaining its native gravity and impact fragments.",
+  "cataclysm_nouveau.glyph_name.glyph_bone_storm": "Bone Storm",
+  "item.cataclysm_nouveau.glyph_bone_storm": "Bone Storm",
+  "cataclysm_nouveau.glyph_desc.glyph_bone_storm": "Release four native radial volleys from self, an ally or a position. Each volley randomly fires six, eight or ten Blazing Bones."
 }

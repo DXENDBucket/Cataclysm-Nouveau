@@ -2451,11 +2451,13 @@ public final class NativeAbilityTests {
                     case GUARDIAN -> new SpellGuardian(h.getLevel(),cast,a.center,new Vec3(-1,0,0),0,ability);
                     case HARBINGER -> new SpellHarbinger(h.getLevel(),cast,ability,a.center,0,0);
                     case MONSTROSITY -> new SpellMonstrosity(h.getLevel(),cast,a.center,new Vec3(-1,0,0),0);
+                    case REVENANT -> new SpellRevenant(h.getLevel(),cast,a.center,new Vec3(-1,0,0),0);
                     case REMNANT -> new SpellRemnant(h.getLevel(),cast,ability,a.center,new Vec3(-1,0,0),0);
                     case MALEDICTUS -> new SpellMaledictus(h.getLevel(),cast,ability,a.center,new Vec3(-1,0,0),0);
                 };
                 int[] states=switch(ability) {
                     case REMNANT_CHARGE -> new int[]{10,11};case REMNANT_TAIL_SWEEP -> new int[]{16};case REMNANT_STOMP -> new int[]{8,13};
+                    case BONE_STORM -> new int[]{1};
                     case DESERT_STELE_ARRAY -> new int[]{17};case REMNANT_TRIPLE_QUAKE -> new int[]{15};
                     case THUNDER_COMBO -> new int[]{25};case ANCHOR_SPIN -> new int[]{7};case ANCHOR_LEAP -> new int[]{15,17};
                     case HARBINGER_CHARGE,GRAVITY_PUNCH -> new int[]{1};case GUARDIAN_UPPERCUT -> new int[]{2,3};
@@ -2468,6 +2470,7 @@ public final class NativeAbilityTests {
                         case SpellGuardian b -> {b.setAnimation(BodyPhantomAnimations.animation(kind,state));b.setAnimationTick(37);}
                         case SpellHarbinger b -> {b.setAnimation(BodyPhantomAnimations.animation(kind,state));b.setAnimationTick(26);b.setIsCharge(true);}
                         case SpellMonstrosity b -> {b.setAttackState(state);b.attackTicks=35;}
+                        case SpellRevenant b -> {b.setAnimation(com.github.L_Ender.cataclysm.entity.AnimationMonster.BossMonsters.Ignited_Revenant_Entity.BONE_STORM_ATTACK);b.setAnimationTick(20);}
                         case SpellRemnant b -> {b.setAttackState(state);b.attackTicks=20;}
                         case SpellMaledictus b -> {b.setAttackState(state);b.attackTicks=20;MaledictusRage.gain(a.p,5);}
                         default -> throw new AssertionError();
