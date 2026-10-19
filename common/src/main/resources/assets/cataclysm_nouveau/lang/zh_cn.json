@@ -203,5 +203,18 @@
   "item.cataclysm_nouveau.cursium_fragment": "咒魂碎片",
   "cataclysm_nouveau.glyph_name.glyph_maledictus_spin_slashes": "咒翼双段旋斩",
   "item.cataclysm_nouveau.glyph_maledictus_spin_slashes": "咒翼双段旋斩",
-  "cataclysm_nouveau.glyph_desc.glyph_maledictus_spin_slashes": "向前冲出并连续旋斩两次，第二击可破盾。保留原生伤害与怒气机制；两击准备期间可调整朝向。"
+  "cataclysm_nouveau.glyph_desc.glyph_maledictus_spin_slashes": "向前冲出并连续旋斩两次，第二击可破盾。保留原生伤害与怒气机制；两击准备期间可调整朝向。",
+  "cataclysm_nouveau.glyph_name.glyph_abyss_orb": "深渊灵珠",
+  "item.cataclysm_nouveau.glyph_abyss_orb": "深渊灵珠",
+  "cataclysm_nouveau.glyph_desc.glyph_abyss_orb": "将弹射物替换为原生深渊灵珠，延迟追踪前方目标。成功直击附加短暂深渊恐惧，阻止治疗；保留爆炸、紫色电弧与原生碰墙时序。",
+  "cataclysm_nouveau.glyph_name.glyph_abyss_mine": "深渊水雷",
+  "item.cataclysm_nouveau.glyph_abyss_mine": "深渊水雷",
+  "cataclysm_nouveau.glyph_desc.glyph_abyss_mine": "在落点布置一枚可以悬浮的深渊水雷。启动后由接近的敌人触发爆炸与深渊恐惧；自然到期不爆炸。延长时效增加布雷持续时间。",
+  "cataclysm_nouveau.glyph_name.glyph_abyss_blast": "深渊冲击波",
+  "item.cataclysm_nouveau.glyph_abyss_blast": "深渊冲击波",
+  "cataclysm_nouveau.glyph_desc.glyph_abyss_blast": "自身或友军沿视线发射原生深渊冲击波，也可从固定位置发射。预备1秒，基础输出4秒，持续消耗魔力，空蓝结束。成功命中叠加深渊灼烧，低生命目标可能被灼烧随机传送。",
+  "cataclysm_nouveau.glyph_name.glyph_abyss_bombardment": "深渊轰炸",
+  "item.cataclysm_nouveau.glyph_abyss_bombardment": "深渊轰炸",
+  "cataclysm_nouveau.glyph_desc.glyph_abyss_bombardment": "在落点地面展开深渊门户，随后向上发射原生光束，基础输出8秒。附加深渊灼烧；延长时效延长光束，费用包含门户与子光束。",
+  "item.cataclysm_nouveau.tidal_claw_fragment": "潮汐利爪碎片"
 }

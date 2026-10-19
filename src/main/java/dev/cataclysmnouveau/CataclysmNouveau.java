@@ -27,6 +27,7 @@ public final class CataclysmNouveau {
                 output.accept(CataclysmItems.GUARDIAN_VOID_FRAGMENT.get());
                 output.accept(CataclysmItems.IGNITIUM_FRAGMENT.get());
                 output.accept(CataclysmItems.CURSIUM_FRAGMENT.get());
+                output.accept(CataclysmItems.TIDAL_CLAW_FRAGMENT.get());
                 GlyphCatalog.ALL.forEach(g->output.accept(g.getGlyph()));
             }).build());
         tabs.register(bus);

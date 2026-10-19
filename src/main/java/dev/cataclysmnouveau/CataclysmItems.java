@@ -14,6 +14,8 @@ public final class CataclysmItems {
         ITEMS.registerSimpleItem("ignitium_fragment", new Item.Properties());
     public static final DeferredItem<Item> CURSIUM_FRAGMENT =
         ITEMS.registerSimpleItem("cursium_fragment", new Item.Properties());
+    public static final DeferredItem<Item> TIDAL_CLAW_FRAGMENT =
+        ITEMS.registerSimpleItem("tidal_claw_fragment", new Item.Properties());
     public static void register(IEventBus bus) { ITEMS.register(bus); }
     private CataclysmItems() {}
 }

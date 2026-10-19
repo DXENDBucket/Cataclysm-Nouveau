@@ -203,5 +203,18 @@
   "item.cataclysm_nouveau.cursium_fragment": "Cursium Fragment",
   "cataclysm_nouveau.glyph_name.glyph_maledictus_spin_slashes": "Maledictus Twin Spin",
   "item.cataclysm_nouveau.glyph_maledictus_spin_slashes": "Maledictus Twin Spin",
-  "cataclysm_nouveau.glyph_desc.glyph_maledictus_spin_slashes": "Lunges forward for two native spinning slashes. The second strike breaks shields. Preserves native damage and Cursed Rage, with steering during preparation windows."
+  "cataclysm_nouveau.glyph_desc.glyph_maledictus_spin_slashes": "Lunges forward for two native spinning slashes. The second strike breaks shields. Preserves native damage and Cursed Rage, with steering during preparation windows.",
+  "cataclysm_nouveau.glyph_name.glyph_abyss_orb": "Abyss Orb",
+  "item.cataclysm_nouveau.glyph_abyss_orb": "Abyss Orb",
+  "cataclysm_nouveau.glyph_desc.glyph_abyss_orb": "Replaces the projectile with a native Abyss Orb. Delayed homing, explosions and purple arcs are preserved. Successful direct hits briefly prevent healing with Abyssal Fear; young orbs do not immediately explode on blocks.",
+  "cataclysm_nouveau.glyph_name.glyph_abyss_mine": "Abyss Mine",
+  "item.cataclysm_nouveau.glyph_abyss_mine": "Abyss Mine",
+  "cataclysm_nouveau.glyph_desc.glyph_abyss_mine": "Places a floating native mine at the impact. After arming, an enemy triggers its explosion and Abyssal Fear. Expiry does not detonate it. Duration augments change its lifetime.",
+  "cataclysm_nouveau.glyph_name.glyph_abyss_blast": "Abyss Blast",
+  "item.cataclysm_nouveau.glyph_abyss_blast": "Abyss Blast",
+  "cataclysm_nouveau.glyph_desc.glyph_abyss_blast": "The caster or an ally emits the native beam along their view, or it fires from a fixed position. One-second preparation and four seconds of output, prepaid per active second; insufficient mana stops it. Successful hits stack Abyssal Burn, which may teleport low-health victims.",
+  "cataclysm_nouveau.glyph_name.glyph_abyss_bombardment": "Abyss Bombardment",
+  "item.cataclysm_nouveau.glyph_abyss_bombardment": "Abyss Bombardment",
+  "cataclysm_nouveau.glyph_desc.glyph_abyss_bombardment": "Opens a native ground portal which then fires an upward beam for eight seconds, inflicting Abyssal Burn. Duration augments extend the beam. Its price includes the portal and child beam.",
+  "item.cataclysm_nouveau.tidal_claw_fragment": "Tidal Claw Fragment"
 }

@@ -16,7 +16,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import java.util.function.Predicate;
 
 /** Run native visual/trail ticks while the Ars carrier exclusively owns movement and hits. */
-@Mixin(value={Laser_Beam_Entity.class,Wither_Missile_Entity.class,Wither_Homing_Missile_Entity.class,Wither_Howitzer_Entity.class,Ender_Guardian_Bullet_Entity.class},remap=false)
+@Mixin(value={com.github.L_Ender.cataclysm.entity.AnimationMonster.BossMonsters.The_Leviathan.Abyss_Orb_Entity.class,Laser_Beam_Entity.class,Wither_Missile_Entity.class,Wither_Homing_Missile_Entity.class,Wither_Howitzer_Entity.class,Ender_Guardian_Bullet_Entity.class},remap=false)
 public abstract class HarbingerNativeMixin {
     @WrapMethod(method="tick")
     private void harbinger$visualTick(Operation<Void> original) {
@@ -35,6 +35,11 @@ public abstract class HarbingerNativeMixin {
     }
     @WrapOperation(method="*",at=@At(value="INVOKE",target="Lnet/minecraft/world/level/Level;explode(Lnet/minecraft/world/entity/Entity;DDDFZLnet/minecraft/world/level/Level$ExplosionInteraction;)Lnet/minecraft/world/level/Explosion;",remap=true),require=0)
     private Explosion harbinger$explosion(Level world,Entity source,double x,double y,double z,float radius,boolean fire,Level.ExplosionInteraction interaction,Operation<Explosion> original) {
+        var payload=(Entity)(Object)this;
+        if(payload instanceof com.github.L_Ender.cataclysm.entity.AnimationMonster.BossMonsters.The_Leviathan.Abyss_Orb_Entity && NativeSpellDamage.context(payload)!=null){
+            if(HarbingerCasting.decorating(payload) && !((ManagedProjectile)payload).confluxCataclysm$resolving())return null;
+            return LeviathanCasting.explosion(payload,world,x,y,z,radius);
+        }
         if(NativeSpellDamage.context(source)==null)return original.call(world,source,x,y,z,radius,fire,interaction);
         if(HarbingerCasting.decorating(source) && !((ManagedProjectile)source).confluxCataclysm$resolving())return null;
         return HarbingerCasting.explosion(source,world,x,y,z,radius);

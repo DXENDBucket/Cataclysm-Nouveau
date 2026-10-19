@@ -928,7 +928,7 @@ public final class NativeAbilityTests {
     }
 
 
-    private static final class Arena implements AutoCloseable {
+    static final class Arena implements AutoCloseable {
         final GameTestHelper h;final ServerPlayer p;final Vec3 center;final BlockPos base;
         final List<net.minecraft.world.level.ChunkPos> forced=new ArrayList<>();
         final List<Entity> actors=new ArrayList<>();final net.minecraft.world.scores.PlayerTeam team;boolean closed;

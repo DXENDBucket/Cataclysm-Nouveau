@@ -1,0 +1,13 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "misc",
+  "ingredients": [
+    {
+      "item": "cataclysm:tidal_claws"
+    }
+  ],
+  "result": {
+    "id": "cataclysm_nouveau:tidal_claw_fragment",
+    "count": 9
+  }
+}

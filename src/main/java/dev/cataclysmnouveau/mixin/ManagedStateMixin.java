@@ -9,7 +9,7 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.HitResult;
 import org.spongepowered.asm.mixin.*;
 import java.util.function.Consumer;
-@Mixin(value={Phantom_Arrow_Entity.class,Amethyst_Cluster_Projectile_Entity.class,Lionfish_Spike_Entity.class,Player_Ceraunus_Entity.class,Wave_Entity.class,Flare_Bomb_Entity.class,Lava_Bomb_Entity.class,Elemental_Spear_Entity.class,Spark_Entity.class,Laser_Beam_Entity.class,Wither_Missile_Entity.class,Wither_Homing_Missile_Entity.class,Wither_Howitzer_Entity.class,Ender_Guardian_Bullet_Entity.class,Ignis_Fireball_Entity.class,Ignis_Abyss_Fireball_Entity.class},remap=false)
+@Mixin(value={com.github.L_Ender.cataclysm.entity.AnimationMonster.BossMonsters.The_Leviathan.Abyss_Orb_Entity.class,Phantom_Arrow_Entity.class,Amethyst_Cluster_Projectile_Entity.class,Lionfish_Spike_Entity.class,Player_Ceraunus_Entity.class,Wave_Entity.class,Flare_Bomb_Entity.class,Lava_Bomb_Entity.class,Elemental_Spear_Entity.class,Spark_Entity.class,Laser_Beam_Entity.class,Wither_Missile_Entity.class,Wither_Homing_Missile_Entity.class,Wither_Howitzer_Entity.class,Ender_Guardian_Bullet_Entity.class,Ignis_Fireball_Entity.class,Ignis_Abyss_Fireball_Entity.class},remap=false)
 public abstract class ManagedStateMixin extends Entity implements ManagedProjectile {
     @Unique private EntityProjectileSpell confluxCataclysm$carrier;
     @Unique private dev.cataclysmnouveau.Ability confluxCataclysm$sourceAbility;

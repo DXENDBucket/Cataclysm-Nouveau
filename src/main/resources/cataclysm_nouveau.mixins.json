@@ -69,13 +69,20 @@
     "MaledictusAdapterMixin",
     "NativeAttackGoalAccess",
     "NativeStateGoalAccess",
-    "MaledictusBowGoalMixin"
+    "MaledictusBowGoalMixin",
+    "LeviathanOrbMixin",
+    "LeviathanMineMixin",
+    "LeviathanPortalMixin",
+    "LeviathanLaserMixin",
+    "LeviathanPortalBeamMixin",
+    "LeviathanLoadedRayMixin"
   ],
   "client": [
     "client.GuardianVortexRenderProbeMixin",
     "client.PhantomRenderTypeAccess",
     "client.PhantomCompositeStateAccess",
-    "client.PhantomTextureStateAccess"
+    "client.PhantomTextureStateAccess",
+    "client.LeviathanBeamViewMixin"
   ],
   "injectors": {
     "defaultRequire": 1

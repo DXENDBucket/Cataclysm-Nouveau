@@ -1,3 +1,11 @@
+## 0.1.0-dev.50
+
+- Add the native Abyss Orb projectile replacement, floating Abyss Mine, sustained Abyss Blast and upward Abyss Bombardment portal effect.
+- Preserve delayed homing, explosions, healing prevention, stacking Abyssal Burn, native events, particles, sound and child-ray lifecycle.
+- Reuse Conflux execution, allied filtering and trigger billing. Prepay active beam seconds; reject hostile emitters, follow ally aim, support fixed origins and stop at unloaded ray boundaries without loading terrain.
+- Add divisible Tidal Claw Fragments and four Scribe recipes. Two guaranteed kills cover this batch; default costs and cooldowns are configurable.
+- Keep upstream assets and code out of binary/source distributions; glyph icons reference native resources and item renderers at runtime.
+
 ## 0.1.0-dev.49
 
 - Add Maledictus Twin Spin as an effect glyph, invoking the complete native spin goal and attack body.

@@ -2,6 +2,7 @@ package dev.cataclysmnouveau.casting;
 
 import com.github.L_Ender.cataclysm.config.CMCommonConfig;
 import com.github.L_Ender.cataclysm.entity.projectile.*;
+import com.github.L_Ender.cataclysm.entity.AnimationMonster.BossMonsters.The_Leviathan.Abyss_Orb_Entity;
 import com.github.L_Ender.cataclysm.entity.effect.Wither_Smoke_Effect_Entity;
 import com.github.L_Ender.cataclysm.init.ModEntities;
 import com.hollingsworth.arsnouveau.common.entity.EntityProjectileSpell;
@@ -25,8 +26,8 @@ import java.util.function.Supplier;
 /** Native payloads own visuals/hit bodies; a single trajectory owns motion and collision. */
 public final class HarbingerCasting {
     private static final ThreadLocal<Entity> DECORATING=new ThreadLocal<>();
-    public static boolean supports(Ability a) {return switch(a){case PHANTOM_ARROW,IGNIS_FIREBALL,IGNIS_ABYSS_FIREBALL,LASER_BOLT,WITHER_MISSILE,HOMING_MISSILE,WITHER_HOWITZER,GUARDIAN_BULLET->true;default->false;};}
-    public static boolean nativePayload(Entity e) {return e instanceof Phantom_Arrow_Entity || e instanceof Ignis_Fireball_Entity || e instanceof Ignis_Abyss_Fireball_Entity || e instanceof Laser_Beam_Entity || e instanceof Wither_Missile_Entity || e instanceof Wither_Homing_Missile_Entity || e instanceof Wither_Howitzer_Entity || e instanceof Ender_Guardian_Bullet_Entity;}
+    public static boolean supports(Ability a) {return switch(a){case ABYSS_ORB,PHANTOM_ARROW,IGNIS_FIREBALL,IGNIS_ABYSS_FIREBALL,LASER_BOLT,WITHER_MISSILE,HOMING_MISSILE,WITHER_HOWITZER,GUARDIAN_BULLET->true;default->false;};}
+    public static boolean nativePayload(Entity e) {return e instanceof Abyss_Orb_Entity || e instanceof Phantom_Arrow_Entity || e instanceof Ignis_Fireball_Entity || e instanceof Ignis_Abyss_Fireball_Entity || e instanceof Laser_Beam_Entity || e instanceof Wither_Missile_Entity || e instanceof Wither_Homing_Missile_Entity || e instanceof Wither_Howitzer_Entity || e instanceof Ender_Guardian_Bullet_Entity;}
     public static boolean decorating(Entity e) {return DECORATING.get()==e && e instanceof ManagedProjectile s && s.confluxCataclysm$mode()==1;}
     public static void decorate(Entity e,Runnable tick) {
         var old=DECORATING.get();DECORATING.set(e);
@@ -58,6 +59,10 @@ public final class HarbingerCasting {
         if(IgnisCasting.projectile(a))return IgnisCasting.create(a,world,c,direction,target,amplify);
         var owner=c.damageOwner()==null?c.caster():c.damageOwner();float bonus=Resources.amplification(amplify);
         Projectile p=switch(a) {
+            case ABYSS_ORB->{
+                var orb=new Abyss_Orb_Entity(owner,direction.x,direction.y,direction.z,world,Math.max(0,(float)CMCommonConfig.Leviathan.AbyssOrbdamage),target);
+                orb.setUp(40);yield orb;
+            }
             case PHANTOM_ARROW->{
                 var arrow=new Phantom_Arrow_Entity(world,owner,target);
                 arrow.setBaseDamage(MaledictusRage.arrowDamage(CMCommonConfig.Maledictus.PhantomArrowDamage,c.caster()));
@@ -78,13 +83,13 @@ public final class HarbingerCasting {
         var resolver=ArsSpellAccess.resolver(carrier);var frame=CastContext.of(resolver.spellContext,null,null);
         if(frame.caster()==null || !frame.caster().isAlive())return true;
         Vec3 direction=TriggerGeometry.direction(carrier);
-        var selected=(a==Ability.PHANTOM_ARROW || a==Ability.HOMING_MISSILE || IgnisCasting.projectile(a))?target(world,carrier.position(),direction,frame):null;
+        var selected=(a==Ability.ABYSS_ORB || a==Ability.PHANTOM_ARROW || a==Ability.HOMING_MISSILE || IgnisCasting.projectile(a))?target(world,carrier.position(),direction,frame):null;
         if(a==Ability.HOMING_MISSILE && !profile.arsDriven() && selected==null)return true;
         var stats=resolver.getCastStats();var quote=Resources.quote(resolver.spellContext,a,stats.getAugments());
         var payload=create(a,world,frame,direction,selected,stats.getAmpMultiplier());
         var driver=new Flight(payload,carrier,profile,stats.getAccMultiplier());var continuation=resolver.clone();
         var session=new ExecutionSession<>(world,frame.withAccount(quote.account()),payload,
-                Math.max(1,Math.min(1200,carrier.getExpirationTime()+1)),driver,
+                a==Ability.ABYSS_ORB && !profile.arsDriven()?510:Math.max(1,Math.min(1200,carrier.getExpirationTime()+1)),driver,
                 hit->{var child=continuation.clone();CastContexts.bind(child.spellContext,CastContexts.current().withAccount(frame.account()));child.onResolveEffect(payload.level(),hit);},
                 ()->GlyphCatalog.projectile(a).isEnabled(),ExecutionScope.DIRECT).billing(quote::trigger,profile.repeated());
         ExecutionSessions.start(session);return true;
@@ -97,6 +102,7 @@ public final class HarbingerCasting {
         public boolean start(ExecutionSession<Projectile> s) {
             if(payload instanceof Laser_Beam_Entity)s.world().playSound(null,carrier.blockPosition(),com.github.L_Ender.cataclysm.init.ModSounds.HARBINGER_LASER.get(),net.minecraft.sounds.SoundSource.PLAYERS,1,1);
             var state=(ManagedProjectile)payload;state.confluxCataclysm$mode(trajectory==null?2:1);state.confluxCataclysm$carrier(carrier);state.confluxCataclysm$repeated(repeated);state.confluxCataclysm$impact(h->impact(s,h));
+            if(payload instanceof Abyss_Orb_Entity orb){((LeviathanOrb)orb).confluxLeviathan$acceleration(acceleration);orb.xPower*=acceleration;orb.yPower*=acceleration;orb.zPower*=acceleration;}
             if(payload instanceof Ender_Guardian_Bullet_Entity bullet) {
                 Vec3 staging=carrier.position().add(direction.scale(3));
                 bullet.setUp(CataclysmConfig.guardianBulletDelay(),direction.x*acceleration,direction.y*acceleration,direction.z*acceleration,staging.x,staging.y,staging.z);
@@ -112,6 +118,7 @@ public final class HarbingerCasting {
         }
         void impact(ExecutionSession<Projectile> s,HitResult hit) {
             var state=(ManagedProjectile)payload;if(state.confluxCataclysm$resolving() || hit.getType()==HitResult.Type.MISS)return;
+            if(payload instanceof LeviathanOrb orb && hit instanceof BlockHitResult && !orb.confluxLeviathan$blockReady())return;
             if(payload instanceof GuardianBullet bullet && !bullet.confluxGuardian$fired())return;
             if(payload instanceof IgnisProjectile fire && !fire.confluxIgnis$ready())return;
             if(hit instanceof EntityHitResult e && allied(s.context(),e.getEntity()))return;
