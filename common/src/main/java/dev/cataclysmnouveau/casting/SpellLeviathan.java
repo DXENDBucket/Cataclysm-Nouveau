@@ -17,6 +17,7 @@ public final class SpellLeviathan extends The_Leviathan_Entity {
     public final double amplification,duration;
     public final List<Entity> children=new ArrayList<>();
     public boolean collecting;
+    public boolean childrenCancelled;
     public int candidates;
     public SpellLeviathan(ServerLevel world,CastContext cast,Ability ability,Vec3 point,double amp,double duration){
         super(ModEntities.THE_LEVIATHAN.get(),world);
@@ -24,11 +25,12 @@ public final class SpellLeviathan extends The_Leviathan_Entity {
         setPos(point);setNoAi(true);setNoGravity(true);
     }
     public Goal nativeGoal(){
-        String name=ability==Ability.ABYSS_MINEFIELD?"LeviathanMineAttackGoal":"LeviathanAbyssBlastPortalAttackGoal";
+        String name=switch(ability){case ABYSS_MINEFIELD->"LeviathanMineAttackGoal";case ABYSS_TRIPLE_BLAST->"LeviathanBlastFireAttackGoal";default->"LeviathanAbyssBlastPortalAttackGoal";};
         return goalSelector.getAvailableGoals().stream().map(g->g.getGoal()).filter(g->g.getClass().getSimpleName().equals(name))
                 .findFirst().orElseThrow(()->new IllegalStateException("Missing native Leviathan goal: "+name));
     }
     @Override public boolean isAlliedTo(Entity other){return other==this || cast!=null && HarbingerCasting.allied(cast,other);}
     @Override public boolean shouldBeSaved(){return false;}
-    public void clearChildren(){for(var child:children)LeviathanFormations.remove(child);children.clear();}
+    @Override public net.minecraft.sounds.SoundEvent getBossMusic(){return null;}
+    public void clearChildren(){childrenCancelled=true;for(var child:children)LeviathanFormations.remove(child);children.clear();}
 }

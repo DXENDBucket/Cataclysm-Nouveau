@@ -228,5 +228,11 @@
   "cataclysm_nouveau.glyph_desc.glyph_abyss_minefield": "在原生准备后围绕落点或目标分布至多35枚深渊水雷，依次启动。障碍或未加载区域会减少数量；费用包含整片雷场，时效修饰改变水雷的存续。",
   "cataclysm_nouveau.glyph_name.glyph_abyss_bombardment_array": "深渊轰炸阵",
   "item.cataclysm_nouveau.glyph_abyss_bombardment_array": "深渊轰炸阵",
-  "cataclysm_nouveau.glyph_desc.glyph_abyss_bombardment_array": "准备后在目标周围展开随机门户，并分三次瞄准目标进行向上轰炸。保留原生落地搜索与时序，至多12个有效门户；费用包含全阵与子光束。"
+  "cataclysm_nouveau.glyph_desc.glyph_abyss_bombardment_array": "准备后在目标周围展开随机门户，并分三次瞄准目标进行向上轰炸。保留原生落地搜索与时序，至多12个有效门户；费用包含全阵与子光束。",
+  "cataclysm_nouveau.glyph_name.glyph_abyss_orb_array": "深渊灵珠环阵",
+  "item.cataclysm_nouveau.glyph_abyss_orb_array": "深渊灵珠环阵",
+  "cataclysm_nouveau.glyph_desc.glyph_abyss_orb_array": "短暂聚集魔力后，按原生三层阵型向四周释放12枚深渊灵珠；施法者启动时生命不高于一半则为五层24枚。保留延迟追踪、爆炸和禁疗。自身或友军从眼部释放，方块触发以该位置为中心；整阵只收费一次。",
+  "cataclysm_nouveau.glyph_name.glyph_abyss_triple_blast": "三连深渊冲击波",
+  "item.cataclysm_nouveau.glyph_abyss_triple_blast": "三连深渊冲击波",
+  "cataclysm_nouveau.glyph_desc.glyph_abyss_triple_blast": "按原生节奏释放三段深渊光束，各有重新瞄准和锁定窗口。自身或友军从眼部释放，方块触发保留固定方向；时效修饰改变每段输出时长。每段实际输出按秒预付魔力，不足时停止整组后续输出。"
 }

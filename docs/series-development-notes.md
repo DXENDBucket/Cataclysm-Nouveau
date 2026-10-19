@@ -176,3 +176,9 @@ InternalAttackGoal与InternalStateGoal的start不能视为等价入口：后者�
 焰魔原生 renderer 只更新剑尖 socket；火焰拖尾由实体 tick 里的纯视觉 SwingParticles 调用产生。视觉代理不 tick 时必须单独接这个方法，先渲染采样、再调用粒子，并按变化的逻辑 tick 去重。新动作、阶段切换、遮挡后重见、丢包或瞬移后先初始化旧剑尖，避免从零坐标／远处拉出海量粒子。强化砸击的准备／收招和剑舞结尾还有其他私有纯视觉方法，不能只看 server aiStep。
 
 咒翼的旋斩光环与电弧已经在原生渲染层，但模型统一压到第一人称 10% 会把它们一起压暗。身体透明度和动作粒子／电弧透明度应分开；短暂残像继续淡化，避免叠出高亮光团。原生 AfterImage 依赖真实实体 ID，无世界实体的代理可复用现有 native renderer 画短寿命历史姿态，不得捏造注册 ID 或用整只 Boss tick 换取特效。实际发布包中的 Ignis SwingParticle 是空方法，检查调用名之后还要检查实现，不能凭名字声称缺了独立刀光。具体行为和人工验证缺口见 action-visuals-dev52.md。
+
+## dev.53：调用帧的来源 ID 与实体音效
+
+Native Goal 使用无世界 Boss 帧构造子光束后，重绑 `beam.caster` 还不够，必须同步更新 native caster ID；真实执行者 ID 另行保留，不能把友军、付款者和伤害拥有者混成一个。原生 `Level.playSound(player, entity, ...)` 会发送绑定实体 ID 的声音包，无世界帧不会在客户端出现。只对本附属帧把声音改为实际锚点的位置调用，保留原声与参数；不要同时补播一份而保留可解析的重复声音。可用 NeoForge 的 PlayLevelSoundEvent 同时验证位置、数量与事件类型，不依赖伪玩家是否出现在 PlayerList。
+
+利维坦灵珠 12／24 阵调用原生 aiStep 的实际布阵片段，不复制方向表；三连调用已注册 native Goal，并复用单束 driver。延长时效后不同束可能重叠，各束必须保留自己的锁定方向；任一束未付费时取消整组排队输出，不能回蓝后再次凭旧会话发射。细节与验证见 leviathan-volleys-dev53.md。

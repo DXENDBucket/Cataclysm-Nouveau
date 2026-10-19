@@ -16,7 +16,7 @@ import net.minecraft.world.phys.*;
 
 /** Native stationary areas retain their own tick, events, attacks and visual lifecycle. */
 public final class LeviathanCasting {
-    public static boolean supports(Ability a) { return switch(a){case DIMENSIONAL_RIFT,TIDAL_TENTACLE,ABYSS_MINEFIELD,ABYSS_BOMBARDMENT_ARRAY,ABYSS_MINE,ABYSS_BOMBARDMENT->true;default->false;}; }
+    public static boolean supports(Ability a) { return switch(a){case ABYSS_ORB_ARRAY,DIMENSIONAL_RIFT,TIDAL_TENTACLE,ABYSS_MINEFIELD,ABYSS_BOMBARDMENT_ARRAY,ABYSS_MINE,ABYSS_BOMBARDMENT->true;default->false;}; }
     public static boolean enabled(Ability a) {
         return GlyphCatalog.ALL.stream().anyMatch(g->g instanceof CataclysmEffectGlyph e && e.ability==a && e.isEnabled());
     }
@@ -31,6 +31,7 @@ public final class LeviathanCasting {
         return HarbingerCasting.allied(cast,target) || source.tickCount>20+duration;
     }
     public static boolean effect(Ability ability,ServerLevel world,CastContext cast,double amp,double duration) {
+        if(ability==Ability.ABYSS_ORB_ARRAY)return LeviathanVolleys.orbs(world,cast,amp);
         if(ability==Ability.DIMENSIONAL_RIFT)return LeviathanRift.start(world,cast,amp,duration);
         if(ability==Ability.TIDAL_TENTACLE)return LeviathanTentacles.start(world,cast,amp);
         if(ability==Ability.ABYSS_MINEFIELD || ability==Ability.ABYSS_BOMBARDMENT_ARRAY)return LeviathanFormations.start(ability,world,cast,amp,duration);

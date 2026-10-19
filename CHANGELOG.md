@@ -1,3 +1,12 @@
+## 0.1.0-dev.53
+
+- Add Abyss Orb Array: after a short preparation, invoke the native twelve-orb burst, or the twenty-four-orb phase burst when the logical caster starts at half health or less. Preserve the native layered directions, delayed homing, explosions, fear and client visuals.
+- Add Triple Abyss Blast: invoke the native three-ray goal at ticks 64/109/154, with its reaim/lock windows and independent locked headings for extended overlapping rays.
+- Reuse the existing Leviathan beam driver for geometry, native rendering, prepaid active seconds, allied protection, terrain protection and fade. Insufficient mana cancels the entire remaining sequence.
+- Support self, allied-eye and fixed-position execution without body-action claims. Replace both the native caster reference and synchronized caster ID; retain the separate actual emitter ID.
+- Default array fee/cooldown: 300 Mana / 8 seconds. Triple rays: 80 Mana per active second of each ray / 12 seconds, normally 480 total.
+- Add two Scribe recipes using one claw fragment each. The ten-glyph series needs two whole claws and eight fragments, within three guaranteed kills. No upstream assets or implementation are bundled.
+
 ## 0.1.0-dev.52
 
 - Reduce Abyss Bombardment Array from 1200 to 600 Mana and Abyss Minefield from 900 to 450; retain their cooldowns and one-payment group billing.

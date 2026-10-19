@@ -228,5 +228,11 @@
   "cataclysm_nouveau.glyph_desc.glyph_abyss_minefield": "After native preparation, distributes up to 35 floating mines around the impact or target with staggered arming. Obstructions and unloaded terrain reduce the count. One payment covers the field; duration augments extend the mines.",
   "cataclysm_nouveau.glyph_name.glyph_abyss_bombardment_array": "Abyss Bombardment Array",
   "item.cataclysm_nouveau.glyph_abyss_bombardment_array": "Abyss Bombardment Array",
-  "cataclysm_nouveau.glyph_desc.glyph_abyss_bombardment_array": "After preparation, opens random surrounding portals and performs three aimed upward bombardments. Preserves native ground search and timing, with up to 12 portals. One payment includes the array and child beams."
+  "cataclysm_nouveau.glyph_desc.glyph_abyss_bombardment_array": "After preparation, opens random surrounding portals and performs three aimed upward bombardments. Preserves native ground search and timing, with up to 12 portals. One payment includes the array and child beams.",
+  "cataclysm_nouveau.glyph_name.glyph_abyss_orb_array": "Abyss Orb Array",
+  "item.cataclysm_nouveau.glyph_abyss_orb_array": "Abyss Orb Array",
+  "cataclysm_nouveau.glyph_desc.glyph_abyss_orb_array": "After a short preparation, releases the native three-layer array of 12 Abyss Orbs, or five layers of 24 if the caster starts at half health or less. Preserves delayed homing, explosions and healing prevention. Emits from self or allied eyes, or a fixed block impact. Pay once for the entire array.",
+  "cataclysm_nouveau.glyph_name.glyph_abyss_triple_blast": "Triple Abyss Blast",
+  "item.cataclysm_nouveau.glyph_abyss_triple_blast": "Triple Abyss Blast",
+  "cataclysm_nouveau.glyph_desc.glyph_abyss_triple_blast": "Releases three native abyssal rays with separate aiming and locking windows. Emits from self or allied eyes, or a fixed impact and direction. Duration augments change each ray's active time. Prepay each active second of each ray; insufficient mana stops the entire remaining sequence."
 }

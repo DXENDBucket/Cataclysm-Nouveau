@@ -71,6 +71,8 @@
     "NativeStateGoalAccess",
     "MaledictusBowGoalMixin",
     "LeviathanOrbMixin",
+    "LeviathanVolleyMixin",
+    "LeviathanTripleGoalMixin",
     "LeviathanMineMixin",
     "LeviathanPortalMixin",
     "LeviathanLaserMixin",
