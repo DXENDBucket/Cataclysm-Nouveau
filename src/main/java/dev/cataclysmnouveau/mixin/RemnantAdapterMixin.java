@@ -14,11 +14,13 @@ import org.spongepowered.asm.mixin.injection.*;
 
 @Mixin(value=Ancient_Remnant_Entity.class,remap=false)
 public abstract class RemnantAdapterMixin {
+    @Inject(method="ChargeBlockBreaking",at=@At("HEAD"),cancellable=true)
+    private void remnant$noSpellGrief(double inflate,org.spongepowered.asm.mixin.injection.callback.CallbackInfo ci){if((Object)this instanceof SpellRemnant)ci.cancel();}
     @WrapOperation(method="aiStep",at=@At(value="INVOKE",target="Lcom/github/L_Ender/cataclysm/entity/InternalAnimationMonster/IABossMonsters/IABoss_monster;aiStep()V"))
     private void remnant$noMobTick(Ancient_Remnant_Entity boss,Operation<Void> original){if(!((Object)this instanceof SpellRemnant))original.call(boss);}
     @WrapOperation(method={"aiStep","spawnBlocks","EarthQuakeSummon"},at=@At(value="INVOKE",target="Lnet/minecraft/world/level/Level;addFreshEntity(Lnet/minecraft/world/entity/Entity;)Z",remap=true))
     private boolean remnant$birth(Level world,Entity child,Operation<Boolean> original){return RemnantCasting.spawn(child,()->original.call(world,child));}
-    @ModifyArg(method={"spawnBlocks","AreaAttack"},at=@At(value="INVOKE",target="Lnet/minecraft/world/damagesource/DamageSources;mobAttack(Lnet/minecraft/world/entity/LivingEntity;)Lnet/minecraft/world/damagesource/DamageSource;",remap=true),index=0)
+    @ModifyArg(method={"spawnBlocks","AreaAttack","TailAreaAttack","Charge"},at=@At(value="INVOKE",target="Lnet/minecraft/world/damagesource/DamageSources;mobAttack(Lnet/minecraft/world/entity/LivingEntity;)Lnet/minecraft/world/damagesource/DamageSource;",remap=true),index=0)
     private LivingEntity remnant$owner(LivingEntity original){return (Object)this instanceof SpellRemnant frame?frame.cast.damageOwner():original;}
     @ModifyExpressionValue(method={"StompParticle","Roarparticle"},at=@At(value="FIELD",target="Lnet/minecraft/world/level/Level;isClientSide:Z",remap=true))
     private boolean remnant$visualBranch(boolean original){return original || (Object)this instanceof SpellRemnant;}

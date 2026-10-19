@@ -87,7 +87,9 @@ public enum Ability {
     REMNANT_STOMP("remnant_stomp", "Remnant Shockwave", 240),
     DESERT_STELE_ARRAY("desert_stele_array", "Desert Stele Array", 600),
     REMNANT_TRIPLE_QUAKE("remnant_triple_quake", "Remnant Triple Quake", 420),
-    CURSED_SANDSTORM("cursed_sandstorm", "Cursed Sandstorm", 50);
+    CURSED_SANDSTORM("cursed_sandstorm", "Cursed Sandstorm", 50),
+    REMNANT_CHARGE("remnant_charge", "Remnant Charge", 300),
+    REMNANT_TAIL_SWEEP("remnant_tail_sweep", "Remnant Tail Sweep", 180);
     public final String id, name;
     public final int mana;
     Ability(String id, String name, int mana) { this.id=id; this.name=name; this.mana=mana; }
@@ -95,7 +97,7 @@ public enum Ability {
     /** Acquisition/source families, shared by all presentation surfaces. */
     public Series series() {
         return switch(this) {
-            case DESERT_STELE_ARRAY,REMNANT_TRIPLE_QUAKE,CURSED_SANDSTORM,SANDSTORM_RING,DESERT_STELE,GROUND_QUAKE,REMNANT_STOMP -> Series.ANCIENT_REMNANT;
+            case REMNANT_CHARGE,REMNANT_TAIL_SWEEP,DESERT_STELE_ARRAY,REMNANT_TRIPLE_QUAKE,CURSED_SANDSTORM,SANDSTORM_RING,DESERT_STELE,GROUND_QUAKE,REMNANT_STOMP -> Series.ANCIENT_REMNANT;
             case ABYSS_ORB_ARRAY,ABYSS_TRIPLE_BLAST,DIMENSIONAL_RIFT,TIDAL_TENTACLE,ABYSS_MINEFIELD,ABYSS_BOMBARDMENT_ARRAY,ABYSS_ORB,ABYSS_MINE,ABYSS_BLAST,ABYSS_BOMBARDMENT -> Series.LEVIATHAN;
             case PHANTOM_ARROW,PHANTOM_HALBERD,CURSED_RAGE,PHANTOM_SPIRAL,PHANTOM_RINGS,HALBERD_CLEAVE,SOUL_BURST,MALEDICTUS_AERIAL_SMASH,PHANTOM_AERIAL_VOLLEY,MALEDICTUS_RUSH,MALEDICTUS_SHOCKWAVE,MALEDICTUS_UPPERCUT,MALEDICTUS_MELEE_COMBO,MALEDICTUS_SPIN_SLASHES -> Series.MALEDICTUS;
             case IGNIS_FIREBALL,IGNIS_ABYSS_FIREBALL,IGNIS_BLADE_FIREBALLS,IGNIS_AIR_SMASH,IGNIS_SWORD_COMBO,

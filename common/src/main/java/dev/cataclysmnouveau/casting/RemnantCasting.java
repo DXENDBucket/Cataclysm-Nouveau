@@ -24,7 +24,7 @@ public final class RemnantCasting {
     public static boolean spawn(Entity child,BooleanSupplier original){
         var birth=BIRTH.get();return birth==null?original.getAsBoolean():birth.apply(child);
     }
-    public static boolean supports(Ability a){return a==Ability.DESERT_STELE_ARRAY || a==Ability.REMNANT_TRIPLE_QUAKE || a==Ability.SANDSTORM_RING || a==Ability.DESERT_STELE || a==Ability.REMNANT_STOMP;}
+    public static boolean supports(Ability a){return RemnantActions.supports(a) || a==Ability.DESERT_STELE_ARRAY || a==Ability.REMNANT_TRIPLE_QUAKE || a==Ability.SANDSTORM_RING || a==Ability.DESERT_STELE || a==Ability.REMNANT_STOMP;}
     public static boolean enabled(Ability a){return GlyphCatalog.ALL.stream().anyMatch(g->g instanceof CataclysmEffectGlyph e && e.ability==a && e.isEnabled());}
     public static boolean rejectDamage(Entity source,Entity target){
         if(source.level().isClientSide || !(source instanceof Sandstorm_Entity || source instanceof Ancient_Desert_Stele_Entity))return false;
@@ -32,6 +32,7 @@ public final class RemnantCasting {
     }
     private static boolean loaded(ServerLevel w,Vec3 p){return w.isInWorldBounds(BlockPos.containing(p)) && w.hasChunkAt(BlockPos.containing(p));}
     public static boolean effect(Ability a,ServerLevel world,CastContext cast,double amp,double duration) {
+        if(RemnantActions.supports(a))return RemnantActions.start(a,world,cast,amp);
         if(a==Ability.DESERT_STELE_ARRAY || a==Ability.REMNANT_TRIPLE_QUAKE)return RemnantFormations.start(a,world,cast,amp);
         if(a==Ability.SANDSTORM_RING)return storms(world,cast,amp,duration);
         if(a==Ability.DESERT_STELE)return stele(world,cast,amp);
@@ -94,20 +95,23 @@ public final class RemnantCasting {
         if(point==null || !MonstrosityCasting.loadedArea(world,point,22))return false;
         var friendly=ExecutionAnchor.beneficial(cast,ExecutionAnchor.Basis.FEET,Vec3.ZERO);
         var anchor=friendly==null?ExecutionAnchor.position(point,MonstrosityCasting.direction(cast)):friendly;
-        var context=friendly==null?cast:cast.withExecutor(anchor.entity());
+        var context=cast.withExecutor(anchor.entity());
         var frame=new SpellRemnant(world,context,Ability.REMNANT_STOMP,point,anchor.sample().direction(),amp);
-        frame.setAttackState(8);
-        return ExecutionSessions.start(new ExecutionSession<>(world,context,frame,65,new ExecutionDriver<SpellRemnant>() {
+        boolean powered=cast.caster().getHealth()<=cast.caster().getMaxHealth()*.5F;
+        frame.setIsPower(powered);frame.setAttackState(powered?13:8);
+        var driver=new ExecutionDriver<SpellRemnant>() {
             int age;
             public boolean start(ExecutionSession<SpellRemnant> s){return true;}
             public boolean tick(ExecutionSession<SpellRemnant> s){
                 if(!anchor.valid(world,context) || !MonstrosityCasting.loadedArea(world,anchor.sample().origin(),22))return true;
                 var sample=anchor.sample();frame.pose(sample.origin(),sample.direction());frame.attackTicks=++age;
-                if(age<=46)invoke(e->add(world,frame,e,amp),frame::aiStep);
-                return age>=62;
+                if(age<=(powered?68:46))invoke(e->add(world,frame,e,amp),frame::aiStep);
+                return age>=(powered?84:62);
             }
             public void close(ExecutionSession<SpellRemnant> s,ExecutionSession.EndReason reason){frame.clear();}
-        },hit->{},()->enabled(Ability.REMNANT_STOMP),ExecutionScope.DIRECT));
+        };
+        return ExecutionSessions.start(new ExecutionSession<>(world,context,frame,powered?87:65,
+            dev.cataclysmnouveau.network.BodyPhantomSync.wrap(Ability.REMNANT_STOMP,frame,driver),hit->{},()->enabled(Ability.REMNANT_STOMP),ExecutionScope.DIRECT));
     }
     private RemnantCasting(){}
 }

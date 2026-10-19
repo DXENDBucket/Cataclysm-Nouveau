@@ -198,3 +198,10 @@ StompParticle 只在客户端分支执行，Stompsound 用 playLocalSound；无�
 Cursed Sandstorm 的 tick 在具体类内调用 CustomAbstractHurtingProjectile.tick 执行原生碰撞／加速，再更新追踪和寿命。只在具体类压制位移仍会留下基类碰撞，特殊Ars轨迹须覆盖基类碰撞，并保留原生具体类粒子与同步。普通弹有两个成功命中次数，不应在第一次命中就关闭会话；重复形态则每触发付款并复位原生预算，不能被290tick寿命／消退状态偷偷永久禁用。
 
 新增原生幻影家族同时更新 Kind 的所有 exhaustive switch、snapshot、客户端proxy、配置和全状态协议夹具。Ancient Remnant 的三连尾砸使用 ground_tail，不能仅看 threetailhit 字段名推断动画key。调用帧的 roar 粒子／实体音效与地裂一样需要独立服务端发送；具体实现和9项验证见 remnant-second-dev55.md。
+
+
+## dev.56：原生冲撞的碰撞与伤害几何、双踩的最后两tick
+
+原生冲撞的接触伤害只查询Boss自身包围盒，不能直接让它永远沿用玩家的小包围盒，否则与幻影范围和高速移动不符。仅在原生伤害调用期间使用Boss尺寸，真实执行者／脱离实体的位置帧仍用实际碰撞尺寸移动。移动冲撞的位置帧不能每tick重新吸回最初锚点；用同一driver维持位置、重力和碰墙，保留逻辑caster作为付款者与伤害来源。原生 ChargeBlockBreaking 只为本附属SpellRemnant取消，真实Boss保持原样。
+
+原生state13第二次践踏从50tick开始，一直推进到68tick，但注册Goal的时长仅66tick。独立范围效果须调用完整aiStep到68并留出地块退场时间，不能机械按Goal时间截掉最后一圈。半血按原施法者判断，友军生命不改变变体；不新增魔符或额外收费。具体交付见 remnant-actions-dev56.md。

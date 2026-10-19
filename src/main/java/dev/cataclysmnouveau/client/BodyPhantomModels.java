@@ -29,7 +29,10 @@ final class BodyPhantomModels {
         switch(proxy) {
             case com.github.L_Ender.cataclysm.entity.InternalAnimationMonster.IABossMonsters.Ancient_Remnant.Ancient_Remnant_Entity boss -> {
                 boss.setIsPower((data.flags()&1)!=0);boss.setAttackState(data.animation());boss.stopAllAnimationStates();
-                boss.attackTicks=age;boss.tickCount=age;boss.getAnimationState(data.animation()==15?"ground_tail":"monolith").start(0);
+                boss.attackTicks=age;boss.tickCount=age;boss.getAnimationState(switch(data.animation()){
+                    case 8->"right_stomp";case 10->"charge_prepare";case 11->"charge";
+                    case 13->"right_double_stomp";case 15->"ground_tail";case 16->"tail_swing";default->"monolith";
+                }).start(0);
             }
             case com.github.L_Ender.cataclysm.entity.InternalAnimationMonster.IABossMonsters.Maledictus.Maledictus_Entity boss -> {
                 boss.setWeapon(switch(data.animation()){case 3,4->1;case 11,12,15,16,17,24,25,26->2;default->0;});boss.setRageMeter(data.flags());

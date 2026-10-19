@@ -24,6 +24,8 @@ public final class SpellRemnant extends Ancient_Remnant_Entity {
         setPos(point);setYRot((float)Math.toDegrees(Math.atan2(-direction.x,direction.z)));
         yRotO=yBodyRot=yHeadRot=yHeadRotO=getYRot();
     }
+    public Goal nativeGoal(int state){return goalSelector.getAvailableGoals().stream().map(g->g.getGoal())
+        .filter(g->g instanceof NativeInternalGoal n && n.confluxMaledictus$state()==state).findFirst().orElseThrow();}
     public Goal monolithGoal(){return goalSelector.getAvailableGoals().stream().map(g->g.getGoal())
         .filter(g->g.getClass().getSimpleName().equals("RemnantMonolithAttackGoal")).findFirst().orElseThrow();}
     @Override public boolean isAlliedTo(Entity other){return other==this || cast!=null && HarbingerCasting.allied(cast,other);}

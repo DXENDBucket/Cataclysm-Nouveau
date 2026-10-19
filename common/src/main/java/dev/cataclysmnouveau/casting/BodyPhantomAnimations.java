@@ -20,7 +20,7 @@ public final class BodyPhantomAnimations {
     }
     public static Kind kind(Ability ability) {
         return switch(ability) {
-            case DESERT_STELE_ARRAY,REMNANT_TRIPLE_QUAKE -> Kind.REMNANT;
+            case REMNANT_CHARGE,REMNANT_TAIL_SWEEP,REMNANT_STOMP,DESERT_STELE_ARRAY,REMNANT_TRIPLE_QUAKE -> Kind.REMNANT;
             case THUNDER_COMBO, ANCHOR_SPIN, ANCHOR_LEAP -> Kind.SCYLLA;
             case HARBINGER_CHARGE -> Kind.HARBINGER;
             case GRAVITY_PUNCH, GUARDIAN_UPPERCUT, GUARDIAN_BLINK, GUARDIAN_AIR_STRIKE, GUARDIAN_ROCKET_PUNCH -> Kind.GUARDIAN;
@@ -54,6 +54,9 @@ public final class BodyPhantomAnimations {
     public static boolean valid(Ability ability,int state,int age,int flags) {
         if(ability==null || age<0 || age>1200 || flags<0 || flags>(kind(ability)==Kind.MALEDICTUS?5:3)) return false;
         return switch(ability) {
+            case REMNANT_CHARGE -> state==10 || state==11;
+            case REMNANT_TAIL_SWEEP -> state==16;
+            case REMNANT_STOMP -> state==8 || state==13;
             case DESERT_STELE_ARRAY -> state==17;
             case REMNANT_TRIPLE_QUAKE -> state==15;
             case THUNDER_COMBO -> state==25;

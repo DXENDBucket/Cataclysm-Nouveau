@@ -1,3 +1,12 @@
+## 0.1.0-dev.56
+
+- Add Remnant Charge and Remnant Tail Sweep using registered native goals, attack bodies, sounds and translucent native Boss animations.
+- Share self, ally and position execution. Actual actors take replaceable action claims; detached charges move with collision without moving the caster. Wall impact ends the charge without terrain damage.
+- Preserve native damage, knockback, tail stun/shield disable, Ars damage events and bounded augmentation. Fix the charge health-cap baseline to its native double attack damage.
+- At or below half health, the original caster's Remnant Shockwave uses native double-stomp state13, including its second wave through tick68, at the existing cost/cooldown.
+- New Scribe recipes each cost an ancient metal ingot and source gem; all nine Remnant glyphs remain obtainable within three guaranteed Boss kills.
+- 90 glyphs, with English and Chinese names/descriptions. Ten focused server checks pass; binary/source distribution checks pass. Client appearance remains unverified. No upstream implementation or media included.
+
 ## 0.1.0-dev.55
 
 - Add Desert Stele Array using the complete native eight-arm formation plus a forward line (128 + 16 steles).
