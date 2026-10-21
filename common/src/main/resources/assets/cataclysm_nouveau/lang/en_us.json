@@ -270,5 +270,11 @@
   "cataclysm_nouveau.glyph_desc.glyph_blazing_bone": "Replace a projectile with a spinning Blazing Bone, retaining its native gravity and impact fragments.",
   "cataclysm_nouveau.glyph_name.glyph_bone_storm": "Bone Storm",
   "item.cataclysm_nouveau.glyph_bone_storm": "Bone Storm",
-  "cataclysm_nouveau.glyph_desc.glyph_bone_storm": "Release four native radial volleys from self, an ally or a position. Each volley randomly fires six, eight or ten Blazing Bones."
+  "cataclysm_nouveau.glyph_desc.glyph_bone_storm": "Release four native radial volleys from self, an ally or a position. Each volley randomly fires six, eight or ten Blazing Bones.",
+  "cataclysm_nouveau.glyph_name.glyph_axe_blade": "Whirling Axe Blade",
+  "item.cataclysm_nouveau.glyph_axe_blade": "Whirling Axe Blade",
+  "cataclysm_nouveau.glyph_desc.glyph_axe_blade": "Replace a projectile with an Aptrgangr axe blade. It pierces entities and blocks before fading away.",
+  "cataclysm_nouveau.glyph_name.glyph_aptrgangr_smash": "Aptrgangr Smash",
+  "item.cataclysm_nouveau.glyph_aptrgangr_smash": "Aptrgangr Smash",
+  "cataclysm_nouveau.glyph_desc.glyph_aptrgangr_smash": "Perform a native Aptrgangr smash from self, an ally or a position, striking ahead and releasing five axe blades."
 }

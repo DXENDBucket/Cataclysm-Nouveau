@@ -270,5 +270,11 @@
   "cataclysm_nouveau.glyph_desc.glyph_blazing_bone": "将弹射物替换为旋转的炽燃骨弹，沿原生抛物线飞行并在碰撞时碎裂。",
   "cataclysm_nouveau.glyph_name.glyph_bone_storm": "骨骸风暴",
   "item.cataclysm_nouveau.glyph_bone_storm": "骨骸风暴",
-  "cataclysm_nouveau.glyph_desc.glyph_bone_storm": "自身、友军或指定位置连续向四周释放四轮炽燃骨弹，每轮随机发射六、八或十枚。"
+  "cataclysm_nouveau.glyph_desc.glyph_bone_storm": "自身、友军或指定位置连续向四周释放四轮炽燃骨弹，每轮随机发射六、八或十枚。",
+  "cataclysm_nouveau.glyph_name.glyph_axe_blade": "飞旋斧刃",
+  "item.cataclysm_nouveau.glyph_axe_blade": "飞旋斧刃",
+  "cataclysm_nouveau.glyph_desc.glyph_axe_blade": "将弹射物替换为冥行武弁的幽影斧刃，可穿过目标与方块，在短暂飞行后消退。",
+  "cataclysm_nouveau.glyph_name.glyph_aptrgangr_smash": "砸地重击",
+  "item.cataclysm_nouveau.glyph_aptrgangr_smash": "砸地重击",
+  "cataclysm_nouveau.glyph_desc.glyph_aptrgangr_smash": "自身、友军或指定位置执行冥行武弁的砸地重击，同时向前释放五道斧刃。"
 }

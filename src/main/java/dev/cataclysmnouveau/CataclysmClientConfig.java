@@ -6,7 +6,7 @@ import net.neoforged.neoforge.common.ModConfigSpec;
 public final class CataclysmClientConfig {
     public static final ModConfigSpec SPEC;
     public static final ModConfigSpec.BooleanValue VORTEX_DIAGNOSTICS;
-    private static final ModConfigSpec.BooleanValue IGNIS_PHANTOM,IGNIS_ACTIONS,SCYLLA_ACTIONS,HARBINGER_ACTIONS,GUARDIAN_ACTIONS,MONSTROSITY_ACTIONS,MALEDICTUS_ACTIONS,REMNANT_ACTIONS,REVENANT_ACTIONS;
+    private static final ModConfigSpec.BooleanValue IGNIS_PHANTOM,IGNIS_ACTIONS,SCYLLA_ACTIONS,HARBINGER_ACTIONS,GUARDIAN_ACTIONS,MONSTROSITY_ACTIONS,MALEDICTUS_ACTIONS,REMNANT_ACTIONS,REVENANT_ACTIONS,APTRGANGR_ACTIONS;
     private static final ModConfigSpec.DoubleValue PHANTOM_OPACITY,FIRST_PERSON_OPACITY,PHANTOM_SCALE,EFFECT_OPACITY,FIRST_PERSON_EFFECT_OPACITY;
     static {
         var builder = new ModConfigSpec.Builder();
@@ -27,6 +27,7 @@ public final class CataclysmClientConfig {
         MALEDICTUS_ACTIONS=builder.comment("Native Maledictus combat and soul burst phantoms.").define("maledictus_actions",true);
         REMNANT_ACTIONS=builder.comment("Native Ancient Remnant formation and triple-quake phantoms.").define("remnant_actions",true);
         REVENANT_ACTIONS=builder.comment("Native Ignited Revenant bone storm phantom.").define("revenant_actions",true);
+        APTRGANGR_ACTIONS=builder.comment("Native Aptrgangr smash phantom.").define("aptrgangr_actions",true);
         PHANTOM_OPACITY=builder.comment("Opacity of native body/model layers. Does not change damage or attack range.").defineInRange("opacity",.28,0,1);
         FIRST_PERSON_OPACITY=builder.comment("Lower opacity when the local player is the executor and the camera is first person.").defineInRange("first_person_opacity",.10,0,1);
         EFFECT_OPACITY=builder.comment("Separate opacity of native action rings, arcs and lightning; the body stays translucent.").defineInRange("effect_opacity",.80,0,1);
@@ -41,7 +42,7 @@ public final class CataclysmClientConfig {
         if(kind==null)return false;
         return !SPEC.isLoaded() || switch(kind){
             case SCYLLA -> SCYLLA_ACTIONS.get();case HARBINGER -> HARBINGER_ACTIONS.get();
-            case GUARDIAN -> GUARDIAN_ACTIONS.get();case MONSTROSITY -> MONSTROSITY_ACTIONS.get();case MALEDICTUS -> MALEDICTUS_ACTIONS.get();case REMNANT -> REMNANT_ACTIONS.get();case REVENANT -> REVENANT_ACTIONS.get();
+            case GUARDIAN -> GUARDIAN_ACTIONS.get();case MONSTROSITY -> MONSTROSITY_ACTIONS.get();case MALEDICTUS -> MALEDICTUS_ACTIONS.get();case REMNANT -> REMNANT_ACTIONS.get();case REVENANT -> REVENANT_ACTIONS.get();case APTRGANGR -> APTRGANGR_ACTIONS.get();
         };
     }
     public static float phantomOpacity(boolean firstPerson){return SPEC.isLoaded()?(firstPerson?FIRST_PERSON_OPACITY:PHANTOM_OPACITY).get().floatValue():firstPerson?.10F:.28F;}

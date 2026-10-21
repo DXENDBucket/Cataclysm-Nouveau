@@ -7,7 +7,7 @@ import dev.cataclysmnouveau.Ability;
 
 /** Stable visual IDs for the supported native body actions; no client classes. */
 public final class BodyPhantomAnimations {
-    public enum Kind { SCYLLA, HARBINGER, GUARDIAN, MONSTROSITY, MALEDICTUS, REMNANT, REVENANT }
+    public enum Kind { SCYLLA, HARBINGER, GUARDIAN, MONSTROSITY, MALEDICTUS, REMNANT, REVENANT, APTRGANGR }
     /** Native Maledictus afterimage windows (the renderer proxy has no world entity ID). */
     public static boolean maledictusAfterimage(int state,int age) {
         return age>=0 && switch(state) {
@@ -20,6 +20,7 @@ public final class BodyPhantomAnimations {
     }
     public static Kind kind(Ability ability) {
         return switch(ability) {
+            case APTRGANGR_SMASH -> Kind.APTRGANGR;
             case BONE_STORM -> Kind.REVENANT;
             case REMNANT_CHARGE,REMNANT_TAIL_SWEEP,REMNANT_STOMP,DESERT_STELE_ARRAY,REMNANT_TRIPLE_QUAKE -> Kind.REMNANT;
             case THUNDER_COMBO, ANCHOR_SPIN, ANCHOR_LEAP -> Kind.SCYLLA;
@@ -59,6 +60,7 @@ public final class BodyPhantomAnimations {
             case REMNANT_CHARGE -> state==10 || state==11;
             case REMNANT_TAIL_SWEEP -> state==16;
             case REMNANT_STOMP -> state==8 || state==13;
+            case APTRGANGR_SMASH -> state==2;
             case BONE_STORM -> state==1;
             case DESERT_STELE_ARRAY -> state==17;
             case REMNANT_TRIPLE_QUAKE -> state==15;

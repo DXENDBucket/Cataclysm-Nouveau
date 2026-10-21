@@ -27,7 +27,7 @@ import java.util.function.Supplier;
 public final class HarbingerCasting {
     private static final ThreadLocal<Entity> DECORATING=new ThreadLocal<>();
     public static boolean supports(Ability a) {return switch(a){case BLAZING_BONE,CURSED_SANDSTORM,ABYSS_ORB,PHANTOM_ARROW,IGNIS_FIREBALL,IGNIS_ABYSS_FIREBALL,LASER_BOLT,WITHER_MISSILE,HOMING_MISSILE,WITHER_HOWITZER,GUARDIAN_BULLET->true;default->false;};}
-    public static boolean nativePayload(Entity e) {return e instanceof Blazing_Bone_Entity || e instanceof Cursed_Sandstorm_Entity || e instanceof Abyss_Orb_Entity || e instanceof Phantom_Arrow_Entity || e instanceof Ignis_Fireball_Entity || e instanceof Ignis_Abyss_Fireball_Entity || e instanceof Laser_Beam_Entity || e instanceof Wither_Missile_Entity || e instanceof Wither_Homing_Missile_Entity || e instanceof Wither_Howitzer_Entity || e instanceof Ender_Guardian_Bullet_Entity;}
+    public static boolean nativePayload(Entity e) {return e instanceof Axe_Blade_Entity || e instanceof Blazing_Bone_Entity || e instanceof Cursed_Sandstorm_Entity || e instanceof Abyss_Orb_Entity || e instanceof Phantom_Arrow_Entity || e instanceof Ignis_Fireball_Entity || e instanceof Ignis_Abyss_Fireball_Entity || e instanceof Laser_Beam_Entity || e instanceof Wither_Missile_Entity || e instanceof Wither_Homing_Missile_Entity || e instanceof Wither_Howitzer_Entity || e instanceof Ender_Guardian_Bullet_Entity;}
     public static boolean decorating(Entity e) {return DECORATING.get()==e && e instanceof ManagedProjectile s && s.confluxCataclysm$mode()==1;}
     public static void decorate(Entity e,Runnable tick) {
         var old=DECORATING.get();DECORATING.set(e);

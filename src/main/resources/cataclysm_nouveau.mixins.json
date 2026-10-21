@@ -94,7 +94,10 @@
     "CursedStormHitMixin",
     "RevenantAdapterMixin",
     "BlazingBoneMixin",
-    "AshenBreathMixin"
+    "AshenBreathMixin",
+    "AxeBladeAccess",
+    "AxeBladeMixin",
+    "AptrgangrAdapterMixin"
   ],
   "client": [
     "client.GuardianVortexRenderProbeMixin",

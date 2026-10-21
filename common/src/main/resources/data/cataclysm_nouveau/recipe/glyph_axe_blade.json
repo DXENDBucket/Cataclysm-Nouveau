@@ -1,0 +1,16 @@
+{
+  "type": "ars_nouveau:glyph",
+  "exp": 27,
+  "output": {
+    "id": "cataclysm_nouveau:glyph_axe_blade",
+    "count": 1
+  },
+  "inputs": [
+    {
+      "item": "cataclysm:strange_key"
+    },
+    {
+      "item": "ars_nouveau:source_gem"
+    }
+  ]
+}

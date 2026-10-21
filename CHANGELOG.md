@@ -1,3 +1,12 @@
+## 0.1.0-dev.58
+
+- Add Whirling Axe Blade using the native non-Projectile axe entity, accelerating flight, piercing contact, animated renderer and eighty-tick fade. Preserve Ars-driven trajectories and per-trigger billing for repeating forms.
+- Add Aptrgangr Smash through the registered native state2 goal: tick15 melee impact, shield disable, particles, sound and all five axe blades. Support self, ally and fixed origins, preparation-only steering and replaceable body actions.
+- Keep real ownership, allied protection, bounded augmentation and Ars damage events. Ordinary piercing blades continue the Ars chain once per successfully damaged victim; native damage may still recur.
+- Extend the existing native body phantom protocol and client toggle. Normal action completion leaves child blades alive; interruption and invalid ownership clean them up.
+- Add two Scribe recipes, each using a strange key and source gem; two guaranteed kills cover the series. No heavy axe sweep or grab charge added.
+- Seven focused server tests pass, including shared bone projectile and full phantom protocol regressions. All 95 bilingual glyphs and binary/source distribution boundaries pass. Client appearance remains unverified.
+
 ## 0.1.0-dev.57
 
 - Add Ashen Breath using the native growing cone, blindness, synced lifetime and native client smoke/flame particles. Support self, ally and position emission with one server driver and prepaid active-second mana.

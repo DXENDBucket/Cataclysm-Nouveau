@@ -211,3 +211,11 @@ Cursed Sandstorm 的 tick 在具体类内调用 CustomAbstractHurtingProjectile.
 灰烬吐息的主体是原生Ashen_Breath实体客户端tick产生的80烟／2火焰粒子，不是需要另接的模型。让真实实体出生，并同步管理标记／寿命，服务端只由会话tick一次；不能像未出生的Boss调用帧那样仅运行服务端就宣称有特效。它的tick会读取caster.yHeadRot，友军或固定点执行时须用实际执行方向，不能跟着付款者转。
 
 Blazing Bone本身没有独立尾迹／额外点燃；旋转来自原生物品渲染器，碎裂来自实体事件3。重复Ars载体应保留该事件，仅抑制其原生discard；ThrowableProjectile既有轨迹钩子负责禁止双重重力／碰撞，普通弹继续走原生轨迹。骨骸风暴直接调用注册Goal的四次随机6／8／10发，不复制原生方向表，子弹与独立单弹共用伤害桥接但不独立收费。详见 revenant-dev57.md。
+
+## dev.58：非Projectile斧刃与动作结束后的子会话
+
+Axe_Blade_Entity直接继承Entity，不能套用Projectile的Invoker／碰撞Mixin。既有Core ArsTrajectory已接受Entity，无需扩Core；附属只增加opt-in的同步mode、碰撞入口和原生运动抑制，原生动画／粒子tick仍运行。普通斧刃穿过实体和方块，80tick消退；重复载体必须重置原生lifetick／透明度，否则形态仍在但载荷已透明或移除。原生yaw用atan2(-x,z)，不要直接套相反符号的通用yaw。
+
+冥行砸地直接调用state2注册Goal及aiStep，15tick同时近战和五刃；原生五方向为-75／-45／-15／15／45度，不改成自造的对称扇形。Makeparticle只有客户端分支，未出生的调用帧须把原生粒子参数转发到服务端位置包。身体40tick完成时子斧刃还应飞行，不能一概随父close清除；独立子会话保留原生寿命，只有中断、禁用、所有者／执行资格失效才清理。原生扇形子刃不重复收费或复制Ars续接。
+
+独立穿透斧刃沿用伤害成功续接；普通单刃同一受害者去重，但不取消后续原生伤害；重复形态逐次付费和续接。两项各用必掉的奇怪钥匙，不把所有配方压到罕见武器掉落；两次击杀覆盖。重斧横扫和抓取冲撞不在用户批准范围。详见aptrgangr-dev58.md。
