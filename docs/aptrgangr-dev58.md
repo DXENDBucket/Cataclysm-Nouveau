@@ -48,3 +48,11 @@ Axe_Blade直接继承Entity，不是Projectile；附属提供专用opt-in碰撞�
   SHA256 `c1fef917ad5821bc7d4c7c66c75a26afd29733f938450df4e39cfb83ab5cf461`
 - `cataclysm-nouveau-0.1.0-dev.58-sources.jar`
   SHA256 `8b1462adb78f2177c44bc07d2d06cf2c5b7d541e70c40397376a217807aa94d7`
+
+## 提交与部署
+
+实现提交`620e1e58b3ebcd8b4e86f54148149ab5de5742f4`，标签`v0.1.0-dev.58`，主仓库已快进合并。未推送、未上传CurseForge。
+
+已部署到“万法归一”mods，仅用dev.58替换dev.57；其余173文件和活跃服务端配置哈希不变，Core仍为0.1.27。旧包及完整部署清单位于实例`codex-backups/cataclysm-dev58-20261021`。主仓库build/libs已同步发行／源码包。未修改存档或其他实例；新配置项下次启动补齐默认值。
+
+人工验收重点：原生斧刃旋转／淡出及特殊Ars轨迹，砸地幻影／地块尘／圆环／声音，自身／友军／固定点表现和动作结束后五刃继续飞行。上述画面尚未人工验证。
