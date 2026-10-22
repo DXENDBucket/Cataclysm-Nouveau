@@ -9,6 +9,6 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 public abstract class LeapActorAiMixin {
     @Inject(method="serverAiStep",at=@At("HEAD"),cancellable=true)
     private void nativeArs$controlledMotion(CallbackInfo ci) {
-        if(dev.cataclysmnouveau.casting.AptrgangrCasting.isActing((Mob)(Object)this) || dev.cataclysmnouveau.casting.RemnantActions.isActing((Mob)(Object)this) || dev.cataclysmnouveau.casting.MaledictusCasting.isActing((Mob)(Object)this) || ScyllaActions.isLeaping((Mob)(Object)this) || dev.cataclysmnouveau.casting.HarbingerActions.isCharging((Mob)(Object)this) || dev.cataclysmnouveau.casting.GuardianCasting.isPunching((Mob)(Object)this)) ci.cancel();
+        if(dev.cataclysmnouveau.casting.BerserkerCasting.isActing((Mob)(Object)this) || dev.cataclysmnouveau.casting.AptrgangrCasting.isActing((Mob)(Object)this) || dev.cataclysmnouveau.casting.RemnantActions.isActing((Mob)(Object)this) || dev.cataclysmnouveau.casting.MaledictusCasting.isActing((Mob)(Object)this) || ScyllaActions.isLeaping((Mob)(Object)this) || dev.cataclysmnouveau.casting.HarbingerActions.isCharging((Mob)(Object)this) || dev.cataclysmnouveau.casting.GuardianCasting.isPunching((Mob)(Object)this)) ci.cancel();
     }
 }

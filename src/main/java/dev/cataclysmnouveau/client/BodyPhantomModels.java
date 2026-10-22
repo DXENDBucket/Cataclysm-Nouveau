@@ -15,6 +15,7 @@ import net.minecraft.world.entity.Mob;
 final class BodyPhantomModels {
     static Mob create(Kind kind,ClientLevel level) {
         Mob proxy=switch(kind) {
+            case BERSERKER -> new com.github.L_Ender.cataclysm.entity.InternalAnimationMonster.Ignited_Berserker_Entity(ModEntities.IGNITED_BERSERKER.get(),level);
             case APTRGANGR -> new com.github.L_Ender.cataclysm.entity.InternalAnimationMonster.Draugar.Aptrgangr_Entity(ModEntities.APTRGANGR.get(),level);
             case REVENANT -> new Ignited_Revenant_Entity(ModEntities.IGNITED_REVENANT.get(),level);
             case REMNANT -> new com.github.L_Ender.cataclysm.entity.InternalAnimationMonster.IABossMonsters.Ancient_Remnant.Ancient_Remnant_Entity(ModEntities.ANCIENT_REMNANT.get(),level);
@@ -29,6 +30,12 @@ final class BodyPhantomModels {
     }
     static void pose(Mob proxy,BodyPhantomPayload data,int age) {
         switch(proxy) {
+            case com.github.L_Ender.cataclysm.entity.InternalAnimationMonster.Ignited_Berserker_Entity boss -> {
+                boss.setAttackState(data.animation());boss.stopAllAnimationStates();boss.attackTicks=boss.tickCount=age;
+                boss.getAnimationState(switch(data.animation()){
+                    case 1->"x_slash";case 2->"mixer_start";case 3->"mixer_idle";case 4->"mixer_finish";case 5->"sword_dance_left";default->"sword_dance_right";
+                }).start(0);
+            }
             case com.github.L_Ender.cataclysm.entity.InternalAnimationMonster.Draugar.Aptrgangr_Entity boss -> {
                 boss.setAttackState(2);boss.stopAllAnimationStates();boss.attackTicks=boss.tickCount=age;boss.getAnimationState("smash").start(0);
             }

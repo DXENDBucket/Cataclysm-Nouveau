@@ -97,7 +97,8 @@
     "AshenBreathMixin",
     "AxeBladeAccess",
     "AxeBladeMixin",
-    "AptrgangrAdapterMixin"
+    "AptrgangrAdapterMixin",
+    "BerserkerAdapterMixin"
   ],
   "client": [
     "client.GuardianVortexRenderProbeMixin",

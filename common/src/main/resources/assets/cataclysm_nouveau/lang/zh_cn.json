@@ -276,5 +276,14 @@
   "cataclysm_nouveau.glyph_desc.glyph_axe_blade": "将弹射物替换为冥行武弁的幽影斧刃，可穿过目标与方块，在短暂飞行后消退。",
   "cataclysm_nouveau.glyph_name.glyph_aptrgangr_smash": "砸地重击",
   "item.cataclysm_nouveau.glyph_aptrgangr_smash": "砸地重击",
-  "cataclysm_nouveau.glyph_desc.glyph_aptrgangr_smash": "自身、友军或指定位置执行冥行武弁的砸地重击，同时向前释放五道斧刃。"
+  "cataclysm_nouveau.glyph_desc.glyph_aptrgangr_smash": "自身、友军或指定位置执行冥行武弁的砸地重击，同时向前释放五道斧刃。",
+  "cataclysm_nouveau.glyph_name.glyph_berserker_cross_slash": "交叉双斩",
+  "cataclysm_nouveau.glyph_desc.glyph_berserker_cross_slash": "自身、友军或指定位置执行炽燃狂魂的交叉双斩，命中叠加炽热烙印并恢复生命。",
+  "item.cataclysm_nouveau.glyph_berserker_cross_slash": "交叉双斩",
+  "cataclysm_nouveau.glyph_name.glyph_berserker_sword_dance": "狂魂剑舞",
+  "cataclysm_nouveau.glyph_desc.glyph_berserker_sword_dance": "自身、友军或指定位置执行炽燃狂魂的四段前冲剑舞，命中叠加炽热烙印并恢复生命。",
+  "item.cataclysm_nouveau.glyph_berserker_sword_dance": "狂魂剑舞",
+  "cataclysm_nouveau.glyph_name.glyph_berserker_spin": "回旋绞杀",
+  "cataclysm_nouveau.glyph_desc.glyph_berserker_spin": "自身、友军或指定位置执行炽燃狂魂的回旋绞杀，在起势后持续旋转攻击并推开敌人。",
+  "item.cataclysm_nouveau.glyph_berserker_spin": "回旋绞杀"
 }

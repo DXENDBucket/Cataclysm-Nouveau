@@ -276,5 +276,14 @@
   "cataclysm_nouveau.glyph_desc.glyph_axe_blade": "Replace a projectile with an Aptrgangr axe blade. It pierces entities and blocks before fading away.",
   "cataclysm_nouveau.glyph_name.glyph_aptrgangr_smash": "Aptrgangr Smash",
   "item.cataclysm_nouveau.glyph_aptrgangr_smash": "Aptrgangr Smash",
-  "cataclysm_nouveau.glyph_desc.glyph_aptrgangr_smash": "Perform a native Aptrgangr smash from self, an ally or a position, striking ahead and releasing five axe blades."
+  "cataclysm_nouveau.glyph_desc.glyph_aptrgangr_smash": "Perform a native Aptrgangr smash from self, an ally or a position, striking ahead and releasing five axe blades.",
+  "cataclysm_nouveau.glyph_name.glyph_berserker_cross_slash": "Berserker Cross Slash",
+  "cataclysm_nouveau.glyph_desc.glyph_berserker_cross_slash": "Perform two native cross slashes. Successful hits stack Blazing Brand and restore health.",
+  "item.cataclysm_nouveau.glyph_berserker_cross_slash": "Berserker Cross Slash",
+  "cataclysm_nouveau.glyph_name.glyph_berserker_sword_dance": "Berserker Sword Dance",
+  "cataclysm_nouveau.glyph_desc.glyph_berserker_sword_dance": "Perform one of the native four-strike advancing sword dances. Successful hits stack Blazing Brand and restore health.",
+  "item.cataclysm_nouveau.glyph_berserker_sword_dance": "Berserker Sword Dance",
+  "cataclysm_nouveau.glyph_name.glyph_berserker_spin": "Berserker Whirl",
+  "cataclysm_nouveau.glyph_desc.glyph_berserker_spin": "Prepare, spin with both blades, then recover. Native repeated contact damage pushes enemies away.",
+  "item.cataclysm_nouveau.glyph_berserker_spin": "Berserker Whirl"
 }

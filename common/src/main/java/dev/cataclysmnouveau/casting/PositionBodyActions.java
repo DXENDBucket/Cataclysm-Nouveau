@@ -32,6 +32,7 @@ final class PositionBodyActions {
             case GUARDIAN -> new SpellGuardian(world,frame,point,heading,amp,ability);
             case HARBINGER -> new SpellHarbinger(world,frame,ability,point,0,amp);
             case MONSTROSITY -> new SpellMonstrosity(world,frame,point,heading,amp);
+            case BERSERKER -> throw new IllegalArgumentException("Berserker uses its shared native driver");
             case APTRGANGR -> throw new IllegalArgumentException("Aptrgangr uses its shared smash driver");
             case REVENANT -> throw new IllegalArgumentException("Revenant uses its native formation driver");
             case REMNANT -> throw new IllegalArgumentException("Remnant uses its shared formation driver");

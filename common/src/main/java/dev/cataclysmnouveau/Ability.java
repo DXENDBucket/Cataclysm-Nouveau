@@ -94,7 +94,10 @@ public enum Ability {
     BLAZING_BONE("blazing_bone", "Blazing Bone", 25),
     BONE_STORM("bone_storm", "Bone Storm", 240),
     AXE_BLADE("axe_blade", "Whirling Axe Blade", 40),
-    APTRGANGR_SMASH("aptrgangr_smash", "Aptrgangr Smash", 180);
+    APTRGANGR_SMASH("aptrgangr_smash", "Aptrgangr Smash", 180),
+    BERSERKER_CROSS_SLASH("berserker_cross_slash", "Berserker Cross Slash", 90),
+    BERSERKER_SWORD_DANCE("berserker_sword_dance", "Berserker Sword Dance", 150),
+    BERSERKER_SPIN("berserker_spin", "Berserker Whirl", 180);
     public final String id, name;
     public final int mana;
     Ability(String id, String name, int mana) { this.id=id; this.name=name; this.mana=mana; }
@@ -102,6 +105,7 @@ public enum Ability {
     /** Acquisition/source families, shared by all presentation surfaces. */
     public Series series() {
         return switch(this) {
+            case BERSERKER_CROSS_SLASH,BERSERKER_SWORD_DANCE,BERSERKER_SPIN -> Series.IGNITED_BERSERKER;
             case AXE_BLADE,APTRGANGR_SMASH -> Series.APTRGANGR;
             case ASHEN_BREATH,BLAZING_BONE,BONE_STORM -> Series.IGNITED_REVENANT;
             case REMNANT_CHARGE,REMNANT_TAIL_SWEEP,DESERT_STELE_ARRAY,REMNANT_TRIPLE_QUAKE,CURSED_SANDSTORM,SANDSTORM_RING,DESERT_STELE,GROUND_QUAKE,REMNANT_STOMP -> Series.ANCIENT_REMNANT;
@@ -120,5 +124,5 @@ public enum Ability {
                     STORM_SERPENT,LIGHTNING_STORM,LIGHTNING_FIELD,STORM_BURST,SPARK,THUNDER_CLOUD,LIGHTNING_ROW,THUNDER_COMBO,ANCHOR_SPIN,ANCHOR_LEAP,WATER_WALKING -> Series.SCYLLA;
         };
     }
-    public enum Series { AMETHYST_CRAB, LIONFISH, ENDER_GOLEM, MONSTROSITY, SCYLLA, HARBINGER, ENDER_GUARDIAN, IGNIS, MALEDICTUS, LEVIATHAN, ANCIENT_REMNANT, IGNITED_REVENANT, APTRGANGR }
+    public enum Series { AMETHYST_CRAB, LIONFISH, ENDER_GOLEM, MONSTROSITY, SCYLLA, HARBINGER, ENDER_GUARDIAN, IGNIS, MALEDICTUS, LEVIATHAN, ANCIENT_REMNANT, IGNITED_REVENANT, APTRGANGR, IGNITED_BERSERKER }
 }

@@ -1,3 +1,11 @@
+## 0.1.0-dev.59
+
+- Add Berserker Cross Slash, Sword Dance and Whirl through the native registered goals and aiStep. Retain original strike timing, left/right dance selection and impulses, the three-stage spin, shield disabling, knockback and damage immunity.
+- Preserve native Blazing Brand stacking and hit recovery for slashes. Heal the actual allied executor, or the original caster for a detached position. Whirl does not gain invented branding or recovery.
+- Share self, ally and moving-position execution, Core action replacement, real damage ownership, Ars equipment/events and bounded augmentation. No Core changes or duplicated native implementation.
+- Add the native Ignited Berserker phantom family, all six supported animation states and local visual toggle. Native model/glow/sound and glyph icons are runtime references only.
+- Defaults: 90/150/180 Mana, 3/4/8-second cooldowns. Each real Scribe recipe uses one dying ember, one Source Gem and 27 experience. Native 0–2 ember drops are retained.
+
 ## 0.1.0-dev.58
 
 - Add Whirling Axe Blade using the native non-Projectile axe entity, accelerating flight, piercing contact, animated renderer and eighty-tick fade. Preserve Ars-driven trajectories and per-trigger billing for repeating forms.

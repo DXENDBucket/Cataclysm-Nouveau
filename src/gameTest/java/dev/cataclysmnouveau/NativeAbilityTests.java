@@ -2451,6 +2451,7 @@ public final class NativeAbilityTests {
                     case GUARDIAN -> new SpellGuardian(h.getLevel(),cast,a.center,new Vec3(-1,0,0),0,ability);
                     case HARBINGER -> new SpellHarbinger(h.getLevel(),cast,ability,a.center,0,0);
                     case MONSTROSITY -> new SpellMonstrosity(h.getLevel(),cast,a.center,new Vec3(-1,0,0),0);
+                    case BERSERKER -> new SpellBerserker(h.getLevel(),cast,0);
                     case APTRGANGR -> new SpellAptrgangr(h.getLevel(),cast,dev.arsconflux.api.execution.ExecutionAnchor.entity(actor,dev.arsconflux.api.execution.ExecutionAnchor.Basis.FEET,Vec3.ZERO),0);
                     case REVENANT -> new SpellRevenant(h.getLevel(),cast,a.center,new Vec3(-1,0,0),0);
                     case REMNANT -> new SpellRemnant(h.getLevel(),cast,ability,a.center,new Vec3(-1,0,0),0);
@@ -2458,6 +2459,7 @@ public final class NativeAbilityTests {
                 };
                 int[] states=switch(ability) {
                     case REMNANT_CHARGE -> new int[]{10,11};case REMNANT_TAIL_SWEEP -> new int[]{16};case REMNANT_STOMP -> new int[]{8,13};
+                    case BERSERKER_CROSS_SLASH -> new int[]{1};case BERSERKER_SWORD_DANCE -> new int[]{5,6};case BERSERKER_SPIN -> new int[]{2,3,4};
                     case APTRGANGR_SMASH -> new int[]{2};
                     case BONE_STORM -> new int[]{1};
                     case DESERT_STELE_ARRAY -> new int[]{17};case REMNANT_TRIPLE_QUAKE -> new int[]{15};
@@ -2472,6 +2474,7 @@ public final class NativeAbilityTests {
                         case SpellGuardian b -> {b.setAnimation(BodyPhantomAnimations.animation(kind,state));b.setAnimationTick(37);}
                         case SpellHarbinger b -> {b.setAnimation(BodyPhantomAnimations.animation(kind,state));b.setAnimationTick(26);b.setIsCharge(true);}
                         case SpellMonstrosity b -> {b.setAttackState(state);b.attackTicks=35;}
+                        case SpellBerserker b -> {b.setAttackState(state);b.attackTicks=20;}
                         case SpellAptrgangr b -> {b.setAttackState(state);b.attackTicks=20;}
                         case SpellRevenant b -> {b.setAnimation(com.github.L_Ender.cataclysm.entity.AnimationMonster.BossMonsters.Ignited_Revenant_Entity.BONE_STORM_ATTACK);b.setAnimationTick(20);}
                         case SpellRemnant b -> {b.setAttackState(state);b.attackTicks=20;}
