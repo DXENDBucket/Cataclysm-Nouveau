@@ -53,3 +53,11 @@ state6推力条件在实际3.33中是15／123／26／33tick，动作55tick结束
   SHA256 `f32ba9db7da60dfc68fee858d66667fc68c7924aed2115f8d23fef34f41be27e`
 - `cataclysm-nouveau-0.1.0-dev.59-sources.jar`
   SHA256 `be821964d778980fc5469cfc93df47dc8aaffac8b391a505240d64c8e4482e8a`
+
+## 提交与部署
+
+实现提交`cfb4909c7d99385073e1436985b914be4a586f7e`，标签`v0.1.0-dev.59`，主仓库已快进合并。未推送、未上传CurseForge。
+
+已部署“万法归一”mods，仅以dev.59替换dev.58；其余173文件和活跃服务端配置哈希不变，Core仍为0.1.27。旧JAR与部署清单位于实例`codex-backups/cataclysm-dev59-20261023`，主仓库build/libs已同步发行／源码包。未修改存档或其他实例；新配置项下次启动补齐默认值。
+
+人工验收重点：三类动作原生幻影与glow、双斩和剑舞朝向／前冲／命中恢复、固定位置剑舞连续移动、回旋完整三阶段与音效。本次没有客户端人工验收。
