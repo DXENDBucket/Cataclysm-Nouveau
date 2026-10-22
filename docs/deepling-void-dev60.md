@@ -53,3 +53,8 @@
 - `cataclysm-nouveau-0.1.0-dev.60-sources.jar` SHA256 `d812e217f5b56a590b17cb3bdc160cdbaf03c27d1c9680c307e14396449bfefa`
 
 工作树build/libs包含上述产物。客户端人工验收重点：标记跟踪/闪动并转为光束、祭司头部光芒、榴弹原生拖尾/爆炸/符文环、散射箭单份碎裂/17碎片，以及法术书肩炮3D图标。服务端测试通过不等于画面已确认。
+
+
+## 提交与部署
+
+实现提交 `d72a2aa4ec0a5d3bb91738c3d078f3ce726417cc`，标签 `v0.1.0-dev.60`；主仓库快进合并。已部署“万法归一”mods，以dev.60替换dev.59，其余173文件与活跃服务端配置哈希完全不变，Core仍0.1.27。主仓库build/libs同步发行与源码包。旧JAR与前后哈希清单位于实例 `codex-backups/cataclysm-dev60-20261023`。未改存档、其他整合包实例；未推送或上传CurseForge。
