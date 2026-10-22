@@ -15,6 +15,7 @@ public final class BodyPhantomSync {
                                               int elapsed, boolean closed) {
         int state=0,age=0,flags=0;
         switch(frame) {
+            case SpellPriest boss -> {state=1;age=boss.getAnimationTick();}
             case SpellBerserker boss -> {state=boss.getAttackState();age=boss.attackTicks;}
             case SpellAptrgangr boss -> {state=boss.getAttackState();age=boss.attackTicks;}
             case SpellRevenant boss -> {state=1;age=boss.getAnimationTick();}

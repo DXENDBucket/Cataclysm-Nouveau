@@ -285,5 +285,17 @@
   "item.cataclysm_nouveau.glyph_berserker_sword_dance": "狂魂剑舞",
   "cataclysm_nouveau.glyph_name.glyph_berserker_spin": "回旋绞杀",
   "cataclysm_nouveau.glyph_desc.glyph_berserker_spin": "自身、友军或指定位置执行炽燃狂魂的回旋绞杀，在起势后持续旋转攻击并推开敌人。",
-  "item.cataclysm_nouveau.glyph_berserker_spin": "回旋绞杀"
+  "item.cataclysm_nouveau.glyph_berserker_spin": "回旋绞杀",
+  "item.cataclysm_nouveau.glyph_abyss_mark": "深渊标记",
+  "cataclysm_nouveau.glyph_name.glyph_abyss_mark": "深渊标记",
+  "cataclysm_nouveau.glyph_desc.glyph_abyss_mark": "在敌方生物身下留下追踪标记，四秒后化为深渊射线门户。延长时效改变射线的持续时间。",
+  "item.cataclysm_nouveau.glyph_priest_glare": "祭司眩光",
+  "cataclysm_nouveau.glyph_name.glyph_priest_glare": "祭司眩光",
+  "cataclysm_nouveau.glyph_desc.glyph_priest_glare": "自身、友军或选定位置闪耀渊灵祭司的眩光。直视眩光且未被遮挡的附近敌人受到伤害与失明。",
+  "item.cataclysm_nouveau.glyph_void_howitzer": "虚空榴弹",
+  "cataclysm_nouveau.glyph_name.glyph_void_howitzer": "虚空榴弹",
+  "cataclysm_nouveau.glyph_desc.glyph_void_howitzer": "将弹射物替换为虚空榴弹。爆炸后生成逐圈展开的虚空符文，直接击杀敌人时恢复施法者生命。",
+  "item.cataclysm_nouveau.glyph_void_scatter_arrow": "虚空散射箭",
+  "cataclysm_nouveau.glyph_name.glyph_void_scatter_arrow": "虚空散射箭",
+  "cataclysm_nouveau.glyph_desc.glyph_void_scatter_arrow": "将弹射物替换为虚空散射箭。命中后迸发虚空碎片，碎片不会再次命中最初被箭射中的生物。"
 }

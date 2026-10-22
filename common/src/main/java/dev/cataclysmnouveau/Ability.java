@@ -97,7 +97,11 @@ public enum Ability {
     APTRGANGR_SMASH("aptrgangr_smash", "Aptrgangr Smash", 180),
     BERSERKER_CROSS_SLASH("berserker_cross_slash", "Berserker Cross Slash", 90),
     BERSERKER_SWORD_DANCE("berserker_sword_dance", "Berserker Sword Dance", 150),
-    BERSERKER_SPIN("berserker_spin", "Berserker Whirl", 180);
+    BERSERKER_SPIN("berserker_spin", "Berserker Whirl", 180),
+    ABYSS_MARK("abyss_mark", "Abyssal Mark", 320),
+    PRIEST_GLARE("priest_glare", "Priest's Glare", 80),
+    VOID_HOWITZER("void_howitzer", "Void Howitzer", 350),
+    VOID_SCATTER_ARROW("void_scatter_arrow", "Void Scatter Arrow", 120);
     public final String id, name;
     public final int mana;
     Ability(String id, String name, int mana) { this.id=id; this.name=name; this.mana=mana; }
@@ -105,6 +109,8 @@ public enum Ability {
     /** Acquisition/source families, shared by all presentation surfaces. */
     public Series series() {
         return switch(this) {
+            case ABYSS_MARK,PRIEST_GLARE -> Series.DEEPLING;
+            case VOID_HOWITZER,VOID_SCATTER_ARROW -> Series.VOID_WEAPONS;
             case BERSERKER_CROSS_SLASH,BERSERKER_SWORD_DANCE,BERSERKER_SPIN -> Series.IGNITED_BERSERKER;
             case AXE_BLADE,APTRGANGR_SMASH -> Series.APTRGANGR;
             case ASHEN_BREATH,BLAZING_BONE,BONE_STORM -> Series.IGNITED_REVENANT;
@@ -124,5 +130,5 @@ public enum Ability {
                     STORM_SERPENT,LIGHTNING_STORM,LIGHTNING_FIELD,STORM_BURST,SPARK,THUNDER_CLOUD,LIGHTNING_ROW,THUNDER_COMBO,ANCHOR_SPIN,ANCHOR_LEAP,WATER_WALKING -> Series.SCYLLA;
         };
     }
-    public enum Series { AMETHYST_CRAB, LIONFISH, ENDER_GOLEM, MONSTROSITY, SCYLLA, HARBINGER, ENDER_GUARDIAN, IGNIS, MALEDICTUS, LEVIATHAN, ANCIENT_REMNANT, IGNITED_REVENANT, APTRGANGR, IGNITED_BERSERKER }
+    public enum Series { AMETHYST_CRAB, LIONFISH, ENDER_GOLEM, MONSTROSITY, SCYLLA, HARBINGER, ENDER_GUARDIAN, IGNIS, MALEDICTUS, LEVIATHAN, ANCIENT_REMNANT, IGNITED_REVENANT, APTRGANGR, IGNITED_BERSERKER, DEEPLING, VOID_WEAPONS }
 }

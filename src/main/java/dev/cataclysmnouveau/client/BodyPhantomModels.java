@@ -15,6 +15,7 @@ import net.minecraft.world.entity.Mob;
 final class BodyPhantomModels {
     static Mob create(Kind kind,ClientLevel level) {
         Mob proxy=switch(kind) {
+            case PRIEST -> new com.github.L_Ender.cataclysm.entity.Deepling.Deepling_Priest_Entity(ModEntities.DEEPLING_PRIEST.get(),level);
             case BERSERKER -> new com.github.L_Ender.cataclysm.entity.InternalAnimationMonster.Ignited_Berserker_Entity(ModEntities.IGNITED_BERSERKER.get(),level);
             case APTRGANGR -> new com.github.L_Ender.cataclysm.entity.InternalAnimationMonster.Draugar.Aptrgangr_Entity(ModEntities.APTRGANGR.get(),level);
             case REVENANT -> new Ignited_Revenant_Entity(ModEntities.IGNITED_REVENANT.get(),level);
@@ -30,6 +31,10 @@ final class BodyPhantomModels {
     }
     static void pose(Mob proxy,BodyPhantomPayload data,int age) {
         switch(proxy) {
+            case com.github.L_Ender.cataclysm.entity.Deepling.Deepling_Priest_Entity priest -> {
+                priest.setAnimation(com.github.L_Ender.cataclysm.entity.Deepling.Deepling_Priest_Entity.DEEPLING_BLIND);
+                priest.setAnimationTick(Math.min(age,56));priest.tickCount=age;
+            }
             case com.github.L_Ender.cataclysm.entity.InternalAnimationMonster.Ignited_Berserker_Entity boss -> {
                 boss.setAttackState(data.animation());boss.stopAllAnimationStates();boss.attackTicks=boss.tickCount=age;
                 boss.getAnimationState(switch(data.animation()){

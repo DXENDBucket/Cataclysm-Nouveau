@@ -26,8 +26,8 @@ import java.util.function.Supplier;
 /** Native payloads own visuals/hit bodies; a single trajectory owns motion and collision. */
 public final class HarbingerCasting {
     private static final ThreadLocal<Entity> DECORATING=new ThreadLocal<>();
-    public static boolean supports(Ability a) {return switch(a){case BLAZING_BONE,CURSED_SANDSTORM,ABYSS_ORB,PHANTOM_ARROW,IGNIS_FIREBALL,IGNIS_ABYSS_FIREBALL,LASER_BOLT,WITHER_MISSILE,HOMING_MISSILE,WITHER_HOWITZER,GUARDIAN_BULLET->true;default->false;};}
-    public static boolean nativePayload(Entity e) {return e instanceof Axe_Blade_Entity || e instanceof Blazing_Bone_Entity || e instanceof Cursed_Sandstorm_Entity || e instanceof Abyss_Orb_Entity || e instanceof Phantom_Arrow_Entity || e instanceof Ignis_Fireball_Entity || e instanceof Ignis_Abyss_Fireball_Entity || e instanceof Laser_Beam_Entity || e instanceof Wither_Missile_Entity || e instanceof Wither_Homing_Missile_Entity || e instanceof Wither_Howitzer_Entity || e instanceof Ender_Guardian_Bullet_Entity;}
+    public static boolean supports(Ability a) {return switch(a){case VOID_HOWITZER,VOID_SCATTER_ARROW,BLAZING_BONE,CURSED_SANDSTORM,ABYSS_ORB,PHANTOM_ARROW,IGNIS_FIREBALL,IGNIS_ABYSS_FIREBALL,LASER_BOLT,WITHER_MISSILE,HOMING_MISSILE,WITHER_HOWITZER,GUARDIAN_BULLET->true;default->false;};}
+    public static boolean nativePayload(Entity e) {return e instanceof Void_Howitzer_Entity || e instanceof Void_Scatter_Arrow_Entity || e instanceof Void_Shard_Entity || e instanceof Axe_Blade_Entity || e instanceof Blazing_Bone_Entity || e instanceof Cursed_Sandstorm_Entity || e instanceof Abyss_Orb_Entity || e instanceof Phantom_Arrow_Entity || e instanceof Ignis_Fireball_Entity || e instanceof Ignis_Abyss_Fireball_Entity || e instanceof Laser_Beam_Entity || e instanceof Wither_Missile_Entity || e instanceof Wither_Homing_Missile_Entity || e instanceof Wither_Howitzer_Entity || e instanceof Ender_Guardian_Bullet_Entity;}
     public static boolean decorating(Entity e) {return DECORATING.get()==e && e instanceof ManagedProjectile s && s.confluxCataclysm$mode()==1;}
     public static void decorate(Entity e,Runnable tick) {
         var old=DECORATING.get();DECORATING.set(e);
@@ -59,6 +59,11 @@ public final class HarbingerCasting {
         if(IgnisCasting.projectile(a))return IgnisCasting.create(a,world,c,direction,target,amplify);
         var owner=c.damageOwner()==null?c.caster():c.damageOwner();float bonus=Resources.amplification(amplify);
         Projectile p=switch(a) {
+            case VOID_HOWITZER->new Void_Howitzer_Entity(ModEntities.VOID_HOWITZER.get(),world,owner);
+            case VOID_SCATTER_ARROW->{
+                var arrow=new Void_Scatter_Arrow_Entity(ModEntities.VOID_SCATTER_ARROW.get(),world);
+                arrow.setOwner(owner);arrow.pickup=AbstractArrow.Pickup.DISALLOWED;yield arrow;
+            }
             case BLAZING_BONE->new Blazing_Bone_Entity(world,Math.max(0,(float)CMCommonConfig.IgnitedRevenant.BlazingBoneDamage),owner);
             case CURSED_SANDSTORM->{
                 var storm=new Cursed_Sandstorm_Entity(owner,direction.x,direction.y,direction.z,world,Math.max(0,(float)CMCommonConfig.WrathOfTheDesert.damage),target);
@@ -116,7 +121,9 @@ public final class HarbingerCasting {
             if(payload instanceof CMAbstractHurtingProjectile fire)IgnisCasting.accelerate(fire,acceleration,target(s.world(),carrier.position(),direction,s.context()));
             if(trajectory!=null)return trajectory.start(s.world(),()->{},h->impact(s,h));
             payload.setPos(carrier.position());
-            if(payload instanceof Blazing_Bone_Entity bone)bone.shoot(direction.x,direction.y,direction.z,(float)(.5*acceleration),0);
+            if(payload instanceof Void_Howitzer_Entity shell)shell.shoot(direction.x,direction.y,direction.z,(float)acceleration,0);
+            else if(payload instanceof Void_Scatter_Arrow_Entity arrow)arrow.shoot(direction.x,direction.y,direction.z,(float)(3*acceleration),0);
+            else if(payload instanceof Blazing_Bone_Entity bone)bone.shoot(direction.x,direction.y,direction.z,(float)(.5*acceleration),0);
             else if(payload instanceof Phantom_Arrow_Entity arrow)arrow.shoot(direction.x,direction.y,direction.z,(float)(1.8*acceleration),0);
             else if(payload instanceof Wither_Howitzer_Entity shell)shell.shoot(direction.x,direction.y,direction.z,(float)(.6*acceleration),0);
             else {payload.setDeltaMovement(payload.getDeltaMovement().scale(acceleration));if(payload instanceof Laser_Beam_Entity laser)laser.accelerationPower*=acceleration;if(payload instanceof Wither_Missile_Entity missile)missile.accelerationPower*=acceleration;if(payload instanceof Wither_Homing_Missile_Entity homing)homing.accelerationPower*=acceleration;}

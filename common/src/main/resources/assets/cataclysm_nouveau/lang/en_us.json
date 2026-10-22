@@ -285,5 +285,17 @@
   "item.cataclysm_nouveau.glyph_berserker_sword_dance": "Berserker Sword Dance",
   "cataclysm_nouveau.glyph_name.glyph_berserker_spin": "Berserker Whirl",
   "cataclysm_nouveau.glyph_desc.glyph_berserker_spin": "Prepare, spin with both blades, then recover. Native repeated contact damage pushes enemies away.",
-  "item.cataclysm_nouveau.glyph_berserker_spin": "Berserker Whirl"
+  "item.cataclysm_nouveau.glyph_berserker_spin": "Berserker Whirl",
+  "item.cataclysm_nouveau.glyph_abyss_mark": "Abyssal Mark",
+  "cataclysm_nouveau.glyph_name.glyph_abyss_mark": "Abyssal Mark",
+  "cataclysm_nouveau.glyph_desc.glyph_abyss_mark": "Marks an enemy with a pursuing abyssal sigil. After four seconds it becomes an abyssal beam portal. Duration augments change the beam duration.",
+  "item.cataclysm_nouveau.glyph_priest_glare": "Priest's Glare",
+  "cataclysm_nouveau.glyph_name.glyph_priest_glare": "Priest's Glare",
+  "cataclysm_nouveau.glyph_desc.glyph_priest_glare": "Self, an ally, or a selected location emits a deepling priest's glare. Nearby enemies looking directly at the unobstructed glare are damaged and blinded.",
+  "item.cataclysm_nouveau.glyph_void_howitzer": "Void Howitzer",
+  "cataclysm_nouveau.glyph_name.glyph_void_howitzer": "Void Howitzer",
+  "cataclysm_nouveau.glyph_desc.glyph_void_howitzer": "Replaces the projectile with a void howitzer shell. Its explosion raises expanding rings of void runes. A direct killing blow heals its owner.",
+  "item.cataclysm_nouveau.glyph_void_scatter_arrow": "Void Scatter Arrow",
+  "cataclysm_nouveau.glyph_name.glyph_void_scatter_arrow": "Void Scatter Arrow",
+  "cataclysm_nouveau.glyph_desc.glyph_void_scatter_arrow": "Replaces the projectile with a void scatter arrow. Impact releases void shards which exclude the arrow's initial victim."
 }

@@ -98,7 +98,13 @@
     "AxeBladeAccess",
     "AxeBladeMixin",
     "AptrgangrAdapterMixin",
-    "BerserkerAdapterMixin"
+    "BerserkerAdapterMixin",
+    "AbyssMarkMixin",
+    "VoidHowitzerMixin",
+    "VoidScatterArrowMixin",
+    "VoidArrowDamageMixin",
+    "VoidShardMixin",
+    "PriestAdapterMixin"
   ],
   "client": [
     "client.GuardianVortexRenderProbeMixin",

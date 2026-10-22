@@ -229,3 +229,14 @@ Axe_Blade_Entity直接继承Entity，不能套用Projectile的Invoker／碰撞Mi
 旋转的接触节奏读取全局tickCount，不是每阶段重置的attackTicks；driver维持totalAge和phaseAge两套时钟，30／90／40tick各阶段完整执行。正常无敌帧限制实际有效输出，不因为每4tick尝试就承诺每次成功。原生renderer只有模型和glow layer，没有额外独立斩击粒子／弹体可漏接。
 
 获取各用一份将熄余烬，三项累计三份，原生0–2掉落意味着平均约三只，非保底三只。测试伪玩家不在友军实体tracking集合，不能拿它没有收到幻影包推断施法失败；伤害／动作实际状态及独立全状态协议夹具各自验证。详见berserker-dev59.md。
+
+
+## dev.60：渊灵计时与原生后续实体
+
+标记、门户、光束各自读取不同计时字段：lifespan、warmupDelay、tickCount。手工测试调用Entity.tick不会递增tickCount，必须模拟世界tick，不能因标记和门户成功就认定光束时钟已推进。原生Portal伤害的hpDamage还乘0.01，不能将配置0.1直接当10%。mark正常discard后，其portal/beam仍由同一会话管理；目标死亡保留最后落点，root失效清理整链。客户端只读同步managed标志，不访问服务器CastContext。
+
+祭司眩光在tick而非aiStep，实际视觉是原生渲染层而非独立粒子。要同步DEEPLING_BLIND动画并绘制light layer，独立范围行为无需占用身体动作。视线读取LivingEntity的头部yaw，测试只设body yaw会同时使原生对照和适配结果都为0；不要因此放宽业务LOS/朝向条件。新增幻影Kind仍需补齐既有穷举switch、新GameTest namespace必须有模板。
+
+虚空榴弹保留原生五圈76根符文，散射箭保留17碎片及“忽略首个箭目标”的规则。子实体随正常父弹结束继续，独立清理且不另收费/复制续接。继承AbstractArrow的直接伤害要在父类伤害入口opt-in处理。散射碎裂客户端预测与服务端转发不能双发，特殊Ars轨迹也要收到粒子。友军过滤应早于碎片的原生免疫重置。
+
+13项聚焦验证跨两批通过，102魔符资源/本地化及发行包与源码包边界检查通过；未人工验证客户端。详见[dev.60](deepling-void-dev60.md)。

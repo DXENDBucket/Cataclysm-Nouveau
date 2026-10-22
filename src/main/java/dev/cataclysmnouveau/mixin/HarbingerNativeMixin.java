@@ -16,7 +16,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import java.util.function.Predicate;
 
 /** Run native visual/trail ticks while the Ars carrier exclusively owns movement and hits. */
-@Mixin(value={com.github.L_Ender.cataclysm.entity.projectile.Cursed_Sandstorm_Entity.class,com.github.L_Ender.cataclysm.entity.AnimationMonster.BossMonsters.The_Leviathan.Abyss_Orb_Entity.class,Laser_Beam_Entity.class,Wither_Missile_Entity.class,Wither_Homing_Missile_Entity.class,Wither_Howitzer_Entity.class,Ender_Guardian_Bullet_Entity.class},remap=false)
+@Mixin(value={Void_Howitzer_Entity.class,com.github.L_Ender.cataclysm.entity.projectile.Cursed_Sandstorm_Entity.class,com.github.L_Ender.cataclysm.entity.AnimationMonster.BossMonsters.The_Leviathan.Abyss_Orb_Entity.class,Laser_Beam_Entity.class,Wither_Missile_Entity.class,Wither_Homing_Missile_Entity.class,Wither_Howitzer_Entity.class,Ender_Guardian_Bullet_Entity.class},remap=false)
 public abstract class HarbingerNativeMixin {
     @WrapMethod(method="tick")
     private void harbinger$visualTick(Operation<Void> original) {

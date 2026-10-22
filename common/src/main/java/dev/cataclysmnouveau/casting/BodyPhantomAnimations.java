@@ -7,7 +7,7 @@ import dev.cataclysmnouveau.Ability;
 
 /** Stable visual IDs for the supported native body actions; no client classes. */
 public final class BodyPhantomAnimations {
-    public enum Kind { SCYLLA, HARBINGER, GUARDIAN, MONSTROSITY, MALEDICTUS, REMNANT, REVENANT, APTRGANGR, BERSERKER }
+    public enum Kind { SCYLLA, HARBINGER, GUARDIAN, MONSTROSITY, MALEDICTUS, REMNANT, REVENANT, APTRGANGR, BERSERKER, PRIEST }
     /** Native Maledictus afterimage windows (the renderer proxy has no world entity ID). */
     public static boolean maledictusAfterimage(int state,int age) {
         return age>=0 && switch(state) {
@@ -20,6 +20,7 @@ public final class BodyPhantomAnimations {
     }
     public static Kind kind(Ability ability) {
         return switch(ability) {
+            case PRIEST_GLARE -> Kind.PRIEST;
             case BERSERKER_CROSS_SLASH,BERSERKER_SWORD_DANCE,BERSERKER_SPIN -> Kind.BERSERKER;
             case APTRGANGR_SMASH -> Kind.APTRGANGR;
             case BONE_STORM -> Kind.REVENANT;
@@ -37,6 +38,7 @@ public final class BodyPhantomAnimations {
         return null;
     }
     public static Animation animation(Kind kind,int id) {
+        if(kind==Kind.PRIEST)return id==1?com.github.L_Ender.cataclysm.entity.Deepling.Deepling_Priest_Entity.DEEPLING_BLIND:null;
         if(kind==Kind.REVENANT)return id==1?com.github.L_Ender.cataclysm.entity.AnimationMonster.BossMonsters.Ignited_Revenant_Entity.BONE_STORM_ATTACK:null;
         if(kind==Kind.HARBINGER) return id==1?The_Harbinger_Entity.CHARGE_ANIMATION:null;
         if(kind!=Kind.GUARDIAN) return null;
@@ -65,7 +67,7 @@ public final class BodyPhantomAnimations {
             case BERSERKER_SWORD_DANCE -> state==5 || state==6;
             case BERSERKER_SPIN -> state==2 || state==3 || state==4;
             case APTRGANGR_SMASH -> state==2;
-            case BONE_STORM -> state==1;
+            case BONE_STORM,PRIEST_GLARE -> state==1;
             case DESERT_STELE_ARRAY -> state==17;
             case REMNANT_TRIPLE_QUAKE -> state==15;
             case THUNDER_COMBO -> state==25;
