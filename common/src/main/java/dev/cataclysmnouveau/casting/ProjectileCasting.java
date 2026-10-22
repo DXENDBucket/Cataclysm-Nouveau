@@ -41,7 +41,6 @@ public final class ProjectileCasting {
         private final boolean repeated;
         private final float acceleration;
         private Vec3 direction;
-        private final java.util.Set<java.util.UUID> sparkTargets=new java.util.HashSet<>();
         Flight(Ability ability,ThrowableProjectile payload,EntityProjectileSpell carrier,boolean arsDriven,boolean repeated,double acceleration) {
             this.ability=ability;this.payload=payload;this.carrier=carrier;this.repeated=repeated;this.acceleration=(float)acceleration;
             trajectory=arsDriven?new ArsTrajectory(payload,carrier):null;direction=TriggerGeometry.direction(carrier);
@@ -67,7 +66,7 @@ public final class ProjectileCasting {
                     payload.setPos(hit.getLocation());
                     var policy=ability==Ability.SPARK?dev.arsconflux.api.projectile.ImpactTriggers.Policy.ACTIVATION:dev.arsconflux.api.projectile.ImpactTriggers.Policy.ENTITY_DAMAGE;
                     boolean continued=dev.arsconflux.api.projectile.ImpactTriggers.resolve(hit,policy,()->NativePayloads.hit(payload,hit));
-                    if(continued && (ability!=Ability.SPARK || repeated || !(hit instanceof EntityHitResult target) || sparkTargets.add(target.getEntity().getUUID()))) session.impact(hit);
+                    if(continued) session.impact(hit);
                     return true;
                 })) session.finish(ExecutionSession.EndReason.DENIED);
             } finally { state.confluxCataclysm$resolving(false); }

@@ -14,7 +14,6 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.*;
 import net.minecraft.world.phys.*;
-import java.util.*;
 import java.util.function.BiFunction;
 
 /** Contact wave: native movement damages grounded targets; special Ars forms own movement only. */
@@ -46,7 +45,7 @@ public final class RemnantQuake {
     }
     private static final class Flight implements ExecutionDriver<EarthQuake_Entity> {
         final EarthQuake_Entity wave;final EntityProjectileSpell carrier;final ArsTrajectory trajectory;final boolean repeated;final float speed;
-        final Set<UUID> continued=new HashSet<>();Vec3 direction;
+        Vec3 direction;
         Flight(EarthQuake_Entity wave,EntityProjectileSpell carrier,CarrierProfile profile,double acceleration){
             this.wave=wave;this.carrier=carrier;repeated=profile.repeated();trajectory=profile.arsDriven()?new ArsTrajectory(wave,carrier):null;
             speed=(float)(.45*Math.max(.1,1+acceleration/.75));direction=TriggerGeometry.direction(carrier);
@@ -62,7 +61,7 @@ public final class RemnantQuake {
             wave.shoot(horizontal.x,-1,horizontal.z,speed,0);return s.world().addFreshEntity(wave);
         }
         private void contact(ExecutionSession<EarthQuake_Entity> s,HitResult hit){
-            if(!s.active() || !s.permitted() || !(hit instanceof EntityHitResult e) || !continued.add(e.getEntity().getUUID()))return;
+            if(!s.active() || !s.permitted() || !(hit instanceof EntityHitResult))return;
             if(wave.getDeltaMovement().lengthSqr()>1e-8)direction=wave.getDeltaMovement().normalize();s.impact(hit);
         }
         private void impact(ExecutionSession<EarthQuake_Entity> s,HitResult hit){

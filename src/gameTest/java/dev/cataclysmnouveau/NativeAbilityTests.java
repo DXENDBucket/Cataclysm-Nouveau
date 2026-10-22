@@ -789,7 +789,7 @@ public final class NativeAbilityTests {
         } finally {clean(h,p);}
     }
     @GameTest(template="empty",batch="cat_native_wave",timeoutTicks=100)
-    public static void nativeWaveContactsAlliesDedupAndLifetime(GameTestHelper h) {
+    public static void nativeWaveContactsAlliesRepeatedContinuationAndLifetime(GameTestHelper h) {
         var p=player(h);var mana=CapabilityRegistry.getMana(p);var marker=new Marker();
         var target=cow(h,scene(h).add(0,0,1));var ally=cow(h,target.position());
         var scoreboard=h.getLevel().getScoreboard();var team=scoreboard.addPlayerTeam("wave_"+p.getUUID().toString().substring(0,8));
@@ -805,9 +805,11 @@ public final class NativeAbilityTests {
         close(h,500-target.getHealth(),wave.getDamage(),"Native contact damage");
         h.assertTrue(target.hasEffect(ModEffect.EFFECTWETNESS),"Native Wetness retained");
         close(h,ally.getHealth(),500,"Native allied filtering retained");
+        control.confluxCataclysm$attack(1.5,0,-1);
+        h.assertTrue(marker.hits==1,"Native invulnerability rejects another continuation");
         target.invulnerableTime=0;control.confluxCataclysm$attack(1.5,0,-1);
         close(h,500-target.getHealth(),2*wave.getDamage(),"Native repeated damage remains possible");
-        h.assertTrue(marker.hits==1,"One native wave continues only once per target");
+        h.assertTrue(marker.hits==2,"Each successful native wave contact continues against the same target");
         close(h,mana.getCurrentMana(),10000-CataclysmConfig.cost(Ability.WAVE),"Native contact does not bill repeatedly");
         h.runAfterDelay(CataclysmConfig.waveLifetime()+3,()->{
             try {h.assertTrue(wave.isRemoved(),"Wave retains bounded native lifespan");h.succeed();}
@@ -1255,8 +1257,16 @@ public final class NativeAbilityTests {
                 var spear=h.getLevel().getEntitiesOfClass(Elemental_Spear_Entity.class,box).getFirst();
                 close(h,spear.getDeltaMovement().length(),2,"Native spear launch speed retained");
                 close(h,mana.getCurrentMana(),10000-CataclysmConfig.cost(glyph.ability),"Native launch pays once");
+                var victim=a.target(a.center.add(0,2,2),false);
+                var contact=new EntityHitResult(victim);
+                ((ProjectileHitAccess)spear).confluxCataclysm$nativeHit(contact);
+                h.assertTrue(marker.hits==1 && victim.getHealth()<500 && !spear.isRemoved(),"Native spear damage continues and retains its piercing body");
+                ((ProjectileHitAccess)spear).confluxCataclysm$nativeHit(contact);
+                h.assertTrue(marker.hits==1,"Spear damage rejected by invulnerability does not continue");
+                victim.invulnerableTime=0;((ProjectileHitAccess)spear).confluxCataclysm$nativeHit(contact);
+                h.assertTrue(marker.hits==2,"Second successful spear damage repeats the same-target chain");
                 ((ProjectileHitAccess)spear).confluxCataclysm$nativeHit(block(a.center.add(0,0,2)));
-                h.assertTrue(marker.hits==1,"Native impact continues once");
+                h.assertTrue(marker.hits==3,"Native block aftermath continues separately");
                 close(h,mana.getCurrentMana(),10000-CataclysmConfig.cost(glyph.ability),"Native impact does not double charge");
                 spear.discard();ExecutionSessions.tick();
                 mana.setMana(10000);marker=new Marker();cast=resolver(h,a.p,new Spell(MethodProjectile.INSTANCE,glyph,marker));cast.spellContext.nextPart();

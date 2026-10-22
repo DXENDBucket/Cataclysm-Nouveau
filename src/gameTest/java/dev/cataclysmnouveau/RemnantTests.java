@@ -91,7 +91,7 @@ public final class RemnantTests {
         }
     }
     @GameTest(template="empty",batch="remnant_5",timeoutTicks=100)
-    public static void nativeQuakeGroundedContactsSuccessfulDamageAndContinuationDedup(GameTestHelper h){
+    public static void nativeQuakeGroundedContactsSuccessfulDamageAndRepeatedContinuation(GameTestHelper h){
         try(var a=new NativeAbilityTests.Arena(h)){
             var marker=new Marker();var r=resolver(a,new Spell(MethodProjectile.INSTANCE,GlyphCatalog.GROUND_QUAKE,marker));r.spellContext.nextPart();
             var carrier=new EntityProjectileSpell(h.getLevel(),r);carrier.setPos(a.center);carrier.setDeltaMovement(0,0,.75);
@@ -99,7 +99,7 @@ public final class RemnantTests {
             near(h,mana(a),9950,"One launch fee");h.assertTrue(wave.getOwner()==a.p && !wave.shouldBeSaved(),"Actual owner and transient projectile");
             var victim=a.target(a.center,false);victim.setOnGround(true);var airborne=a.target(a.center,false);airborne.setOnGround(false);var friend=a.target(a.center,true);friend.setOnGround(true);
             wave.tickCount=5;((RemnantQuakeAccess)wave).confluxRemnant$contact();near(h,500-victim.getHealth(),11,"Native quake damage");near(h,airborne.getHealth(),500,"Native quake only damages grounded targets");near(h,friend.getHealth(),500,"Ally filtered");h.assertTrue(marker.hits==1,"One damage-success continuation");
-            ((RemnantQuakeAccess)wave).confluxRemnant$contact();h.assertTrue(marker.hits==1,"Invulnerability failure does not continue");victim.invulnerableTime=0;((RemnantQuakeAccess)wave).confluxRemnant$contact();h.assertTrue(marker.hits==1 && victim.getHealth()<489,"More native contact damage does not repeat Ars chain for same victim");
+            ((RemnantQuakeAccess)wave).confluxRemnant$contact();h.assertTrue(marker.hits==1,"Invulnerability failure does not continue");victim.invulnerableTime=0;((RemnantQuakeAccess)wave).confluxRemnant$contact();h.assertTrue(marker.hits==2 && victim.getHealth()<489,"A second successful native contact repeats the Ars chain for the same victim");
             tick(wave,65);step(1);h.assertTrue(wave.isRemoved() && carrier.isRemoved(),"Original wave lifetime ends carrier");h.succeed();
         }
     }

@@ -12,9 +12,8 @@ import dev.cataclysmnouveau.mixin.AxeBladeAccess;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.phys.*;
-import java.util.*;
 
-/** Native non-Projectile entity with piercing contact damage and one Ars continuation per victim. */
+/** Native non-Projectile entity; every successful piercing contact continues Ars. */
 public final class AxeBladeCasting {
     public static boolean replace(EntityProjectileSpell carrier,CarrierProfile profile){
         if(!(carrier.level() instanceof ServerLevel world))return false;
@@ -35,7 +34,7 @@ public final class AxeBladeCasting {
     private static float yaw(Vec3 d){return (float)Math.toDegrees(Math.atan2(-d.x,d.z));}
     private static final class Flight implements ExecutionDriver<Axe_Blade_Entity> {
         final Axe_Blade_Entity blade;final EntityProjectileSpell carrier;final ArsTrajectory trajectory;final boolean repeated;
-        final Set<UUID> continued=new HashSet<>();Vec3 direction;
+        Vec3 direction;
         Flight(Axe_Blade_Entity blade,EntityProjectileSpell carrier,CarrierProfile profile,Vec3 direction){
             this.blade=blade;this.carrier=carrier;this.direction=direction;repeated=profile.repeated();trajectory=profile.arsDriven()?new ArsTrajectory(blade,carrier):null;
         }
@@ -56,7 +55,7 @@ public final class AxeBladeCasting {
                 if(hit instanceof BlockHitResult){if(trajectory==null)((AxeBladeAccess)blade).confluxAptrgangr$hit(hit);return;}
                 if(!s.activate(()->{
                     boolean success=ImpactTriggers.resolve(hit,ImpactTriggers.Policy.ENTITY_DAMAGE,()->((AxeBladeAccess)blade).confluxAptrgangr$hit(hit));
-                    if(success && hit instanceof EntityHitResult e && (repeated || continued.add(e.getEntity().getUUID())))s.impact(hit);
+                    if(success)s.impact(hit);
                     return true;
                 }))s.finish(ExecutionSession.EndReason.DENIED);
             }finally{state.confluxCataclysm$resolving(false);}

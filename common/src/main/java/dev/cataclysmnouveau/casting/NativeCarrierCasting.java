@@ -17,7 +17,6 @@ import net.minecraft.world.level.ClipContext;
 import net.minecraft.world.phys.*;
 import java.util.HashSet;
 import java.util.Set;
-import java.util.UUID;
 
 /** Native returning arrow and contact-volume wave have different hit/lifetime contracts. */
 public final class NativeCarrierCasting {
@@ -55,7 +54,6 @@ public final class NativeCarrierCasting {
         private final ArsTrajectory trajectory;
         private final boolean repeated;
         private final float speed;
-        private final Set<UUID> continuedEntities=new HashSet<>();
         private final Set<BlockPos> continuedBlocks=new HashSet<>();
         private boolean anchorHit;
         private Vec3 direction;
@@ -106,7 +104,6 @@ public final class NativeCarrierCasting {
         }
         private void nativeContact(ExecutionSession<Entity> session,HitResult hit) {
             if(!session.active() || !session.permitted()) return;
-            if(hit instanceof EntityHitResult entity && !continuedEntities.add(entity.getEntity().getUUID())) return;
             if(hit instanceof BlockHitResult block && !continuedBlocks.add(block.getBlockPos())) return;
             direction=payload.getDeltaMovement().lengthSqr()>1e-8?payload.getDeltaMovement().normalize():direction;
             session.impact(hit);

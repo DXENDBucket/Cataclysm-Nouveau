@@ -1,3 +1,9 @@
+## 0.1.0-dev.62
+
+- Remove addon lifetime target deduplication from Ground Quake, Wave, Axe Blade, Scylla spears and Spark continuations. A surviving projectile can continue its Ars arrangement again after another valid native hit on the same entity.
+- Gate Scylla spear entity continuations on accepted native damage. Native invulnerability, damage cancellation, ally protection and native hit budgets remain authoritative.
+- Preserve per-impact reentrancy protection, ordinary launch billing and repeated-form trigger billing.
+
 ## 0.1.0-dev.61
 
 - Reduce four default group costs after a cross-system balance audit: Flare Bomb 300 → 180, Bone Storm 240 → 140, Desert Stele Array 600 → 400, Thundercloud 900 → 650 Mana.

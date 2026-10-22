@@ -10,7 +10,6 @@ import dev.cataclysmnouveau.*;
 import dev.cataclysmnouveau.mixin.ProjectileHitAccess;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.phys.*;
-import java.util.*;
 
 /** Accelerating native spears share the existing Core carrier/session contract. */
 public final class SpearCasting {
@@ -46,7 +45,6 @@ public final class SpearCasting {
         private final EntityProjectileSpell carrier;
         private final CarrierProfile profile;
         private final ArsTrajectory trajectory;
-        private final Set<UUID> continued=new HashSet<>();
         private Vec3 direction;
         Flight(Elemental_Spear_Entity spear,EntityProjectileSpell carrier,CarrierProfile profile) {
             this.spear=spear;this.carrier=carrier;this.profile=profile;
@@ -74,8 +72,9 @@ public final class SpearCasting {
             try {
                 if(!session.activate(()->{
                     if(trajectory!=null) {spear.setPos(hit.getLocation());spear.setDeltaMovement(direction);}
-                    ((ProjectileHitAccess)spear).confluxCataclysm$nativeHit(hit);
-                    if(profile.repeated() || !(hit instanceof EntityHitResult entity) || continued.add(entity.getEntity().getUUID())) session.impact(hit);
+                    boolean success=ImpactTriggers.resolve(hit,ImpactTriggers.Policy.ENTITY_DAMAGE,
+                            ()->((ProjectileHitAccess)spear).confluxCataclysm$nativeHit(hit));
+                    if(success) session.impact(hit);
                     return true;
                 })) session.finish(ExecutionSession.EndReason.DENIED);
             } finally {state.confluxCataclysm$resolving(false);}

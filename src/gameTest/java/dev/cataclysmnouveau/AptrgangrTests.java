@@ -26,16 +26,16 @@ import java.util.*;
 @GameTestHolder("cataclysm_nouveau_aptrgangr") @PrefixGameTestTemplate(false)
 public final class AptrgangrTests {
     @GameTest(template="empty",batch="aptr_0",timeoutTicks=100)
-    public static void piercingBladeNativeMotionDamageFadeAndContinuationDedup(GameTestHelper h){
+    public static void piercingBladeNativeMotionDamageFadeAndRepeatedContinuation(GameTestHelper h){
         try(var a=new NativeAbilityTests.Arena(h)){
             var marker=new Marker();var carrier=carrier(a,marker,false,true);h.assertTrue(ProjectileDispatch.convert(carrier),"Non-Projectile axe entity converts");var blade=blades(a).getFirst();
             near(h,mana(a),9950,"Single augmented launch quote");near(h,blade.zPower,.1,"Native acceleration power");blade.tick();near(h,blade.getDeltaMovement().z,.085,"Native inertia applied to acceleration");
             h.assertTrue(blade.getOwner()==a.p && !blade.shouldBeSaved() && blade.getTransparency()==1,"Actual owner, transient entity and native fade clock");
             var enemy=a.target(a.center,false);var friend=a.target(a.center,true);hit(blade,new EntityHitResult(friend));near(h,friend.getHealth(),500,"Allied blade hit rejected");
             hit(blade,new EntityHitResult(enemy));near(h,500-enemy.getHealth(),10,"Original eight plus minimum two augmentation");h.assertTrue(marker.hits==1 && !blade.isRemoved() && enemy.getLastDamageSource().getEntity()==a.p,"Damage-success continuation and native piercing");
-            hit(blade,new EntityHitResult(enemy));h.assertTrue(marker.hits==1,"Invulnerability failure never continues");enemy.invulnerableTime=0;hit(blade,new EntityHitResult(enemy));h.assertTrue(marker.hits==1 && enemy.getHealth()<490,"Further native damage does not repeat same-victim Ars chain");
-            var second=a.target(a.center.add(3,0,0),false);hit(blade,new EntityHitResult(second));h.assertTrue(marker.hits==2,"Another target can continue");
-            hit(blade,block(a.center));h.assertTrue(!blade.isRemoved() && marker.hits==2,"Wall passage has no nonexistent block effect continuation");
+            hit(blade,new EntityHitResult(enemy));h.assertTrue(marker.hits==1,"Invulnerability failure never continues");enemy.invulnerableTime=0;hit(blade,new EntityHitResult(enemy));h.assertTrue(marker.hits==2 && enemy.getHealth()<490,"Further successful native damage repeats the same-victim Ars chain");
+            var second=a.target(a.center.add(3,0,0),false);hit(blade,new EntityHitResult(second));h.assertTrue(marker.hits==3,"Another target can continue");
+            hit(blade,block(a.center));h.assertTrue(!blade.isRemoved() && marker.hits==3,"Wall passage has no nonexistent block effect continuation");
             for(int i=1;i<80;i++)blade.tick();step(1);h.assertTrue(blade.isRemoved() && carrier.isRemoved(),"Native eighty-tick fade closes carrier");near(h,mana(a),9950,"Piercing contact never adds an ordinary fee");h.succeed();
         }
     }
