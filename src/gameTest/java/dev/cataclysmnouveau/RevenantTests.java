@@ -94,7 +94,7 @@ public final class RevenantTests {
     public static void nativeStormFourRandomVolleysChildDamageOneFeeAndCleanup(GameTestHelper h){
         var frames=new ArrayList<BodyPhantomPayload>();
         try(var a=new NativeAbilityTests.Arena(h,p->{if(p instanceof net.minecraft.network.protocol.common.ClientboundCustomPayloadPacket c && c.payload() instanceof BodyPhantomPayload f)frames.add(f);})){
-            a.p.setYRot(0);a.p.setXRot(0);a.cast(GlyphCatalog.BONE_STORM,block(a.center),true);near(h,mana(a),9750,"One augmented formation quote");
+            a.p.setYRot(0);a.p.setXRot(0);a.cast(GlyphCatalog.BONE_STORM,block(a.center),true);near(h,mana(a),9850,"One augmented formation quote");
             step(4);h.assertTrue(bones(a).isEmpty(),"Native first round waits until tick5");int count=0;
             for(int round=0;round<4;round++){
                 step(round==0?1:5);var all=bones(a);int added=all.size()-count;h.assertTrue(added==6 || added==8 || added==10,"Original random radial count: "+added);count=all.size();
@@ -102,7 +102,7 @@ public final class RevenantTests {
             var all=bones(a);h.assertTrue(count>=24 && count<=40 && all.stream().allMatch(b->b.getOwner()==a.p && !b.shouldBeSaved() && ((ManagedProjectile)b).confluxCataclysm$sourceAbility()==Ability.BONE_STORM),"All native children have actual owner and transient state");
             h.assertTrue(frames.stream().anyMatch(f->f.valid() && f.positionAnchored() && f.animation()==1 && f.ability().equals("bone_storm")),"New native Revenant formation phantom protocol");
             var enemy=a.target(a.center.add(3,0,0),false);((ProjectileHitAccess)all.getFirst()).confluxCataclysm$nativeHit(new EntityHitResult(enemy));near(h,500-enemy.getHealth(),7,"Native group child applies its own base and augment once");
-            near(h,mana(a),9750,"Child contacts have no extra fee");a.p.discard();step(1);h.assertTrue(all.stream().allMatch(Entity::isRemoved) && frames.getLast().closed(),"Root loss cleans every remaining child and closes phantom");h.succeed();
+            near(h,mana(a),9850,"Child contacts have no extra fee");a.p.discard();step(1);h.assertTrue(all.stream().allMatch(Entity::isRemoved) && frames.getLast().closed(),"Root loss cleans every remaining child and closes phantom");h.succeed();
         }
     }
     @GameTest(template="empty",batch="revenant_6",timeoutTicks=100)

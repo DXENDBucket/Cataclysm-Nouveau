@@ -1,3 +1,9 @@
+## 0.1.0-dev.61
+
+- Reduce four default group costs after a cross-system balance audit: Flare Bomb 300 → 180, Bone Storm 240 → 140, Desert Stele Array 600 → 400, Thundercloud 900 → 650 Mana.
+- Account for random coverage, actual target intersections and native damage immunity instead of pricing every child attack as a guaranteed hit. Native damage, geometry, timing, cooldowns and augmentation are unchanged.
+- Existing configured costs remain authoritative; the new defaults do not overwrite server customizations. Update the affected regression-test fee expectations.
+
 ## 0.1.0-dev.59
 
 - Add Berserker Cross Slash, Sword Dance and Whirl through the native registered goals and aiStep. Retain original strike timing, left/right dance selection and impulses, the three-stage spin, shield disabling, knockback and damage immunity.
