@@ -30,14 +30,19 @@ public final class HarbingerActions {
     public static boolean supports(Ability a){return switch(a){case HARBINGER_CHARGE,HOWITZER_VOLLEY,MISSILE_SALVO,WITHER_SMOKE->true;default->false;};}
     private static boolean enabled(Ability a){return GlyphCatalog.ALL.stream().anyMatch(g->g instanceof CataclysmEffectGlyph e && e.ability==a && e.isEnabled());}
     public static boolean effect(Ability a,ServerLevel world,CastContext cast,double amp,double duration) {
+        return effect(a,world,cast,amp,duration,0);
+    }
+    public static boolean effect(Ability a,ServerLevel world,CastContext cast,double amp,double duration,double area) {
         if(cast.target()==null || cast.target().getType()==HitResult.Type.MISS)return false;
         if(a==Ability.HARBINGER_CHARGE)return charge(world,cast,amp);
         if(a==Ability.WITHER_SMOKE) {
             Vec3 point=cast.target() instanceof EntityHitResult hit?hit.getEntity().position():cast.origin();
             if(cast.target() instanceof BlockHitResult block)point=point.add(Vec3.atLowerCornerOf(block.getDirection().getNormal()).scale(.02));
             if(!world.isInWorldBounds(BlockPos.containing(point)) || !world.hasChunkAt(BlockPos.containing(point)))return false;
-            var cloud=new Wither_Smoke_Effect_Entity(world,point.x,point.y,point.z);cloud.setOwner(cast.damageOwner());cloud.setRadius(3);cloud.setWaitTime(5);
-            int ticks=MonstrosityCasting.scaledTicks(300,duration);cloud.setDuration(ticks);cloud.setRadiusPerTick(-3F/ticks);
+            var cloud=new Wither_Smoke_Effect_Entity(world,point.x,point.y,point.z);cloud.setOwner(cast.damageOwner());
+            if(!Double.isFinite(area))return false;
+            float radius=(float)Math.max(.5,Math.min(16,3+area));cloud.setRadius(radius);cloud.setWaitTime(5);
+            int ticks=MonstrosityCasting.scaledTicks(300,duration);cloud.setDuration(ticks);cloud.setRadiusPerTick(-radius/ticks);
             return HarbingerCasting.cloud(world,cloud,cast,Resources.amplification(amp),a,()->world.addFreshEntity(cloud));
         }
         return volley(a,world,cast,amp);

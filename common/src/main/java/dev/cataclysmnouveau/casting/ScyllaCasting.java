@@ -46,6 +46,9 @@ public final class ScyllaCasting {
         return entity instanceof ScyllaPayload?manage(entity,boss.cast,boss.amplification):entity;
     }
     public static boolean effect(Ability ability,ServerLevel world,CastContext cast,double amp,double duration) {
+        return effect(ability,world,cast,amp,duration,0);
+    }
+    public static boolean effect(Ability ability,ServerLevel world,CastContext cast,double amp,double duration,double area) {
         if(ScyllaActions.supports(ability)) return ScyllaActions.effect(ability,world,cast,amp,duration);
         if(ability==Ability.THUNDER_CLOUD || ability==Ability.LIGHTNING_ROW)
             return ScyllaTimedCasting.effect(ability,world,cast,amp,duration);
@@ -57,9 +60,10 @@ public final class ScyllaCasting {
                 Math.max(0,CataclysmConfig.scyllaStormDamage()),CataclysmConfig.scyllaHpDamage(),cast.damageOwner(),2),cast,amp));
         if(ability==Ability.LIGHTNING_FIELD) {
             var field=manage(new Lightning_Area_Effect_Entity(world,point.x,point.y,point.z),cast,amp);
-            field.setRadius(3);field.setDamage(Math.max(0,CataclysmConfig.scyllaFieldDamage()));
+            if(!Double.isFinite(area))return false;
+            float radius=(float)Math.max(.5,Math.min(16,3+area));field.setRadius(radius);field.setDamage(Math.max(0,CataclysmConfig.scyllaFieldDamage()));
             field.setWaitTime(12);int ticks=MonstrosityCasting.scaledTicks(CataclysmConfig.scyllaFieldDuration(),duration);
-            field.setDuration(ticks);field.setRadiusPerTick(-2.5F/ticks);
+            field.setDuration(ticks);field.setRadiusPerTick(-(radius-.5F)/ticks);
             return world.addFreshEntity(field);
         }
         if(ability==Ability.STORM_SERPENT) {

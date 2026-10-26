@@ -297,5 +297,6 @@
   "cataclysm_nouveau.glyph_desc.glyph_void_howitzer": "将弹射物替换为虚空榴弹。爆炸后生成逐圈展开的虚空符文，直接击杀敌人时恢复施法者生命。",
   "item.cataclysm_nouveau.glyph_void_scatter_arrow": "虚空散射箭",
   "cataclysm_nouveau.glyph_name.glyph_void_scatter_arrow": "虚空散射箭",
-  "cataclysm_nouveau.glyph_desc.glyph_void_scatter_arrow": "将弹射物替换为虚空散射箭。命中后迸发虚空碎片，碎片不会再次命中最初被箭射中的生物。"
+  "cataclysm_nouveau.glyph_desc.glyph_void_scatter_arrow": "将弹射物替换为虚空散射箭。命中后迸发虚空碎片，碎片不会再次命中最初被箭射中的生物。",
+  "cataclysm_nouveau.augment.area_up": "初始作用半径增加 1 格，最多 16 格。"
 }

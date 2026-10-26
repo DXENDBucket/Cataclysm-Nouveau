@@ -22,6 +22,10 @@ public final class CataclysmEffectGlyph extends AbstractEffect implements Trigge
     public CataclysmEffectGlyph(Ability ability) {
         super(CarrierRegistry.id("cataclysm_nouveau:glyph_" + ability.id), ability.name);
         this.ability = ability;
+        if (ability == Ability.WITHER_SMOKE || ability == Ability.LIGHTNING_FIELD) {
+            compatibleAugments.add(AugmentAOE.INSTANCE);
+            augmentDescriptions.put(AugmentAOE.INSTANCE, Component.translatable("cataclysm_nouveau.augment.area_up"));
+        }
         if (ability == Ability.ABYSS_MARK || ability == Ability.ASHEN_BREATH || ability == Ability.SANDSTORM_RING || ability == Ability.MONSTROUS || ability == Ability.SHOULDER_CHECK || ability == Ability.BONE_FRACTURE || ability == Ability.LAVA_WALKING || ability == Ability.LIGHTNING_FIELD || ability == Ability.THUNDER_CLOUD || ability == Ability.WATER_WALKING || ability == Ability.DEATH_LASER || ability == Ability.WITHER_SMOKE || ability == Ability.VOID_VORTEX || ability == Ability.IGNIS_FLAME_STRIKE || ability == Ability.ABYSS_TRIPLE_BLAST || ability == Ability.ABYSS_MINE || ability == Ability.ABYSS_BLAST || ability == Ability.ABYSS_BOMBARDMENT || ability == Ability.DIMENSIONAL_RIFT || ability == Ability.ABYSS_MINEFIELD || ability == Ability.ABYSS_BOMBARDMENT_ARRAY) {
             compatibleAugments.add(AugmentExtendTime.INSTANCE);
             compatibleAugments.add(AugmentDurationDown.INSTANCE);
@@ -75,11 +79,11 @@ public final class CataclysmEffectGlyph extends AbstractEffect implements Trigge
                 : GuardianCasting.supports(ability)
                 ? GuardianCasting.effect(ability,world,frame,stats.getAmpMultiplier(),stats.getDurationMultiplier())
                 : HarbingerActions.supports(ability)
-                ? HarbingerActions.effect(ability,world,frame,stats.getAmpMultiplier(),stats.getDurationMultiplier())
+                ? HarbingerActions.effect(ability,world,frame,stats.getAmpMultiplier(),stats.getDurationMultiplier(),stats.getAoeMultiplier())
                 : MonstrosityCasting.supports(ability)
                 ? MonstrosityCasting.effect(ability, world, frame, stats.getAmpMultiplier(), stats.getDurationMultiplier())
                 : ScyllaCasting.supports(ability)
-                ? ScyllaCasting.effect(ability, world, frame, stats.getAmpMultiplier(), stats.getDurationMultiplier())
+                ? ScyllaCasting.effect(ability, world, frame, stats.getAmpMultiplier(), stats.getDurationMultiplier(),stats.getAoeMultiplier())
                 : MaledictusCasting.supports(ability)
                 ? MaledictusCasting.effect(ability, world, frame, stats.getAmpMultiplier())
                 : NativePayloads.effect(ability, world, frame, stats.getAmpMultiplier()));
