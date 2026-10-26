@@ -1,0 +1,34 @@
+[
+  {
+    "file": "ars-nouveau-forge1201.jar",
+    "sha256": "1f1debc282a0c379c1141f2840ea294eede6f6b544c589663f40bbe17b59a1af",
+    "version": "4.12.7"
+  },
+  {
+    "file": "cataclysm-forge1201.jar",
+    "sha256": "c29dcf940168208517b72f2d9965828b106a6b94cbea55d5001558c69a27b362",
+    "version": "3.31",
+    "url": "https://mediafilez.forgecdn.net/files/8246/47/L_Enders_Cataclysm-3.31.jar"
+  },
+  {
+    "file": "curios-forge1201.jar",
+    "sha256": "1e817919a35b37cf30524aaec73f0ca5130452f23f168f844854df282eb8e51f",
+    "version": "5.14.1+1.20.1"
+  },
+  {
+    "file": "geckolib-forge1201.jar",
+    "sha256": "4518779a31b6c2abb92c98b5ad17ef3d60177df68626bfc86c44de2764913c2b",
+    "version": "4.8.4"
+  },
+  {
+    "file": "lionfishapi-forge1201.jar",
+    "sha256": "d2fdaf7e9bc53fde7da4a86ab17018a3ed6c16fc2d46de5054e5a83e2bef7871",
+    "version": "3.0",
+    "url": "https://mediafilez.forgecdn.net/files/8095/554/lionfishapi-3.0.jar"
+  },
+  {
+    "file": "patchouli-forge1201.jar",
+    "sha256": "05f7b5d52f6b8f0fd7f8b4822fa07a192d1394d83a264309c9d221d6d4fd21c5",
+    "version": "1.20.1-85-FORGE"
+  }
+]

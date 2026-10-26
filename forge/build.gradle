@@ -1,0 +1,88 @@
+plugins {
+    id 'java-library'
+    id 'net.minecraftforge.gradle' version '6.0.36'
+    id 'org.spongepowered.mixin' version '0.7.38'
+}
+group = 'dev.cataclysmnouveau'
+version = file('../VERSION').text.trim()
+base { archivesName = 'cataclysm-nouveau' }
+java { toolchain.languageVersion = JavaLanguageVersion.of(17); withSourcesJar() }
+repositories { flatDir { dirs 'libs' }; mavenCentral { content { excludeGroup 'local' } } }
+sourceSets { gameTest { compileClasspath += sourceSets.main.output; runtimeClasspath += sourceSets.main.output } }
+configurations {
+    gameTestImplementation.extendsFrom implementation
+    gameTestCompileOnly.extendsFrom compileOnly
+    gameTestRuntimeOnly.extendsFrom runtimeOnly
+}
+evaluationDependsOn(':ars-conflux')
+minecraft {
+    mappings channel: 'official', version: '1.20.1'
+    copyIdeResources = true
+    runs {
+        configureEach {
+            property 'mixin.env.remapRefMap', 'true'
+            property 'mixin.env.refMapRemappingFile', "${projectDir}/build/createSrgToMcp/output.srg"
+            args '--mixin.config', 'ars_conflux.mixins.json'
+            args '--mixin.config', 'cataclysm_nouveau.mixins.json'
+        }
+        client {
+            workingDirectory file('run/client')
+            jvmArgs '-Xmx1100m'
+            if(providers.gradleProperty('withClientProbe').getOrElse('false').toBoolean()) property 'cataclysm_nouveau.clientProbe','true'
+            mods { ars_conflux { source project(':ars-conflux').sourceSets.main }; cataclysm_nouveau { source sourceSets.main; if(providers.gradleProperty('withClientProbe').getOrElse('false').toBoolean())source sourceSets.gameTest } }
+        }
+        server { workingDirectory file('run/server'); args '--nogui'; mods { ars_conflux { source project(':ars-conflux').sourceSets.main }; cataclysm_nouveau { source sourceSets.main } } }
+        gameTestServer {
+            workingDirectory file('run/gametest')
+            property 'forge.enabledGameTestNamespaces', providers.gradleProperty('gameTestNamespaces').getOrElse('cataclysm_nouveau_forge')
+            jvmArgs '-Xmx'+providers.gradleProperty('gameTestHeap').getOrElse('900m')
+            mods { ars_conflux { source project(':ars-conflux').sourceSets.main }; cataclysm_nouveau { source sourceSets.main; source sourceSets.gameTest } }
+        }
+    }
+}
+dependencies {
+    minecraft 'net.minecraftforge:forge:1.20.1-47.4.0'
+    implementation project(':ars-conflux')
+    compileOnly 'io.github.llamalad7:mixinextras-common:0.4.1'
+    annotationProcessor 'org.spongepowered:mixin:0.8.5:processor'
+    annotationProcessor 'io.github.llamalad7:mixinextras-common:0.4.1'
+    for (name in ['ars-nouveau','curios','geckolib','patchouli','cataclysm','lionfishapi']) implementation fg.deobf("local:${name}:forge1201")
+}
+def bridges = layout.buildDirectory.dir('generated/forge')
+def generatePlatform = tasks.register('generateForgePlatform', Exec) {
+    inputs.dir '../common/src/main'
+    inputs.dir '../src/main'
+    inputs.file 'generate_platform.py'
+    outputs.dir bridges
+    commandLine 'python', 'generate_platform.py'
+}
+sourceSets.main.java.srcDir bridges.map { it.dir('java') }
+sourceSets.main.resources.srcDir bridges.map { it.dir('resources') }
+tasks.named('compileJava') { dependsOn generatePlatform }
+tasks.named('processResources') {
+    dependsOn generatePlatform
+    inputs.property 'version',project.version
+    filesMatching('META-INF/mods.toml') { expand(version:project.version) }
+}
+mixin { add sourceSets.main,'cataclysm_nouveau.refmap.json'; config 'cataclysm_nouveau.mixins.json' }
+tasks.withType(JavaCompile).configureEach { options.encoding = 'UTF-8'; options.compilerArgs += ['-Xmaxerrs','1000'] }
+tasks.named('sourcesJar') { dependsOn generatePlatform; from('../LICENSE','../THIRD_PARTY_NOTICES.md') }
+tasks.named('jar') {
+    duplicatesStrategy=DuplicatesStrategy.EXCLUDE
+    from('../LICENSE','../THIRD_PARTY_NOTICES.md')
+    archiveFileName = "cataclysm-nouveau-${project.version}-mc1.20.1-forge.jar"
+    manifest { attributes 'MixinConfigs':'cataclysm_nouveau.mixins.json' }
+    finalizedBy 'reobfJar'
+}
+tasks.register('verifyDistributions',Exec) {
+    dependsOn tasks.named('jar'),tasks.named('sourcesJar')
+    commandLine 'python','verify_release.py'
+}
+
+// Dev runs use directory sources, so the AP refmap must be present there as well as in the jar.
+def copyRefmap=tasks.register('copyMixinRefmap',Copy){
+    dependsOn tasks.named('compileJava'),tasks.named('processResources')
+    from(layout.buildDirectory.file('tmp/compileJava/compileJava-refmap.json')){rename{ 'cataclysm_nouveau.refmap.json' }}
+    into layout.buildDirectory.dir('resources/main')
+}
+tasks.named('classes'){dependsOn copyRefmap}

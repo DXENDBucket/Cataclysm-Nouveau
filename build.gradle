@@ -19,7 +19,13 @@ neoForge {
     version = '21.1.250'
     addModdingDependenciesTo sourceSets.gameTest
     runs {
-        client { client() }
+        client {
+            client()
+            if(providers.gradleProperty('withClientProbe').getOrElse('false').toBoolean()) {
+                systemProperty 'cataclysm_nouveau.clientProbe','true'
+                jvmArgument '-Xmx1100m'
+            }
+        }
         server { server(); programArgument '--nogui' }
         gameTestServer {
             type = 'gameTestServer'
@@ -92,7 +98,11 @@ tasks.register('verifyDistributions') {
                 zip.entries().each { entry ->
                     if (entry.directory) return
                     def name = entry.name
-                    if (name.startsWith('assets/') && !name.startsWith('assets/cataclysm_nouveau/'))
+                    if (name == 'assets/minecraft/atlases/blocks.json') {
+                        def atlas = new groovy.json.JsonSlurper().parse(zip.getInputStream(entry))
+                        if (atlas != [sources:[[type:'minecraft:single',resource:'cataclysm:entity/deepling/deepling_warlock_mark1']]])
+                            throw new GradleException("Unexpected atlas content: ${name}")
+                    } else if (name.startsWith('assets/') && !name.startsWith('assets/cataclysm_nouveau/'))
                         throw new GradleException("Foreign asset namespace: ${name}")
                     if (name.endsWith('.class') && !name.startsWith('dev/cataclysmnouveau/'))
                         throw new GradleException("Foreign class: ${name}")

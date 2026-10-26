@@ -9,3 +9,8 @@
 .env
 *.key
 *.pem
+
+/forge/.gradle/
+/forge/build/
+/forge/run/
+/forge/libs/

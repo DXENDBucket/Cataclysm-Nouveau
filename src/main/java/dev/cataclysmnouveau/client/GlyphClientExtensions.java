@@ -17,8 +17,22 @@ import net.neoforged.neoforge.client.extensions.common.RegisterClientExtensionsE
 /** A builtin/entity parent needs its native item identity as well as its model. */
 @EventBusSubscriber(modid="cataclysm_nouveau",bus=EventBusSubscriber.Bus.MOD,value=Dist.CLIENT)
 public final class GlyphClientExtensions {
+    private static final java.util.Map<net.minecraft.world.item.Item,java.util.function.Supplier<net.minecraft.world.item.Item>> SOURCES=new java.util.IdentityHashMap<>();
+    private static void registerNative(RegisterClientExtensionsEvent event,java.util.function.Supplier<net.minecraft.world.item.Item> source,net.minecraft.world.item.Item... glyphs){
+        for(var glyph:glyphs)SOURCES.put(glyph,source);
+        event.registerItem(nativeItem(source),glyphs);
+    }
+
+    public static ItemStack nativeStack(ItemStack glyph){
+        var source=SOURCES.get(glyph.getItem());
+        return source==null?ItemStack.EMPTY:source.get().getDefaultInstance();
+    }
     @SubscribeEvent
     public static void register(RegisterClientExtensionsEvent event) {
+        dev.arsconflux.api.glyph.GlyphVisuals.register("cataclysm_nouveau",part->{
+            var source=SOURCES.get(part.getGlyph());
+            return source==null?null:dev.arsconflux.api.glyph.GlyphIcon.item(source.get().getDefaultInstance());
+        });
         // Use a vanilla status sprite at runtime; neither upstream pixels nor a new atlas are bundled.
         event.registerMobEffect(new net.neoforged.neoforge.client.extensions.common.IClientMobEffectExtensions() {
             @Override public boolean renderInventoryIcon(net.minecraft.world.effect.MobEffectInstance instance,
@@ -34,19 +48,19 @@ public final class GlyphClientExtensions {
                 return true;
             }
         },dev.cataclysmnouveau.CataclysmEffects.LAVA_WALKING,dev.cataclysmnouveau.CataclysmEffects.WATER_WALKING,dev.cataclysmnouveau.CataclysmEffects.CURSED_RAGE);
-        event.registerItem(nativeItem(() -> ModItems.VOID_ASSULT_SHOULDER_WEAPON.get()),GlyphCatalog.VOID_HOWITZER.getGlyph());
-        event.registerItem(nativeItem(() -> ModItems.WRATH_OF_THE_DESERT.get()),GlyphCatalog.CURSED_SANDSTORM.getGlyph());
-        event.registerItem(nativeItem(() -> ModItems.TIDAL_CLAWS.get()),GlyphCatalog.ABYSS_BLAST.getGlyph(),GlyphCatalog.TIDAL_TENTACLE.getGlyph(),GlyphCatalog.ABYSS_TRIPLE_BLAST.getGlyph());
-        event.registerItem(nativeItem(() -> com.github.L_Ender.cataclysm.init.ModBlocks.ABYSSAL_EGG.get().asItem()),GlyphCatalog.ABYSS_BOMBARDMENT.getGlyph(),GlyphCatalog.ABYSS_BOMBARDMENT_ARRAY.getGlyph());
-        event.registerItem(nativeItem(() -> ModItems.CURSED_BOW.get()),GlyphCatalog.PHANTOM_ARROW.getGlyph(),GlyphCatalog.PHANTOM_AERIAL_VOLLEY.getGlyph());
-        event.registerItem(nativeItem(() -> ModItems.SOUL_RENDER.get()),GlyphCatalog.PHANTOM_HALBERD.getGlyph(),GlyphCatalog.PHANTOM_SPIRAL.getGlyph(),GlyphCatalog.PHANTOM_RINGS.getGlyph(),GlyphCatalog.HALBERD_CLEAVE.getGlyph(),GlyphCatalog.MALEDICTUS_AERIAL_SMASH.getGlyph(),GlyphCatalog.MALEDICTUS_RUSH.getGlyph(),GlyphCatalog.MALEDICTUS_SHOCKWAVE.getGlyph(),GlyphCatalog.MALEDICTUS_UPPERCUT.getGlyph(),GlyphCatalog.MALEDICTUS_MELEE_COMBO.getGlyph(),GlyphCatalog.MALEDICTUS_SPIN_SLASHES.getGlyph());
-        event.registerItem(nativeItem(() -> ModItems.CERAUNUS.get()),GlyphCatalog.ANCHOR.getGlyph(),GlyphCatalog.WAVE.getGlyph(),GlyphCatalog.SPIN.getGlyph(),GlyphCatalog.LEAP.getGlyph());
-        event.registerItem(nativeItem(() -> ModItems.LASER_GATLING.get()),GlyphCatalog.LASER_BOLT.getGlyph(),GlyphCatalog.DEATH_LASER.getGlyph());
-        event.registerItem(nativeItem(() -> ModItems.WITHER_ASSULT_SHOULDER_WEAPON.get()),GlyphCatalog.MISSILE.getGlyph(),GlyphCatalog.HOMING.getGlyph(),GlyphCatalog.HOWITZER.getGlyph(),GlyphCatalog.HOWITZER_VOLLEY.getGlyph(),GlyphCatalog.MISSILE_SALVO.getGlyph());
-        event.registerItem(nativeItem(() -> ModItems.THE_INCINERATOR.get()),GlyphCatalog.IGNIS_BLADE_FIREBALLS.getGlyph(),GlyphCatalog.IGNIS_SWORD_COMBO.getGlyph(),GlyphCatalog.IGNIS_ULTIMATE.getGlyph(),GlyphCatalog.IGNIS_FLAME_STRIKE.getGlyph());
-        event.registerItem(nativeItem(() -> ModItems.BULWARK_OF_THE_FLAME.get()),GlyphCatalog.IGNIS_AIR_SMASH.getGlyph(),GlyphCatalog.IGNIS_EARTH_SHUDDERS.getGlyph(),GlyphCatalog.IGNIS_REINFORCED_SMASH.getGlyph());
-        event.registerItem(nativeItem(() -> ModItems.INFERNAL_FORGE.get()),GlyphCatalog.QUAKE.getGlyph());
-        event.registerItem(nativeItem(() -> ModItems.GAUNTLET_OF_GUARD.get()),GlyphCatalog.GRAVITY_PUNCH.getGlyph(),
+        registerNative(event,() -> ModItems.VOID_ASSULT_SHOULDER_WEAPON.get(),GlyphCatalog.VOID_HOWITZER.getGlyph());
+        registerNative(event,() -> ModItems.WRATH_OF_THE_DESERT.get(),GlyphCatalog.CURSED_SANDSTORM.getGlyph());
+        registerNative(event,() -> ModItems.TIDAL_CLAWS.get(),GlyphCatalog.ABYSS_BLAST.getGlyph(),GlyphCatalog.TIDAL_TENTACLE.getGlyph(),GlyphCatalog.ABYSS_TRIPLE_BLAST.getGlyph());
+        registerNative(event,() -> com.github.L_Ender.cataclysm.init.ModBlocks.ABYSSAL_EGG.get().asItem(),GlyphCatalog.ABYSS_BOMBARDMENT.getGlyph(),GlyphCatalog.ABYSS_BOMBARDMENT_ARRAY.getGlyph());
+        registerNative(event,() -> ModItems.CURSED_BOW.get(),GlyphCatalog.PHANTOM_ARROW.getGlyph(),GlyphCatalog.PHANTOM_AERIAL_VOLLEY.getGlyph());
+        registerNative(event,() -> ModItems.SOUL_RENDER.get(),GlyphCatalog.PHANTOM_HALBERD.getGlyph(),GlyphCatalog.PHANTOM_SPIRAL.getGlyph(),GlyphCatalog.PHANTOM_RINGS.getGlyph(),GlyphCatalog.HALBERD_CLEAVE.getGlyph(),GlyphCatalog.MALEDICTUS_AERIAL_SMASH.getGlyph(),GlyphCatalog.MALEDICTUS_RUSH.getGlyph(),GlyphCatalog.MALEDICTUS_SHOCKWAVE.getGlyph(),GlyphCatalog.MALEDICTUS_UPPERCUT.getGlyph(),GlyphCatalog.MALEDICTUS_MELEE_COMBO.getGlyph(),GlyphCatalog.MALEDICTUS_SPIN_SLASHES.getGlyph());
+        registerNative(event,() -> ModItems.CERAUNUS.get(),GlyphCatalog.ANCHOR.getGlyph(),GlyphCatalog.WAVE.getGlyph(),GlyphCatalog.SPIN.getGlyph(),GlyphCatalog.LEAP.getGlyph());
+        registerNative(event,() -> ModItems.LASER_GATLING.get(),GlyphCatalog.LASER_BOLT.getGlyph(),GlyphCatalog.DEATH_LASER.getGlyph());
+        registerNative(event,() -> ModItems.WITHER_ASSULT_SHOULDER_WEAPON.get(),GlyphCatalog.MISSILE.getGlyph(),GlyphCatalog.HOMING.getGlyph(),GlyphCatalog.HOWITZER.getGlyph(),GlyphCatalog.HOWITZER_VOLLEY.getGlyph(),GlyphCatalog.MISSILE_SALVO.getGlyph());
+        registerNative(event,() -> ModItems.THE_INCINERATOR.get(),GlyphCatalog.IGNIS_BLADE_FIREBALLS.getGlyph(),GlyphCatalog.IGNIS_SWORD_COMBO.getGlyph(),GlyphCatalog.IGNIS_ULTIMATE.getGlyph(),GlyphCatalog.IGNIS_FLAME_STRIKE.getGlyph());
+        registerNative(event,() -> ModItems.BULWARK_OF_THE_FLAME.get(),GlyphCatalog.IGNIS_AIR_SMASH.getGlyph(),GlyphCatalog.IGNIS_EARTH_SHUDDERS.getGlyph(),GlyphCatalog.IGNIS_REINFORCED_SMASH.getGlyph());
+        registerNative(event,() -> ModItems.INFERNAL_FORGE.get(),GlyphCatalog.QUAKE.getGlyph());
+        registerNative(event,() -> ModItems.GAUNTLET_OF_GUARD.get(),GlyphCatalog.GRAVITY_PUNCH.getGlyph(),
             GlyphCatalog.GUARDIAN_UPPERCUT.getGlyph(),GlyphCatalog.GUARDIAN_ROCKET_PUNCH.getGlyph());
     }
     private static net.minecraft.client.renderer.texture.TextureAtlasSprite statusIcon(net.minecraft.world.effect.MobEffectInstance instance) {

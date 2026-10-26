@@ -1,0 +1,8 @@
+{
+  "sources": [
+    {
+      "type": "minecraft:single",
+      "resource": "cataclysm:entity/deepling/deepling_warlock_mark1"
+    }
+  ]
+}
