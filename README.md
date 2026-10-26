@@ -1,10 +1,10 @@
 # Cataclysm & Nouveau
 
-当前开发版本：**0.1.0-dev.62**，移除地震波、海浪、旋刃、元素矛和电火花的同目标终生续接限制。伤害型弹体每次原生伤害成功后均可继续 Ars 编排，无敌帧或取消伤害仍会阻止续接。共 102 种魔符，仍仅支持 Minecraft 1.21.1 NeoForge。
+当前发布版本：**0.1.0**，移除地震波、海浪、旋刃、元素矛和电火花的同目标终生续接限制。伤害型弹体每次原生伤害成功后均可继续 Ars 编排，无敌帧或取消伤害仍会阻止续接。共 102 种魔符，仍仅支持 Minecraft 1.21.1 NeoForge。
 
 将 L_Ender's Cataclysm 的能力接入 Ars Nouveau 编排，通过 Ars Conflux 共用弹射物兼容、施法上下文和触发资源结算。
 
-首版：Minecraft **1.21.1 NeoForge**，modid **`cataclysm_nouveau`**。必须安装灾变本体。dev.36 起需要 **Ars Conflux 0.1.21 或更新的0.1.x**。
+首版：Minecraft **1.21.1 NeoForge**，modid **`cataclysm_nouveau`**。必须安装灾变本体。当前需要 **Ars Conflux 0.1.24 或更新的0.1.x**。
 
 客户端排障开关位于 `config/cataclysm_nouveau-client.toml` 的 `[diagnostics] vortex = false`，默认关闭。开启后，在当前客户端世界中最多记录八个虚空漩涡（包括原生 Boss 的漩涡）：实体寿命、同步裁剪标记、原生渲染调用、贴图及资源包来源。日志以 `[Vortex diagnostic]` 标识；不会改变漩涡或优化模组行为。重新进入世界可开始新一轮记录。
 
