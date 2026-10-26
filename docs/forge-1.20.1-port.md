@@ -34,3 +34,10 @@ Ars 4 没有 Ars 5 的每父魔符增强描述 map，这部分使用 Ars 4 本�
 - 没有逐一人工体验所有 Boss 动作、粒子和每种可选 Ars 附属组合；不以服务端通过替代这些视觉／玩法验证。
 
 原始日志、截图和哈希在各工作树忽略的 `build/`、`run/` 与交付目录中。未自动推送、上传 CurseForge 或覆盖共享人工测试实例。
+
+
+## 后续发布与部署
+
+2026-10-27 用户授权后，0.1.1 的 NeoForge／Forge 文件已被 CurseForge 接收，文件 ID 分别为 `9336478`／`9336479`（项目 `1767646`）。Conflux 0.1.30 两平台为 `9336474`／`9336476`（项目 `1737308`）。均等待审核后自动发布，复用已验证二进制。
+
+两套共享测试实例已替换 Core 和本附属；Forge 同时补入灾变 3.31、Lionfish API 3.0。旧文件在实例 `codex-backups/cataclysm-conflux-20261027-0330/mods/` 中保留。复制后哈希与 modid 唯一性检查通过。完整台账位于 Core 的 `build/curseforge/release-20261027-conflux-cataclysm/`；此次未推送 Git。
