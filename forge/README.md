@@ -14,6 +14,10 @@ Place the actual published dependencies in ignored `forge/libs/`, using the file
 
 `jar` is followed by `reobfJar`; distribute the final `*-mc1.20.1-forge.jar`. `verifyDistributions` checks both binary and source archives, including the no-bundled-Cataclysm-assets policy, license files, refmap and all 102 glyph recipes.
 
+From 0.1.3, `verifyDistributions` also depends on `verifyProductionMixins`: a build-only ASM reader checks the final binary's method selectors, invocation sites, invokers/accessors and shadow fields against the **original production** dependencies and Forge's SRG Minecraft JAR. It does not load Minecraft or replace a client launch test. ASM/Gson are verification-tool dependencies only and are not bundled. Intentionally optional `require=0` misses in multi-target adapters are recorded separately.
+
+Compilation declares the raw refmap, archive refmap copy and additional TSRG file as outputs, so `--build-cache` restores all three. A clean cache-restore build is part of the 0.1.3 regression check.
+
 ## Native differences
 
 - Cataclysm 3.31 uses a living-entity tentacle capability rather than a data attachment.

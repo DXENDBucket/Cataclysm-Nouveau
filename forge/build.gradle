@@ -10,6 +10,7 @@ java { toolchain.languageVersion = JavaLanguageVersion.of(17); withSourcesJar() 
 repositories { flatDir { dirs 'libs' }; mavenCentral { content { excludeGroup 'local' } } }
 sourceSets { gameTest { compileClasspath += sourceSets.main.output; runtimeClasspath += sourceSets.main.output } }
 configurations {
+    productionAudit
     gameTestImplementation.extendsFrom implementation
     gameTestCompileOnly.extendsFrom compileOnly
     gameTestRuntimeOnly.extendsFrom runtimeOnly
@@ -41,6 +42,9 @@ minecraft {
     }
 }
 dependencies {
+    // Build-only bytecode reader; never bundled or required by the mod.
+    productionAudit 'org.ow2.asm:asm-tree:9.7.1'
+    productionAudit 'com.google.code.gson:gson:2.10'
     minecraft 'net.minecraftforge:forge:1.20.1-47.4.0'
     implementation project(':ars-conflux')
     compileOnly 'io.github.llamalad7:mixinextras-common:0.4.1'
@@ -65,6 +69,12 @@ tasks.named('processResources') {
     filesMatching('META-INF/mods.toml') { expand(version:project.version) }
 }
 mixin { add sourceSets.main,'cataclysm_nouveau.refmap.json'; config 'cataclysm_nouveau.mixins.json' }
+tasks.named('compileJava', JavaCompile) {
+    // MixinGradle's generated files and post-action copy must survive FROM-CACHE.
+    outputs.file(layout.buildDirectory.file('tmp/compileJava/compileJava-refmap.json')).withPropertyName('mixinRefmap')
+    outputs.file(layout.buildDirectory.file('tmp/compileJava/cataclysm_nouveau.refmap.json')).withPropertyName('packagedMixinRefmap')
+    outputs.file(layout.buildDirectory.file('tmp/compileJava/compileJava-mappings.tsrg')).withPropertyName('mixinMappings')
+}
 tasks.withType(JavaCompile).configureEach { options.encoding = 'UTF-8'; options.compilerArgs += ['-Xmaxerrs','1000'] }
 tasks.named('sourcesJar') { dependsOn generatePlatform; from('../LICENSE','../THIRD_PARTY_NOTICES.md') }
 tasks.named('jar') {
@@ -78,6 +88,20 @@ tasks.register('verifyDistributions',Exec) {
     dependsOn tasks.named('jar'),tasks.named('sourcesJar')
     commandLine 'python','verify_release.py'
 }
+
+def productionAudit = tasks.register('verifyProductionMixins', Exec) {
+    dependsOn tasks.named('reobfJar')
+    doFirst {
+        def minecraftSrg = new File(gradle.gradleUserHomeDir,
+                'caches/forge_gradle/minecraft_user_repo/net/minecraftforge/forge/1.20.1-47.4.0/forge-1.20.1-47.4.0-srg.jar')
+        if (!minecraftSrg.isFile()) throw new GradleException('Missing production Forge SRG JAR for selector audit')
+        def java = javaToolchains.launcherFor { languageVersion = JavaLanguageVersion.of(17) }.get().executablePath.asFile
+        commandLine([java, '-Xmx128m', '-cp', configurations.productionAudit.asPath,
+                file('tools/ProductionMixinAudit.java'), tasks.named('jar').get().archiveFile.get().asFile,
+                file('build/production-mixin-audit.json')] + fileTree('libs').matching { include '*.jar' }.files.sort() + [minecraftSrg])
+    }
+}
+tasks.named('verifyDistributions') { dependsOn productionAudit }
 
 // Dev runs use directory sources, so the AP refmap must be present there as well as in the jar.
 def copyRefmap=tasks.register('copyMixinRefmap',Copy){

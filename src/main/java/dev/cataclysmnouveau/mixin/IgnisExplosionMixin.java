@@ -21,7 +21,7 @@ public abstract class IgnisExplosionMixin {
         if(payload instanceof com.github.L_Ender.cataclysm.entity.effect.Flame_Strike_Entity)radius=2;
         return IgnisCasting.explosion(world,payload,x,y,z,radius);
     }
-    @WrapOperation(method={"onHitEntity","onHitBlock","tick"},at=@At(value="INVOKE",target="Lcom/github/L_Ender/cataclysm/util/CustomExplosion/IgnisExplosion;explode()V"))
+    @WrapOperation(method={"onHitEntity","onHitBlock","tick"},at=@At(value="INVOKE",target="Lcom/github/L_Ender/cataclysm/util/CustomExplosion/IgnisExplosion;explode()V",remap=true))
     private void ignis$damageScope(IgnisExplosion explosion,Operation<Void> original) {
         var source=(Entity)(Object)this;
         if(source.level().isClientSide){original.call(explosion);return;}

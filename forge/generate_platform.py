@@ -66,7 +66,9 @@ def pattern_switches(text):
     return text
 
 
-MC_METHODS = {'tick','aiStep','hurt','defineSynchedData','readAdditionalSaveData','addAdditionalSaveData','onHit','onHitEntity','onHitBlock','canHitEntity','getAddEntityPacket','getBoundingBoxForCulling','shouldRenderAtSqrDistance','remove','setDeltaMovement','setPos','getYRot','getXRot'}
+# Native methods can share vanilla names without overriding them (Abyss Mine's
+# explode is one example). Ambiguous invocation targets carry an explicit @At flag.
+MC_METHODS = {'tick','aiStep','hurt','defineSynchedData','readAdditionalSaveData','addAdditionalSaveData','onHit','onHitEntity','onHitBlock','canHitEntity','getAddEntityPacket','getBoundingBoxForCulling','shouldRenderAtSqrDistance','remove','setDeltaMovement','setPos','getYRot','getXRot','move','positionRider','discard','onSyncedDataUpdated','start','stop','canUse','canContinueToUse'}
 
 
 def split_mixed_selectors(text):

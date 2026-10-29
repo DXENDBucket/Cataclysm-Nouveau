@@ -1,0 +1,101 @@
+{
+  "date": "2026-10-29",
+  "version": "0.1.3",
+  "start_commit": "2b1f803817977b9108714889eb8511f78f10b653",
+  "core_commit": "d8431a722bf439c937ae8e3e355a9688a33e698d",
+  "core_tracked_files_unchanged": true,
+  "worktree": "C:\\Users\\57991\\Documents\\MinecraftDev\\parallel-workspaces\\cataclysm-forge-selectors-20261029\\Cataclysm-Nouveau",
+  "curseforge_uploaded": false,
+  "git_pushed": false,
+  "shared_instances_changed": false,
+  "production_bytecode_audit": {
+    "binary": "C:\\Users\\57991\\Documents\\MinecraftDev\\parallel-workspaces\\cataclysm-forge-selectors-20261029\\Cataclysm-Nouveau\\forge\\build\\libs\\cataclysm-nouveau-0.1.3-mc1.20.1-forge.jar",
+    "mixins": 111,
+    "method_selectors": 420,
+    "invoke_or_field_sites": 272,
+    "optional_misses": 82,
+    "failures": [],
+    "accessors_and_shadow_fields": 49,
+    "optional_miss_callbacks": {
+      "dev/cataclysmnouveau/mixin/HarbingerNativeMixin/harbinger$collision": 8,
+      "dev/cataclysmnouveau/mixin/HarbingerNativeMixin/harbinger$explosion": 3,
+      "dev/cataclysmnouveau/mixin/HarbingerNativeMixin/harbinger$homingCollision": 2,
+      "dev/cataclysmnouveau/mixin/HarbingerNativeMixin/harbinger$smoke": 7,
+      "dev/cataclysmnouveau/mixin/HarbingerNativeMixin/harbinger$terrain": 4,
+      "dev/cataclysmnouveau/mixin/LeviathanFormationGoalMixin/leviathan$mineLoaded": 1,
+      "dev/cataclysmnouveau/mixin/LeviathanFormationGoalMixin/leviathan$portalLoaded": 1,
+      "dev/cataclysmnouveau/mixin/NativeArsDamageMixin/nativeArs$entity": 30,
+      "dev/cataclysmnouveau/mixin/NativeArsDamageMixin/nativeArs$living": 26
+    },
+    "scope": "Production bytecode names and call sites; not a Mixin runtime or client visual test"
+  },
+  "forge_cache_restore": "compileJava FROM-CACHE",
+  "game_tests_run": false,
+  "client_test": {
+    "minecraft": "1.20.1",
+    "forge": "47.4.26",
+    "java": "17.0.18",
+    "naming": "srg",
+    "heap_max_mib": 1400,
+    "title_screen_confirmed": true,
+    "new_world_join_confirmed": true,
+    "world_saved_normally": true,
+    "first_attempt_failure": "AnchorHitAccess missing onHitBlock mapping; fixed before the final successful launch",
+    "instance": "C:\\Users\\57991\\Documents\\MinecraftDev\\parallel-workspaces\\cataclysm-forge-selectors-20261029\\test-instance",
+    "pid": 30696,
+    "process_closed": true,
+    "all_spells_tested": false
+  },
+  "artifacts": [
+    {
+      "loader": "forge",
+      "file": "forge/build/libs/cataclysm-nouveau-0.1.3-mc1.20.1-forge.jar",
+      "size": 753898,
+      "sha256": "3b4dce34a226f24aa4dfdfddb26cf15b8f32c3674f7487dc3706a47de114f8db"
+    },
+    {
+      "loader": "forge",
+      "file": "forge/build/libs/cataclysm-nouveau-0.1.3-sources.jar",
+      "size": 349257,
+      "sha256": "46b2803aa42962b27e59391f5675bbdfdb742e5295af217b9dd35810ac44ae7e"
+    },
+    {
+      "loader": "neoforge",
+      "file": "build/libs/cataclysm-nouveau-0.1.3-mc1.21.1-neoforge.jar",
+      "size": 731077,
+      "sha256": "daf4116f5a7969e86f29c14c3d903729950ed2cacccfd5c5cc092547e3b2463d"
+    },
+    {
+      "loader": "neoforge",
+      "file": "build/libs/cataclysm-nouveau-0.1.3-sources.jar",
+      "size": 343649,
+      "sha256": "0e9730672b58c9d30186c1e26aabddf610cd777874013938f3a62845cadda867"
+    }
+  ],
+  "comparisons": [
+    {
+      "loader": "forge",
+      "old_sha256": "f3f93988b8479ea6ec8cf91135743776f635d985d44abd2eb017fc7612cb7cd8",
+      "changed_classes": [
+        "dev/cataclysmnouveau/mixin/AnchorHitAccess.class",
+        "dev/cataclysmnouveau/mixin/ForgeFlameExplosionMixin.class",
+        "dev/cataclysmnouveau/mixin/HarbingerDecorationMixin.class",
+        "dev/cataclysmnouveau/mixin/HarbingerSmokeMixin.class",
+        "dev/cataclysmnouveau/mixin/IgnisExplosionMixin.class",
+        "dev/cataclysmnouveau/mixin/IgnisHealthDamageMixin.class",
+        "dev/cataclysmnouveau/mixin/LeviathanTripleGoalMixin.class",
+        "dev/cataclysmnouveau/mixin/RepeatedImpactMixin.class",
+        "dev/cataclysmnouveau/mixin/WaveStateMixin.class"
+      ],
+      "gameplay_assets_data_unchanged": true
+    },
+    {
+      "loader": "neoforge",
+      "old_sha256": "a56aeaf101bd1d4583b476317382f1d45344e011a61f2d2719a82d0610eff67a",
+      "changed_classes": [
+        "dev/cataclysmnouveau/mixin/IgnisExplosionMixin.class"
+      ],
+      "gameplay_assets_data_unchanged": true
+    }
+  ]
+}
