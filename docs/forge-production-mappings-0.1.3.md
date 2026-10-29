@@ -37,4 +37,9 @@ Forge 源码生成器原先只为列出的 Minecraft 覆盖方法启用重映射
 - 测试实例位于隔离工作区的 `test-instance`，使用本地测试身份；本次启动的 Java 进程已退出。没有改动共享“万法归一”或原 Forge 测试实例。
 - NeoForge 版本号同步为 0.1.3，打包与发行内容检查通过；本轮没有另开 NeoForge 客户端，也没有逐一战斗测试 102 个法术。
 
-产物哈希、命名检查和客户端证据路径见 [构建记录](forge-production-mappings-build.json)。本批尚未上传 CurseForge，也未推送 Git。
+产物哈希、命名检查和客户端证据路径见 [构建记录](forge-production-mappings-build.json)。修复交付时尚未上传 CurseForge，之后已获用户授权上传；未推送 Git。
+
+
+## 发布回执
+
+2026-10-29，复用已验证的双版本发行包上传项目 `1767646`。NeoForge 1.21.1 文件 ID `9359036`，Forge 1.20.1 文件 ID `9359037`，两项台账均为 `uploaded`，Release，审核通过后自动发布。API 接收不等于审核已完成，见 [发布回执](curseforge-0.1.3.json)。上传阶段没有重建产物、重复测试或修改共享游戏实例。
