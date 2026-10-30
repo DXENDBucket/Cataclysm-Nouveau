@@ -50,7 +50,7 @@ public final class GuardianActions {
         if (target == null) {
             if (needsEnemy) return false;
             Vec3 aim = cast.target() instanceof BlockHitResult block ? block.getLocation()
-                : actor.position().add(horizontal(actor.getLookAngle()).scale(7));
+                : actor.position().add(horizontal(ExecutionAnchor.viewDirection(actor)).scale(7));
             target = new ArmorStand(world, aim.x, aim.y, aim.z);
         }
         if (!validTarget(world, actor, target) || !MonstrosityCasting.loadedArea(world, actor.position(), footprint)) return false;

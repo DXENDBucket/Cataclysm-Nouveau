@@ -33,7 +33,7 @@ public final class HarbingerLaser implements ExecutionDriver<Death_Laser_Beam_En
         return ExecutionSessions.start(new ExecutionSession<>(world,execution,beam,ticks+27,driver,h->{},()->GlyphCatalog.DEATH_LASER.isEnabled(),ExecutionScope.DIRECT));
     }
     private Vec3 origin(){return anchor==null?fixed:anchor.getEyePosition();}
-    private Vec3 facing(){return anchor==null?direction:anchor.getLookAngle();}
+    private Vec3 facing(){return anchor==null?direction:ExecutionAnchor.viewDirection(anchor);}
     private void pose(Death_Laser_Beam_Entity beam){var point=origin();var vec=facing().normalize();beam.setPos(point);beam.setYaw((float)Math.atan2(vec.z,vec.x));beam.setPitch((float)Math.atan2(vec.y,vec.horizontalDistance()));}
     public boolean start(ExecutionSession<Death_Laser_Beam_Entity> s){s.world().playSound(null,BlockPos.containing(origin()),ModSounds.HARBINGER_DEATHLASER_PREPARE.get(),SoundSource.PLAYERS,3,1.2F);return s.world().addFreshEntity(s.parameters());}
     public boolean tick(ExecutionSession<Death_Laser_Beam_Entity> s) {

@@ -136,9 +136,9 @@ public final class MonstrosityCasting {
         Vec3 direction=cast.incomingDirection();
         if(direction==null || direction.lengthSqr()<1e-8) {
             direction=cast.target() instanceof EntityHitResult h && h.getEntity()==cast.caster()
-                    ?cast.caster().getLookAngle():cast.origin().subtract(cast.caster().getEyePosition());
+                    ?ExecutionAnchor.viewDirection(cast.caster()):cast.origin().subtract(cast.caster().getEyePosition());
         }
-        return direction.lengthSqr()<1e-8?cast.caster().getLookAngle():direction.normalize();
+        return direction.lengthSqr()<1e-8?ExecutionAnchor.viewDirection(cast.caster()):direction.normalize();
     }
     public static int scaledTicks(int ticks,double duration) {return (int)Math.max(2,Math.min(1200,Math.round(ticks*Math.max(.1,1+.5*duration))));}
     private static boolean scheduled(ServerLevel world,CastContext cast,Ability ability,int ticks,ExecutionDriver<SpellMonstrosity> driver,SpellMonstrosity boss) {

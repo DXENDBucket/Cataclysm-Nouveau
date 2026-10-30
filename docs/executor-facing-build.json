@@ -1,0 +1,29 @@
+{
+  "date": "2026-10-31",
+  "core_commit": "c21d48a9d44830a4c7ad5553124a952af9c3af1b",
+  "runtime_validation": "Not run: build-only requested. No GameTest, client/server launch or shared instance replacement.",
+  "deployed": false,
+  "checks": "Both loaders compiled/packaged; metadata/Core minimum, licenses, Mixin classes/refmaps and removed workaround checked. Cataclysm/Legendary distribution verification passed.",
+  "artifacts": [
+    {
+      "project": "Cataclysm-Nouveau",
+      "version": "0.1.5",
+      "loader": "neoforge",
+      "minecraft": "1.21.1",
+      "jar": "Cataclysm-Nouveau/build/libs/cataclysm-nouveau-0.1.5-mc1.21.1-neoforge.jar",
+      "sha256": "028ce6947545e460b581349863e9034ca28e9ec4a21ce06706cf9e6663278f90",
+      "sources": "Cataclysm-Nouveau/build/libs/cataclysm-nouveau-0.1.5-sources.jar",
+      "sources_sha256": "a2ece7e378be15382f8cb958f9b749440e6d708b86466a317a8bc95006bb8924"
+    },
+    {
+      "project": "Cataclysm-Nouveau",
+      "version": "0.1.5",
+      "loader": "forge",
+      "minecraft": "1.20.1",
+      "jar": "Cataclysm-Nouveau/forge/build/libs/cataclysm-nouveau-0.1.5-mc1.20.1-forge.jar",
+      "sha256": "f3c36272a1ae16ccf40a82b2ee644d7e2c24f20ba87f4142418cbcede3c1aee3",
+      "sources": "Cataclysm-Nouveau/forge/build/libs/cataclysm-nouveau-0.1.5-sources.jar",
+      "sources_sha256": "108cd978fedb027d5d7fa929f3e2eb291ccbcd7292086738ca2c67b21b0e7e5b"
+    }
+  ]
+}

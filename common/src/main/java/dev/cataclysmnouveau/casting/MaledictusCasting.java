@@ -49,7 +49,7 @@ public final class MaledictusCasting {
         if(ability!=Ability.PHANTOM_HALBERD)return false;
         var point=NativePayloads.groundPoint(world,cast);if(point==null)return false;
         var direction=cast.incomingDirection();
-        if(direction==null || direction.lengthSqr()<1e-10)direction=cast.caster().getLookAngle();
+        if(direction==null || direction.lengthSqr()<1e-10)direction=ExecutionAnchor.viewDirection(cast.caster());
         float yaw=(float)Math.atan2(direction.z,direction.x);
         var halberd=new Phantom_Halberd_Entity(world,point.x,point.y,point.z,yaw,
                 CataclysmConfig.halberdWarmup(),cast.damageOwner(),

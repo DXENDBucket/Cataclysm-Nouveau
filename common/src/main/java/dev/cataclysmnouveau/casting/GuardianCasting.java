@@ -60,7 +60,7 @@ public final class GuardianCasting {
         var geometry=ActionGeometry.entity(world,cast,12);if(geometry==null)return false;
         var actor=geometry.actor;
         var frame=cast.withExecutor(actor);
-        var boss=new SpellGuardian(world,frame,actor.position(),actor.getLookAngle(),amp);
+        var boss=new SpellGuardian(world,frame,actor.position(),ExecutionAnchor.viewDirection(actor),amp);
         boss.setAnimation(Ender_Guardian_Entity.GUARDIAN_RIGHT_STRONG_ATTACK);
         return ExecutionSessions.startReplacing(new ExecutionSession<>(world,frame,boss,61,dev.cataclysmnouveau.network.BodyPhantomSync.wrap(Ability.GRAVITY_PUNCH,boss,new ExecutionDriver<SpellGuardian>() {
             private int age;private boolean started;private Vec3 heading=geometry.initialFacing;

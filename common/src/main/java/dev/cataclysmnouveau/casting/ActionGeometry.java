@@ -32,7 +32,7 @@ final class ActionGeometry {
     }
     /** Preserve the actual executor's vertical aim while sharing bounded horizontal steering. */
     Vec3 direction(Vec3 heading) {
-        Vec3 look=actor==null?anchor.sample().direction():actor.getLookAngle();
+        Vec3 look=actor==null?anchor.sample().direction():ExecutionAnchor.viewDirection(actor);
         if(actor instanceof Mob && validEnemy(enemy))look=enemy.getEyePosition().subtract(actor.getEyePosition()).normalize();
         return new Vec3(heading.x*look.horizontalDistance(),look.y,heading.z*look.horizontalDistance()).normalize();
     }
@@ -56,10 +56,10 @@ final class ActionGeometry {
     }
     Vec3 desired(Vec3 fallback) {
         if(actor==null)return initialFacing;
-        if(actor instanceof Player)return horizontal(actor.getLookAngle(),yawDirection(actor));
+        if(actor instanceof Player)return horizontal(ExecutionAnchor.viewDirection(actor),yawDirection(actor));
         if(actor instanceof Mob mob && validEnemy(mob.getTarget()))enemy=mob.getTarget();
-        if(!validEnemy(enemy))enemy=HarbingerCasting.target(world,actor.getEyePosition(),actor.getLookAngle(),context);
-        return horizontal(validEnemy(enemy)?enemy.position().subtract(point()):actor.getLookAngle(),yawDirection(actor));
+        if(!validEnemy(enemy))enemy=HarbingerCasting.target(world,actor.getEyePosition(),ExecutionAnchor.viewDirection(actor),context);
+        return horizontal(validEnemy(enemy)?enemy.position().subtract(point()):ExecutionAnchor.viewDirection(actor),yawDirection(actor));
     }
     Vec3 aimPoint(Vec3 heading) {
         return actor!=null && !(actor instanceof Player) && validEnemy(enemy)
@@ -70,7 +70,7 @@ final class ActionGeometry {
         return HarbingerCasting.target(world,point().add(0,actor==null?1.62:actor.getEyeHeight(),0),heading,context);
     }
     private static Vec3 yawDirection(LivingEntity entity) {
-        double yaw=Math.toRadians(entity.getYRot());return new Vec3(-Math.sin(yaw),0,Math.cos(yaw));
+        double yaw=Math.toRadians(entity.getViewYRot(1.0F));return new Vec3(-Math.sin(yaw),0,Math.cos(yaw));
     }
     static Vec3 horizontal(Vec3 direction,Vec3 fallback) {
         var flat=direction.multiply(1,0,1);if(flat.lengthSqr()>1e-8)return flat.normalize();

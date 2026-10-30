@@ -1,5 +1,7 @@
 package dev.cataclysmnouveau.casting;
 
+import dev.arsconflux.api.execution.ExecutionAnchor;
+
 import com.github.L_Ender.cataclysm.entity.AnimationMonster.BossMonsters.The_Harbinger_Entity;
 import com.github.L_Ender.cataclysm.init.ModEntities;
 import dev.arsconflux.api.context.CastContext;
@@ -23,7 +25,7 @@ public final class SpellHarbinger extends The_Harbinger_Entity {
         super(ModEntities.THE_HARBINGER.get(),world);
         this.cast=cast;this.ability=ability;amplification=Resources.amplification(amplify);emitterLift=lift;NativeDamageContexts.bind(this,cast,amplification);
         powered=cast.caster().getHealth()<=cast.caster().getMaxHealth()/2;
-        setNoAi(true);setNoGravity(true);pose(point,cast.caster().getLookAngle());
+        setNoAi(true);setNoGravity(true);pose(point,ExecutionAnchor.viewDirection(cast.caster()));
     }
     public void pose(Vec3 point,Vec3 direction) {
         setPos(point.add(0,-emitterLift,0));setYRot((float)Math.toDegrees(Math.atan2(-direction.x,direction.z)));

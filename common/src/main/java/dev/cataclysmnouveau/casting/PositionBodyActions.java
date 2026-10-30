@@ -24,7 +24,7 @@ final class PositionBodyActions {
         if(anchor==null || anchor.entity()!=null || BodyPhantomAnimations.kind(ability)==null)return false;
         var frame=cast.withExecutor(null);
         Vec3 point=anchor.sample().origin();
-        Vec3 heading=ActionGeometry.horizontal(anchor.sample().direction(),cast.caster().getLookAngle());
+        Vec3 heading=ActionGeometry.horizontal(anchor.sample().direction(),ExecutionAnchor.viewDirection(cast.caster()));
         int area=switch(BodyPhantomAnimations.kind(ability)){case SCYLLA -> 14;case GUARDIAN -> 18;default -> 12;};
         if(!anchor.valid(world,cast) || !MonstrosityCasting.loadedArea(world,point,area))return false;
         LivingEntity boss=switch(BodyPhantomAnimations.kind(ability)) {

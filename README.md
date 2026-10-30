@@ -1,5 +1,7 @@
 # Cataclysm & Nouveau
 
+0.1.5 修正 Ars 执行者朝向：读取生物头部视角，避免友军转头时吐息、冲刺或持续光束仍沿身体方向执行。使用 Conflux 0.1.47 的共用视角方法；位置执行保留固定方向和入射方向优先级。本批仅构建，未部署或进行客户端验证。详见 [跨附属朝向核对](docs/executor-facing-audit.md)。
+
 0.1.4 declares AI ability hints for all 102 glyphs, distinguishing enemy targets from allied/self executors. Ars Instinct remains optional. Repeated active buffs and capped rage are skipped by AI; native casting is unchanged. Requires Conflux 0.1.45. See [AI hints](docs/ai-ability-hints.md).
 
 0.1.3 fixes Forge production-name mapping for inherited Minecraft methods used by the wave and Ignis adapters. Forge release verification now checks injection selectors against production bytecode. NeoForge is version-aligned; abilities and balance are unchanged.
