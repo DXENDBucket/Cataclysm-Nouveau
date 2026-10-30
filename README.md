@@ -1,14 +1,16 @@
 # Cataclysm & Nouveau
 
+0.1.4 declares AI ability hints for all 102 glyphs, distinguishing enemy targets from allied/self executors. Ars Instinct remains optional. Repeated active buffs and capped rage are skipped by AI; native casting is unchanged. Requires Conflux 0.1.45. See [AI hints](docs/ai-ability-hints.md).
+
 0.1.3 fixes Forge production-name mapping for inherited Minecraft methods used by the wave and Ignis adapters. Forge release verification now checks injection selectors against production bytecode. NeoForge is version-aligned; abilities and balance are unchanged.
 
 0.1.2 adds AOE to Wither Smoke and Scylla Lightning Field. Each unit changes their starting radius by one block (base three, bounded from 0.5 to 16); native radius synchronization and shrink rates preserve their final footprint. Requires Conflux 0.1.32.
 
-当前开发版本：**0.1.3**，支持 Minecraft **1.20.1 Forge** 与 **1.21.1 NeoForge**，共用 102 种魔符和版本号。Forge 端对接灾变 3.31、Ars Nouveau 4.12.7；平台差异、构建和验证说明见 [forge/README.md](forge/README.md)。同时修正原生三维物品图标与深渊标记缺失贴图；外框偏暗的通用修复由 Ars Conflux 0.1.30 提供。
+当前开发版本：**0.1.4**，支持 Minecraft **1.20.1 Forge** 与 **1.21.1 NeoForge**，共用 102 种魔符和版本号。Forge 端对接灾变 3.31、Ars Nouveau 4.12.7；平台差异、构建和验证说明见 [forge/README.md](forge/README.md)。同时修正原生三维物品图标与深渊标记缺失贴图；外框偏暗的通用修复由 Ars Conflux 0.1.30 提供。
 
 将 L_Ender's Cataclysm 的能力接入 Ars Nouveau 编排，通过 Ars Conflux 共用弹射物兼容、施法上下文和触发资源结算。
 
-支持 Minecraft **1.21.1 NeoForge** 与 **1.20.1 Forge**，modid **`cataclysm_nouveau`**。必须安装灾变本体。当前需要 **Ars Conflux 0.1.32 或更新的0.1.x**。
+支持 Minecraft **1.21.1 NeoForge** 与 **1.20.1 Forge**，modid **`cataclysm_nouveau`**。必须安装灾变本体。当前需要 **Ars Conflux 0.1.45 或更新的0.1.x**。
 
 客户端排障开关位于 `config/cataclysm_nouveau-client.toml` 的 `[diagnostics] vortex = false`，默认关闭。开启后，在当前客户端世界中最多记录八个虚空漩涡（包括原生 Boss 的漩涡）：实体寿命、同步裁剪标记、原生渲染调用、贴图及资源包来源。日志以 `[Vortex diagnostic]` 标识；不会改变漩涡或优化模组行为。重新进入世界可开始新一轮记录。
 

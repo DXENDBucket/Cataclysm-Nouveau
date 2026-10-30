@@ -31,7 +31,7 @@ neoForge {
             type = 'gameTestServer'
             gameDirectory = file('run/gametest')
             systemProperty 'neoforge.enabledGameTestNamespaces', providers.gradleProperty('gameTestNamespaces').getOrElse('cataclysm_nouveau')
-            jvmArgument '-Xmx2G'
+            jvmArgument '-Xmx'+providers.gradleProperty('gameTestHeap').getOrElse('2G')
         }
     }
     mods {
@@ -43,10 +43,21 @@ dependencies {
     implementation(project(':ars-conflux')) { transitive = false }
     compileOnly fileTree(dir: 'libs', include: '*.jar')
     runtimeOnly fileTree(dir: 'libs', include: '*.jar')
+    // Optional integration fixture only; Ars Instinct is not a production dependency.
+    if (providers.gradleProperty('withInstinctTests').getOrElse('false').toBoolean()) {
+        def instinctFixture = files(providers.gradleProperty('instinctJar').getOrElse(
+                '../Ars-Instinct/build/libs/ars-instinct-0.1.1-mc1.21.1-neoforge.jar'))
+        gameTestCompileOnly instinctFixture
+        runtimeOnly instinctFixture
+    }
     if (providers.gradleProperty('withIron').getOrElse('false').toBoolean())
         runtimeOnly fileTree(dir:'libs/iron-coexistence',include:'*.jar')
     if (providers.gradleProperty('withArsSpells').getOrElse('false').toBoolean())
         runtimeOnly fileTree(dir: 'libs/ars-growth', include: '*.jar')
+}
+if (providers.gradleProperty('withInstinctTests').getOrElse('false').toBoolean()) {
+    sourceSets.gameTest.java.srcDir 'src/instinctTest/java'
+    sourceSets.gameTest.resources.srcDir 'src/instinctTest/resources'
 }
 tasks.withType(JavaCompile).configureEach { options.encoding = 'UTF-8' }
 def verifyGlyphLocalization = tasks.register('verifyGlyphLocalization') {

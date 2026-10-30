@@ -124,6 +124,8 @@ public final class GlyphCatalog {
     public static void register() {
         GlyphPresentation.register("cataclysm_nouveau",GlyphCatalog::displayOrderKey);
         ALL.forEach(GlyphRegistry::registerSpell);
+        ALL.forEach(glyph -> AbilityHints.register(glyph, glyph instanceof CataclysmProjectileGlyph projectile
+                ? projectile.ability : ((CataclysmEffectGlyph) glyph).ability));
         dev.cataclysmnouveau.casting.CataclysmActiveCasts.register();
         dev.arsconflux.api.glyph.SpellValidators.register(CarrierRegistry.id("cataclysm_nouveau:payload_rules"),dev.cataclysmnouveau.casting.PayloadValidation::validate);
     }

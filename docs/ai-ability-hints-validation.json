@@ -1,0 +1,47 @@
+{
+  "version": "0.1.4",
+  "core_commit": "8512636481d1a33aa432f3aea1fef391223682ee",
+  "core_version": "0.1.45",
+  "instinct_test_version": "0.1.1",
+  "checks": {
+    "neoforge_gametests": {
+      "passed": 3,
+      "namespace": "cataclysm_nouveau_instinct",
+      "log": "build/ability-hints-neo.log"
+    },
+    "neoforge_distributions": "passed",
+    "forge_distributions": "passed",
+    "forge_production_mixins": {
+      "mixins": 111,
+      "failures": 0,
+      "log": "forge/build/ability-hints-forge.log"
+    },
+    "forge_gametests": "not run for metadata-only shared-source change",
+    "client_visuals": "not manually tested"
+  },
+  "artifacts": [
+    {
+      "file": "build/libs/cataclysm-nouveau-0.1.4-mc1.21.1-neoforge.jar",
+      "sha256": "64c87069e93b5bda44fb26507999632de76e83585a725487df313e4a51d9628a"
+    },
+    {
+      "file": "build/libs/cataclysm-nouveau-0.1.4-sources.jar",
+      "sha256": "9a0167e5c8dd2ddf0c5eb16cd4cccec5cd22fab6c6003701e031b68dd85fb501"
+    },
+    {
+      "file": "forge/build/libs/cataclysm-nouveau-0.1.4-mc1.20.1-forge.jar",
+      "sha256": "bc0420137ec16bd4a21eae7f3b02e2a30065ee801e255c7ff0a74a661572a02e"
+    },
+    {
+      "file": "forge/build/libs/cataclysm-nouveau-0.1.4-sources.jar",
+      "sha256": "fe7e7fb44dc156daf11731bd8a5d6fa15ba72c4ccc05f1b1705c520e15ab3aaf"
+    }
+  ],
+  "deployment": {
+    "instance": "1.21.1-万法归一",
+    "artifact": "cataclysm-nouveau-0.1.4-mc1.21.1-neoforge.jar",
+    "sha256": "64c87069e93b5bda44fb26507999632de76e83585a725487df313e4a51d9628a",
+    "backup": "mod-backups/cataclysm-ai-hints-20261031-045103",
+    "curseforge_upload": "not requested for this change"
+  }
+}

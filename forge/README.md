@@ -4,7 +4,7 @@ This platform shares the root `VERSION`, `common/` behaviors and resource catalo
 
 ## Build
 
-Use Java 17 and Python 3.9+. Keep Ars Conflux checked out beside Cataclysm-Nouveau (or set `-PconfluxCheckout=<path to Core/forge>`). The development baseline is Core `b46be94b17799573b825a8e4a11870fa3dc857d6` (0.1.29); do not update its sources as part of an addon build.
+Use Java 17 and Python 3.9+. Keep Ars Conflux checked out beside Cataclysm-Nouveau (or set `-PconfluxCheckout=<path to Core/forge>`). The 0.1.4 development baseline is Core `8512636481d1a33aa432f3aea1fef391223682ee` (0.1.45); do not update its sources as part of an addon build.
 
 Place the actual published dependencies in ignored `forge/libs/`, using the filenames and versions in `dependencies.lock.json`. The lock records SHA-256 hashes; no native mod binary or media is bundled with this project.
 
